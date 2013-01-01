@@ -568,13 +568,17 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         self.getFetchPromise({
           url: url,
           data: postData
+        }).always(function () {
+          self.trigger("fetch:end");
         }).done(function (catalog) {
           //check if there is a newer call to function
           if (timestamp < self.lastFetchTimestamp) {
             //do nothing because there is a newer call to loadData
             return;
           }
+          self.trigger("fetch:done");
           self.onFetchDone();
+
           //check if returned data is an array or a catalog
           if (_.isArray(catalog)) {
             //
@@ -617,6 +621,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
             //do nothing because there is a newer call to loadData
             return;
           }
+          self.trigger("fetch:error");
           self.onFetchError();
           self.trigger("error", "ajax");
         });

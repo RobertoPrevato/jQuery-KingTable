@@ -25,7 +25,7 @@ module.exports = function (grunt) {
     "../../source/scripts/libs/kingtable/kingtable-core.js",
     "../../source/scripts/libs/kingtable/jquery.kingtable.js",
     "../../source/scripts/libs/kingtable/lodash/jquery.kingtable-lodash.js",
-    "../../source/scripts/libs/kingtable/lodash/templates.js",
+    "../../source/scripts/libs/kingtable/lodash/templates.js"
   ];
 
   grunt.initConfig({
