@@ -10,13 +10,14 @@ Supports client and server side pagination; client and server side search.
 
 ## Live demo
 The following demos show fixed tables:
-[Live demo](http://ugrose.com/content/demos/kingtable/index.html)
-[Double table: two tables displayed in the same page](http://ugrose.com/content/demos/kingtable/double.html)
+* [Live demo](http://ugrose.com/content/demos/kingtable/index.html)
+* [Double table: two tables displayed in the same page](http://ugrose.com/content/demos/kingtable/double.html)
 
 ## Modes
 The jQuery-KingTable implements two working modes:
 * fixed
 * normal
+
 ### Fixed mode
 A fixed table is one displaying a collection that doesn't require server pagination, but may still benefit from client side pagination.
 When working on applications, it commonly happens to deal with collections that are not meant to grow over time, and they have a small size.
@@ -36,6 +37,7 @@ var table = new $.KingTable({
 });
 ```
 Fixed tables perform search and pagination on the client side, offering this feature out of the box.
+
 ### Normal mode
 A normal table is one displaying a collection that requires server side pagination, since it is meant to grow over time.
 This is true in most cases, for example tables of *products* and *customers* in a e-commerce website.
