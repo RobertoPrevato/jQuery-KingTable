@@ -8,20 +8,23 @@ Supports client and server side pagination; client and server side search.
 * Allow for easy configuration of generated HTML, to adapt to different needs: e.g. displaying pictures thumbnails, anchor tags, etc.
 * Support both collections that require server side pagination, and collections that doesn't require server side pagination, but may still benefit from client side pagination.
 
+## Live demo
+The following demos show fixed tables:
 [Live demo](http://ugrose.com/content/demos/kingtable/index.html)
+[Double table: two tables displayed in the same page](http://ugrose.com/content/demos/kingtable/double.html)
 
 ## Modes
 The jQuery-KingTable implements two working modes:
-1. fixed
-2. normal
+* fixed
+* normal
 ### Fixed mode
 A fixed table is one displaying a collection that doesn't require server pagination, but may still benefit from client side pagination.
 When working on applications, it commonly happens to deal with collections that are not meant to grow over time, and they have a small size.
 For example, a table of *categories* in a e-commerce website to sell clothes, or a table of *user roles* in most applications.
 In these cases, it makes sense to return whole collections to the client.
 There are two ways to define a fixed KingTable:
-1. instantiating a KingTable with **fixed** option with value *true*, and **url** from where to fetch a collection
-2. instantiating a KingTable passing a **data** option with an instance of array: in this case, it is assumed that the collection is fixed
+* instantiating a KingTable with **fixed** option with value *true*, and **url** from where to fetch a collection
+* instantiating a KingTable passing a **data** option with an instance of array: in this case, it is assumed that the collection is fixed
 ```js
 var table = new $.KingTable({
   data: [{...},{...},{...}]
@@ -43,11 +46,11 @@ var table = new $.KingTable({
 ```
 ## About usability
 The jQuery-KingTable widget is designed to follow good design principles
-1. the user should be able to immediately understand the size of the collection, so the pagination bar is designed to display the total amount of rows; of pages, and the number of results currently displayed
-2. keyboard navigation: the KingTable controls can be navigated using the TAB; it is possible to navigate through pages using the left, right, A and D keys
-3. filters are stored in the page url, so that if the user hit the refresh button, or send a url to another person, the page loads the right results
-4. support for browser navigation buttons
-5. the table logic handles ajax errors and displays a preloader while fetching data
+* the user should be able to immediately understand the size of the collection, so the pagination bar is designed to display the total amount of rows; of pages, and the number of results currently displayed
+* keyboard navigation: the KingTable controls can be navigated using the TAB; it is possible to navigate through pages using the left, right, A and D keys
+* filters are stored in the page url, so that if the user hit the refresh button, or send a url to another person, the page loads the right results
+* support for browser navigation buttons
+* the table logic handles ajax errors and displays a preloader while fetching data
 
 ### Inline editing feature
 Currently the jQuery-KingTable widget doesn't offer, out of the box, inline editing feature.
@@ -79,16 +82,6 @@ The KingTable offers two configuration options to generate automatically links t
 The KingTable widget requires an utility to implement client side localization, which is used to display proper names of buttons (_refresh, page number, results per page, etc.).
 Currently only the included utility function, inside the file _i.js_, is supported; but soon I will add support for a more complex i18n js implementation.
 
-## Themes
-The jQuery-KingTable offers few themes, out of the box and included in the provided **kingtable.css** file.
-* ![Flat white](http://ugrose.com/content/demos/kingtable/images/theme-flatwhite.png)
-* ![Flat black](http://ugrose.com/content/demos/kingtable/images/theme-flatblack.png)
-* ![Clear](http://ugrose.com/content/demos/kingtable/images/theme-clear.png)
-* ![Dark](http://ugrose.com/content/demos/kingtable/images/theme-dark.png)
-* ![Midnight](http://ugrose.com/content/demos/kingtable/images/theme-midnight.png)
-* ![Olive](http://ugrose.com/content/demos/kingtable/images/theme-olive.png)
-* ![Bronze](http://ugrose.com/content/demos/kingtable/images/theme-bronze.png)
-* ![Ultramarine](http://ugrose.com/content/demos/kingtable/images/theme-ultramarine.png)
 ## How to use
 In order to use the jQuery-KingTable plugin, there are two options:
 1. download the source code, and work with the R.js modules, like in the provided index.html page
@@ -125,8 +118,8 @@ When receiving an AJAX response, it expects the following structure:
 
 ### How to run the provided development server
 In order to run the provided development server it is necessary to install Python and Flask (either Python 2.x or 3.x).
-The recommended way is to install a version of Python, then its **pip** (a package management system for Python), then to use pip to install Flask.
-Then, simply run the server:
+The recommended way is to install a version of Python, then its **pip** (package management system for Python), then to use pip to install Flask.
+Then, simply run the server file:
 ```py
 python server.py
 ```
@@ -147,8 +140,13 @@ The source code makes use of the following two tools, of my creation:
 1. [Knight, html templates packer](https://github.com/RobertoPrevato/Knight)
 2. [Base64, pictures to base64 bulk converter](https://github.com/RobertoPrevato/Base64)
 
-## Examples
-The following demos show fixed tables:
-[Live demo](http://ugrose.com/content/demos/kingtable/index.html)
-[Double table](http://ugrose.com/content/demos/kingtable/double.html)
-The double table example shows how two tables can be displayed in the same page.
+## Themes
+The jQuery-KingTable offers the following themes, included in the provided **kingtable.css** file:
+* ![Flat white](http://ugrose.com/content/demos/kingtable/images/theme-flatwhite.png)
+* ![Flat black](http://ugrose.com/content/demos/kingtable/images/theme-flatblack.png)
+* ![Clear](http://ugrose.com/content/demos/kingtable/images/theme-clear.png)
+* ![Dark](http://ugrose.com/content/demos/kingtable/images/theme-dark.png)
+* ![Midnight](http://ugrose.com/content/demos/kingtable/images/theme-midnight.png)
+* ![Olive](http://ugrose.com/content/demos/kingtable/images/theme-olive.png)
+* ![Bronze](http://ugrose.com/content/demos/kingtable/images/theme-bronze.png)
+* ![Ultramarine](http://ugrose.com/content/demos/kingtable/images/theme-ultramarine.png)
