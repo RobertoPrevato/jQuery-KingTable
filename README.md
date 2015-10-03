@@ -128,7 +128,8 @@ python server.py
 * The source code is organized in modules, defined using the library [R.js](https://github.com/RobertoPrevato/R.js), of my creation.
 * The core business logic of the KingTable is abstracted from DOM manipulation logic and also from jQuery.fn function.
 * The DOM manipulation logic can be implemented in different ways: currently the plugin offers an implementation that uses Lodash *template* function.
-### Dependencies
+
+## Dependencies
 * [jQuery](https://jquery.com/)
 * [Lodash](https://lodash.com/)
 * [R.js](https://github.com/RobertoPrevato/R.js)
@@ -137,8 +138,8 @@ python server.py
 
 ## Development tools
 The source code makes use of the following two tools, of my creation:
-1. [Knight, html templates packer](https://github.com/RobertoPrevato/Knight)
-2. [Base64, pictures to base64 bulk converter](https://github.com/RobertoPrevato/Base64)
+* [Knight, html templates packer](https://github.com/RobertoPrevato/Knight)
+* [Base64, pictures to base64 bulk converter](https://github.com/RobertoPrevato/Base64)
 
 ## Themes
 The jQuery-KingTable offers the following themes, included in the provided **kingtable.css** file:
