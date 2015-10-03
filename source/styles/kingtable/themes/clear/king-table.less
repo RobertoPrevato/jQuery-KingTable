@@ -1,0 +1,77 @@
+.theme-clear {
+
+  .king-table-container {
+    border-top: 1px solid #aaa;
+  }
+
+  .king-table {
+    background: #eee;
+    border-collapse: collapse;
+    border: none;
+    font-family: Sans-Serif;
+    font-size: 12px;
+    line-height: 17px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #bbb;
+  }
+
+  .king-table caption {
+    border: 1px solid #d0d0d0;
+    font-weight: bold;
+    background: white url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAXwBfAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAYAAEDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAQI/8QAFxABAQEBAAAAAAAAAAAAAAAAABMBYf/EABQBAQAAAAAAAAAAAAAAAAAAAAD/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwDVlMEdegIKgA//2Q==") top left repeat;
+  }
+
+  .king-table tr td.row-number {
+    width: 40px;
+    text-align: center;
+  }
+
+  .king-table a {
+    color: #000;
+    &:hover {
+      color: #C00;
+    }
+  }
+
+  .king-table .king-table tr, .king-table .king-table-head tr {
+    width: 100%;
+    border-color: #ccc;
+  }
+
+  .king-table-body tr:hover:nth-child(even), .king-table-body tr:hover:nth-child(odd) {
+    background-color: #fefefe;
+    &.king-table-empty, &.king-table-error {
+      background: #eee;
+    }
+  }
+
+  .king-table .king-table-head tr {
+    background: #d7d7d7 url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAXwBfAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAYAAEDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAQI/8QAFxABAQEBAAAAAAAAAAAAAAAAABMBYf/EABQBAQAAAAAAAAAAAAAAAAAAAAD/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwDVlMEdegIKgA//2Q==") top left repeat-x;
+  }
+
+  .king-table .king-table-head tr {
+    height: 18px;
+  }
+
+  .king-table tr th {
+    text-align: left;
+    border: 1px solid #d0d0d0;
+    border-top: 1px solid #fff;
+  }
+
+  .king-table tr td {
+    line-height: 15px;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .king-table tr {
+    th, td {
+      &.row-number {
+        border: 1px solid #d0d0d0;
+        border-top: 1px solid #fff;
+        background: #d7d7d7 url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAXwBfAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAYAAEDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAQI/8QAFxABAQEBAAAAAAAAAAAAAAAAABMBYf/EABQBAQAAAAAAAAAAAAAAAAAAAAD/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwDVlMEdegIKgA//2Q==") top left repeat-x;
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{% if (allowSearch) { %}
+<input type="text" class="search-field" value="{{search}}" />
+{% } %}
+{% if (filtersWizard) { %}
+<button class="btn btn-filters-wizard">{{I.t("voc.Filters")}}</button>
+{% } %}

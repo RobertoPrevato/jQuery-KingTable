@@ -1,0 +1,73 @@
+.theme-midnight {
+
+  .king-table-container {
+    border-top: 1px solid #222;
+  }
+
+  .king-table {
+    color:#c4feff;
+    background: #000;
+    border-collapse: collapse;
+    border: none;
+    font-family: Sans-Serif;
+    font-size: 12px;
+    line-height: 17px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #666;
+  }
+  
+  .king-table caption {
+    border: 1px solid #d0d0d0;
+    font-weight: bold;
+    background: #000 url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAXwBfAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAYAAEDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAcF/8QAHhABAAAFBQAAAAAAAAAAAAAAAAEDFBUXUVVipOL/xAAVAQEBAAAAAAAAAAAAAAAAAAABA//EABYRAQEBAAAAAAAAAAAAAAAAAAASAf/aAAwDAQACEQMRAD8A27xyEHylM2ns+Q0lOpVUQ1ACr//Z") top left repeat-x;
+  }
+  
+  .king-table tr td.row-number {
+    width:40px;
+    text-align:center;
+  }
+  
+  .king-table a {
+    color: #00becf;
+  }
+
+  .king-table a:hover {
+    color: #FFF;
+  }
+  
+  .king-table .king-table tr, .king-table .king-table-head tr {
+    width: 100%;
+    border-color: #333;
+  }
+
+  .king-table-body tr:hover:nth-child(even), .king-table-body tr:hover:nth-child(odd) {
+    background-color: #06002a;
+    &.king-table-empty, &.king-table-error {
+      background: #000;
+    }
+  }
+  .king-table .king-table-head tr {
+    background-color: #000;
+    border-bottom: 1px solid #222;
+  }
+  .king-table .king-table-head tr {
+    height: 18px;
+  }
+  .king-table tr th {
+    text-align: left;
+    border-top: 1px solid #222;
+  }
+  .king-table tr td {
+    line-height: 15px;
+    border-right: 1px solid #222;
+    border-bottom: 1px solid #222;
+  }
+  .king-table tr {
+    th, td {
+      &.row-number {
+        border-top: 1px solid #222;
+        background: #000 url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAXwBfAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAWAAEDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAYH/8QAGBABAAMBAAAAAAAAAAAAAAAAAAIUYmH/xAAUAQEAAAAAAAAAAAAAAAAAAAAC/8QAFREBAQAAAAAAAAAAAAAAAAAAABH/2gAMAwEAAhEDEQA/AMTv6Erf0HRiWuT6ABP/2Q==") top left repeat-x;
+      }
+    }
+  }
+}

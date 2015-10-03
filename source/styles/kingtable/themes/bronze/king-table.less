@@ -1,0 +1,74 @@
+.theme-bronze {
+
+  .king-table-container {
+    border-top: 1px solid #533e29;
+  }
+
+  .king-table {
+    background: #DA832C;
+    border-collapse: collapse;
+    border-color: #533e29;
+    border: none;
+    font-family: Sans-Serif;
+    font-size: 12px;
+    line-height: 17px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #533e29;
+  }
+  
+  .king-table caption {
+    border: 1px solid #533e29;
+    font-weight: bold;
+    background: white url("data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAYCAYAAAA7zJfaAAAABmJLR0QA3wB5ABSzHNRVAAAACXBIWXMAAA6cAAAOnAEHlFPdAAAAB3RJTUUH3QkaFRIaz7uY6QAAAENJREFUCNdly7EJgFAQBNG5xUxswf4Tq7ICBUN3Df5pYvYYGLytURIkFobKEwIQdb2SW87cOvYT2e7NNqrU1/7iZrwPFLYoooBe/o4AAAAASUVORK5CYII=") top left repeat;
+  }
+  
+  .king-table tr td.row-number {
+    width:40px;
+    text-align:center;
+  }
+  
+  .king-table a {
+    color: #000;
+    &:hover {
+      color: #C00;
+    }
+  }
+  
+  .king-table .king-table tr, .king-table .king-table-head tr {
+    width: 100%;
+    border-color: #483419;
+  }
+  
+  .king-table-body tr:hover:nth-child(even), .king-table-body tr:hover:nth-child(odd) {
+    background-color: #ffecb5;
+    &.king-table-empty, &.king-table-error {
+      background: #DA832C;
+    }
+  }
+  
+  .king-table .king-table-head tr {
+    height: 18px;
+    background: #E27D15 url("data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAYCAYAAAA7zJfaAAAABmJLR0QA3wB5ABSzHNRVAAAACXBIWXMAAA6cAAAOnAEHlFPdAAAAB3RJTUUH3QkaFRIaz7uY6QAAAENJREFUCNdly7EJgFAQBNG5xUxswf4Tq7ICBUN3Df5pYvYYGLytURIkFobKEwIQdb2SW87cOvYT2e7NNqrU1/7iZrwPFLYoooBe/o4AAAAASUVORK5CYII=") top left repeat-x;
+    border-bottom: 1px solid #000;
+  }
+
+  .king-table tr th {
+    text-align: left;
+    border-top: 1px solid #efb77c;
+    border-right: 1px solid #000;
+  }
+  
+  .king-table tr td {
+    line-height: 15px;
+    border-right: 1px solid #483419;
+    border-bottom: 1px solid #483419;
+  }
+  
+  .king-table tr {
+    th, td {
+      &.row-number {
+        background: #e27d15 url("data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAYCAYAAAA7zJfaAAAABmJLR0QA3wB5ABSzHNRVAAAACXBIWXMAAA6cAAAOnAEHlFPdAAAAB3RJTUUH3QkaFRIaz7uY6QAAAENJREFUCNdly7EJgFAQBNG5xUxswf4Tq7ICBUN3Df5pYvYYGLytURIkFobKEwIQdb2SW87cOvYT2e7NNqrU1/7iZrwPFLYoooBe/o4AAAAASUVORK5CYII=") top left repeat-x;
+      }
+    }
+  }
+}
