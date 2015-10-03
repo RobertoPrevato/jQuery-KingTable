@@ -152,7 +152,7 @@ python server.py
 * [Lodash](https://lodash.com/)
 * [R.js](https://github.com/RobertoPrevato/R.js)
 * [OPEN iconic](https://useiconic.com/open/)
-* A function to implement client side localization: simple as the provided _i.js_, file; or a more complex [i18n implementation](http://i18next.com/)
+* A function to implement client side localization: like the provided _i.js_
 
 ## Development tools
 The source code makes use of the following two tools, of my creation:
