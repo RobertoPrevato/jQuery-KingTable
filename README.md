@@ -19,7 +19,7 @@ The jQuery-KingTable implements two working modes:
 * normal
 
 ### Fixed mode
-A fixed table is one displaying a collection that doesn't require server pagination, but may still benefit from client side pagination.
+A fixed table is displaying a collection that doesn't require server side pagination, but may still benefit from client side pagination.
 When working on applications, it commonly happens to deal with collections that are not meant to grow over time, and they have a small size.
 For example, a table of *categories* in a e-commerce website to sell clothes, or a table of *user roles* in most applications.
 In these cases, it makes sense to return whole collections to the client.
@@ -47,7 +47,7 @@ var table = new $.KingTable({
 });
 ```
 ## About usability
-The jQuery-KingTable widget is designed to follow good design principles
+The jQuery-KingTable widget is designed to follow "old-school" design principles
 * the user should be able to immediately understand the size of the collection, so the pagination bar is designed to display the total amount of rows; of pages, and the number of results currently displayed
 * keyboard navigation: the KingTable controls can be navigated using the TAB; it is possible to navigate through pages using the left, right, A and D keys
 * filters are stored in the page url, so that if the user hit the refresh button, or send a url to another person, the page loads the right results
@@ -56,8 +56,7 @@ The jQuery-KingTable widget is designed to follow good design principles
 
 ### Inline editing feature
 Currently the jQuery-KingTable widget doesn't offer, out of the box, inline editing feature.
-This is intentional, since the good old-school design principles state that a tables should be readonly and offer a link to a editable details view.
-I personally agree with this scholastic principle, especially because in most situations we deal with complex objects that cannot be easily edited inline.
+This is intentional, since in most situations we deal with complex objects that cannot be easily edited inline.
 In any case, the provided plugin makes it easy to configure HTML and event handlers to implement inline editing feature,
 for example:
 ```js
@@ -78,16 +77,33 @@ $("#table-container").kingtable({
 });
 ```
 ### How to implement links to detail views
-The KingTable offers two configuration options to generate automatically links to 
+The KingTable offers options to generate automatically links to detailed views: *detailRoute* and *getIdProperty*.
+The detail route is used to render an anchor tag pointing to a generated url, including the id. the getIdProperty is a function used to obtain the name of the property
+that should be used to get the ids of collection items. By default, "id", "_id", "guid" or "_guid" properties are used (case insensitive).
+```js
+//example of go to details options:
+$("#table-container").kingtable({
+  url: "/api/products",
+  detailRoute: "/api/product/" //generates links to details view, to: /api/product/{{id}}
+});
+
+$("#table-container").kingtable({
+  url: "/api/products",
+  detailRoute: "/api/product/", //generates links to details view, to: /api/product/{{foo}}
+  getIdProperty: function () {
+    return "foo";//returns the name of the property that must be read, to obtain the items id
+  }
+});
+```
 
 ## About localization
 The KingTable widget requires an utility to implement client side localization, which is used to display proper names of buttons (_refresh, page number, results per page, etc.).
-Currently only the included utility function, inside the file _i.js_, is supported; but soon I will add support for a more complex i18n js implementation.
+Currently only the included utility function, inside the file *i.js*, is supported; but soon I will add support for a more complex i18n js implementation.
 
 ## How to use
 In order to use the jQuery-KingTable plugin, there are two options:
-1. download the source code, and work with the R.js modules, like in the provided index.html page
-2. download only the bundled source code (/dist/jquery.kingtable.js); or the minified source (/dist/jquery.kingtable.min.js)
+* download the source code, and work with the R.js modules, like in the provided index.html page
+* download only the bundled source code (/dist/jquery.kingtable.js); or the minified source (/dist/jquery.kingtable.min.js)
 It is also necessary to download the .css code: once again it is possible to use the .less source code; or download only the compiled .css.
 
 ### How to integrate with server side code
@@ -96,20 +112,20 @@ When performing AJAX calls to fetch data that requires server side pagination (a
 it sends the following information:
 ```js
 {
-  fixed: [boolean],//whether the table requires server side pagination or not
-  page: [number],  //page number
-  size: [number],  //results per page
-  orderBy: [string],
-  sortOrder: [string],
-  search: [string],
-  timestamp: [number]//the timestamp of the first time the table was rendered: useful for fast growing collections
+  fixed: [boolean],   // whether the table requires server side pagination or not
+  page: [number],     // page number
+  size: [number],     // results per page
+  orderBy: [string],  // name of the property to use for sorting
+  sortOrder: [string],// asc or desc
+  search: [string],   // text search
+  timestamp: [number] // the timestamp of the first time the table was rendered: useful for fast growing collections
 }
 ```
 When receiving an AJAX response, it expects the following structure:
 ```js
 {
   subset: [array],// array of items that respect the given filters
-  total: [number] //the total count of items that respect the given filters: for example 13000
+  total: [number] // the total count of items that respect the given filters: for example 13000
 }
 ```
 ## Repository structure
