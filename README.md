@@ -35,7 +35,7 @@ var table = new $.KingTable({
   url: "/api/categories"
 });
 ```
-Fixed tables perform search and pagination on the client side, trying to understand.
+Fixed tables perform search and pagination on the client side.
 
 ### Normal mode
 A normal table is one displaying a collection that requires server side pagination, since it is meant to grow over time.
