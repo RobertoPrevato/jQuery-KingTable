@@ -144,14 +144,13 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
        * Default schema for each table column.
        */
       columnDefault: {
-        name: '',
-        type: 'Text',
+        name: "",
+        type: "text",
         groupable: true,
         sortable: true,
         resizable: true,
-        allowSearch: true,//whether a column allow for search or not
-        template: '##Name##',
-        order: '',
+        allowSearch: true,
+        template: "##Name##",
         hidden: false
       },
 
