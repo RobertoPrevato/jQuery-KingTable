@@ -152,7 +152,6 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         allowSearch: true,//whether a column allow for search or not
         template: '##Name##',
         order: '',
-        secret: false,
         hidden: false
       },
 
