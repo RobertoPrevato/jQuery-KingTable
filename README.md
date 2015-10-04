@@ -13,6 +13,10 @@ The following demos show fixed tables:
 * [Live demo](http://ugrose.com/content/demos/kingtable/index.html)
 * [Double table: two tables displayed in the same page](http://ugrose.com/content/demos/kingtable/double.html)
 
+## Documentation
+Please refer to the wiki page.
+A list of possible options is available inside the dedicated [wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Options).
+
 ## Modes
 The jQuery-KingTable implements two working modes:
 * fixed
@@ -106,12 +110,11 @@ $("#table-container").kingtable({
 The KingTable widget requires an utility to implement client side localization, which is used to display proper names of buttons (_refresh, page number, results per page, etc.).
 Currently only the included utility function, inside the file *i.js*, is supported; but soon I will add support for a more complex i18n js implementation.
 
-## How to use
+## How to integrate with your project
 In order to use the jQuery-KingTable plugin, there are two options:
 * download the source code, and work with the R.js modules, like in the provided index.html page
 * download only the bundled source code (/dist/jquery.kingtable.js); or the minified source (/dist/jquery.kingtable.min.js)
 It is also necessary to download the Open Iconic fonts and the .css code: once again it is possible to use the .less source code; or download only the compiled .css.
-A list of possible options is available inside the dedicated [wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Options).
 
 ### How to integrate with server side code
 The KingTable logic defines an interface, in order to offer pagination and search out of the box.
