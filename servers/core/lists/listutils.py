@@ -1,7 +1,7 @@
 import re
-import sys
 import locale
 locale.setlocale(locale.LC_ALL, "")
+
 
 class ListUtils:
 
@@ -12,14 +12,14 @@ class ListUtils:
     @staticmethod
     def search(collection, search, properties):
         """Simple search method, that supports only exact text."""
-        #escape characters that need to be escaped
+        # escape characters that need to be escaped
         search = re.escape(search)
         rx = re.compile(search, re.IGNORECASE)
         result = []
         for item in collection:
             if properties == "*":
                 for x in item:
-                    #TODO: support better non-strings with their culture-dependent representations
+                    # TODO: support better non-strings with their culture-dependent representations
                     if rx.search(item[x]):
                         result.append(item)
             else:

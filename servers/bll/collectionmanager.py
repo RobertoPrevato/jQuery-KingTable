@@ -13,12 +13,13 @@
 """
 import os
 import json
-from core.lists.listutils import  ListUtils
+from core.lists.listutils import ListUtils
 from core.literature.scribe import Scribe
 
 # The maximum collection length that the server allows for "fixed collections"
 # (i.e. collections that don't require server side pagination)
 MAXIMUM_COLLECTION_LENGTH = 500
+
 
 class CollectionManager:
     """Provides methods to work with underlying collections; read from static json structures"""
@@ -37,13 +38,13 @@ class CollectionManager:
             if len(all_data) < MAXIMUM_COLLECTION_LENGTH:
                 return all_data
 
-        #timestamp = data["timestamp"] # timestamp of the first time a page was required: useful for tables that grow rapidly
+        # timestamp = data["timestamp"] # timestamp of the first time a page was required
         page_number = data["page"]
         page_size = data["size"]
         search = data["search"] if "search" in data else ""
         order_by = data["orderBy"]
         sort_order = data["sortOrder"]
-        #get the collection
+        # get the collection
         collection, total_rows = self.get_catalog_page(page_number, page_size, search, order_by, sort_order)
         result = {"subset": collection, "page": page_number, "total": total_rows}
         return result
@@ -70,18 +71,18 @@ class CollectionManager:
             """
             collection = ListUtils.search(collection, search, "*")
 
-        #NB: if an order by is defined; we need to order before paginating results!
+        # NB: if an order by is defined; we need to order before paginating results!
         if order_by is not None and order_by != "":
             collection = ListUtils.sort_by(collection, order_by, sort_order)
 
-        #return a paginated result to the client:
+        # return a paginated result to the client:
         skip = ((page_number-1)*page_size) if page_number > 0 else 0
 
-        #the client needs to know the total items count, in order to build the pagination
+        # the client needs to know the total items count, in order to build the pagination
         total_items_count = len(collection)
 
         result = ListUtils.sampling(collection, skip, page_size)
-        #return the collection and the count of results:
+        # return the collection and the count of results:
         return result, total_items_count
 
     def get_all(self):

@@ -1,7 +1,7 @@
 import io
 import sys
-
 is_python3 = sys.version_info >= (3, 0)
+
 
 class Scribe:
 
@@ -58,4 +58,4 @@ class Scribe:
         else:
             with io.open(path, mode="a") as f:
                 f.writelines(contents.decode("utf8"))
-                
+

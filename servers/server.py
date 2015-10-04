@@ -19,16 +19,18 @@ rel = os.path.join(root_dir, ".", "source")
 pat = os.path.abspath(rel)
 app = Flask(__name__, static_folder=pat)
 
-#set debug to true
+# set debug to true
 app.debug = True
 PORT = 44777
 
 ColorsManager = CollectionManager("colors.json")
 ProductsManager = CollectionManager("products.json")
 
+
 @app.route('/')
 def root():
     return app.send_static_file('index.html')
+
 
 @app.route("/api/colors", methods=["OPTIONS", "GET", "POST"])
 def colors():
@@ -39,6 +41,7 @@ def colors():
 
     result = ColorsManager.get_catalog(data)
     return json.dumps(result, indent=4)
+
 
 @app.route('/<path:path>')
 def static_proxy(path):
