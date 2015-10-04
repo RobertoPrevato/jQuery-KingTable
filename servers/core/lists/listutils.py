@@ -20,7 +20,6 @@ class ListUtils:
             if properties == "*":
                 for x in item:
                     #TODO: support better non-strings with their culture-dependent representations
-                    #str() may cause: 'ascii' codec can't encode character u'\xb0' in position 3: ordinal not in range(128)
                     if rx.search(item[x]):
                         result.append(item)
             else:
@@ -31,7 +30,7 @@ class ListUtils:
         return result
 
     @staticmethod
-    def sort_by(collection, field, order, case_sensitive = False):
+    def sort_by(collection, field, order, case_sensitive=False):
         """
         Simple sort method, that doesn't support special characters.
         in order to make something better, for example, consider locale.strxfrm function in Python3

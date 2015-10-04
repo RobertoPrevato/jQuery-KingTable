@@ -41,10 +41,10 @@ class CollectionManager:
         page_number = data["page"]
         page_size = data["size"]
         search = data["search"] if "search" in data else ""
-        orderBy = data["orderBy"]
-        sortOrder = data["sortOrder"]
+        order_by = data["orderBy"]
+        sort_order = data["sortOrder"]
         #get the collection
-        collection, total_rows = self.get_catalog_page(page_number, page_size, search, orderBy, sortOrder)
+        collection, total_rows = self.get_catalog_page(page_number, page_size, search, order_by, sort_order)
         result = {"subset": collection, "page": page_number, "total": total_rows}
         return result
 
@@ -53,7 +53,7 @@ class CollectionManager:
         rel = os.path.join(root_dir, "servers", "data", self.file_path)
         return os.path.abspath(rel)
 
-    def get_catalog_page(self, page_number, page_size, search, orderBy, sortOrder):
+    def get_catalog_page(self, page_number, page_size, search, order_by, sort_order):
         """Gets a catalog page of the managed collection."""
         collection = self.get_all()
         if search is not None and search != "":
@@ -71,8 +71,8 @@ class CollectionManager:
             collection = ListUtils.search(collection, search, "*")
 
         #NB: if an order by is defined; we need to order before paginating results!
-        if orderBy is not None and orderBy != "":
-            collection = ListUtils.sort_by(collection, orderBy, sortOrder)
+        if order_by is not None and order_by != "":
+            collection = ListUtils.sort_by(collection, order_by, sort_order)
 
         #return a paginated result to the client:
         skip = ((page_number-1)*page_size) if page_number > 0 else 0
