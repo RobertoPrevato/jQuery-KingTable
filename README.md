@@ -24,7 +24,7 @@ When working on applications, it commonly happens to deal with collections that 
 For example, a table of *categories* in a e-commerce website to sell clothes, or a table of *user roles* in most applications.
 In these cases, it makes sense to return whole collections to the client.
 There are two ways to define a fixed KingTable:
-* instantiating a KingTable with **fixed** option with value *true*, and **url** from where to fetch a collection
+* instantiating a KingTable with **url** from where to fetch a collection; then code the server side to return an array of items
 * instantiating a KingTable passing a **data** option with an instance of array: in this case, it is assumed that the collection is fixed
 ```js
 var table = new $.KingTable({
@@ -32,11 +32,10 @@ var table = new $.KingTable({
 });
 //or...
 var table = new $.KingTable({
-  url: "/api/categories",
-  fixed: true // the first ajax call will return a full collection of items
+  url: "/api/categories"
 });
 ```
-Fixed tables perform search and pagination on the client side, offering this feature out of the box.
+Fixed tables perform search and pagination on the client side, trying to understand.
 
 ### Normal mode
 A normal table is one displaying a collection that requires server side pagination, since it is meant to grow over time.
@@ -45,6 +44,13 @@ This is true in most cases, for example tables of *products* and *customers* in 
 var table = new $.KingTable({
   url: "/api/profiles"
 });
+```
+When receiving an AJAX response, a normal table expects to receive the following structure:
+```js
+{
+  subset: [array],// array of items that respect the given filters
+  total: [number] // the total count of items that respect the given filters; excluding the pagination: for example 13000
+}
 ```
 ## About usability
 The jQuery-KingTable widget is designed to follow "old-school" design principles
