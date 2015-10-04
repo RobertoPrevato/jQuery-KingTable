@@ -146,8 +146,8 @@ When receiving an AJAX response, it expects the following structure:
 
 ### How to run the provided development server
 In order to run the provided development server it is necessary to use Python and Flask (either Python 2.x or 3.x).
-If necessary, the recommended way is to install a version of Python, then its **pip** (package management system for Python), then to use pip to install Flask.
-Then, simply run the server file:
+If necessary, the recommended way is to install a version of Python, then its **pip** (package management system for Python), then use pip to install Flask.
+Then, simply run the server file from a command line:
 ```py
 python server.py
 ```
