@@ -78,62 +78,13 @@
   <script src="scripts/libs/kingtable/lodash/templates.js"></script>
   <script>
     (function () {
-
-      /**
-       * Rjs condensed version.
-       * 
-       * Write documentation; examples.
-       *
-       * About usability.
-       *
-       *
-       * Future:
-       * Knockout version.
-       * Angular version?
-       * I18n library support.
-       * Example page with details view.
-       * Support client side formatting; otherwise expect server side formatting (example: Datetimes formatted as 30/05/1986 rather than 05/30/1986.
-       * Allow to define formatters inside column properties
-       * Filters wizard
-       * Use open icons: https://useiconic.com/open#icons for the pagination bar
-       * Allow to hide columns and sort them using sortable.
-       * Support change of data collection (nice to have, low priority)
-       * menu and toolstrip
-       * grouping of columns
-       * Example with client side routing (Simrou)
-       * Example of fast-growing table: logic to keep track of showned records
-       * Example of custom elements for table (div, ul), by option. (Requires implementation and testing)
-      * */
-
-      //example: overriding base function
-      //(i.e.) if you don't like the "Go to details" icon...
-      /*
-      _.extend($.KingTable.prototype, {
-          getGoToDetailsLink: function () {
-            var self = this, cellTagName = "td", options = self.options;
-            var idProperty = options.getIdProperty();
-            var detailRoute = options.detailRoute;
-            return self.string.format("<{0} class=\"{1}\"><a href=\"{2}{{" + idProperty + "}}\">details</a></{0}>", cellTagName, "detail-link", detailRoute);
-          }
-      });
-      */
       //add reference to window, just for debugging purpose
       var table = window.kingTable = new $.KingTable({
         id: "colors-table",
         $el: $("#content"),
-        url: "/api/colors",//url where to fetch data
-        //url: "http://127.0.0.1:44669/api/profiles",
-        //fixed: true,//the collection doesn't require server side pagination
-        //resultsPerPageSelect: [10, 30, 50, 100, 200, 500], // allows to specify a different page size (too high values not recommended)
-        //useQueryString: false, // do not use the query string (not recommended for usability)
+        url: "/api/colors",
         orderBy: "name",
         sortOrder: "asc",
-/*
-        detailRoute: "/api/color/",
-        getIdProperty: function () {
-          return "color";
-        },
-*/
         columns: {
           name: "Name",
           color: {
@@ -150,7 +101,6 @@
           hsvValue: "Value (HSV)"
         }
       });
-
       table.render();
     })();
   </script>
