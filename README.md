@@ -30,7 +30,7 @@ There are two ways to define a fixed KingTable:
 var table = new $.KingTable({
   data: [{...},{...},{...}]
 });
-//or...
+//or... code the server side to return an array of items
 var table = new $.KingTable({
   url: "/api/categories"
 });
@@ -110,7 +110,8 @@ Currently only the included utility function, inside the file *i.js*, is support
 In order to use the jQuery-KingTable plugin, there are two options:
 * download the source code, and work with the R.js modules, like in the provided index.html page
 * download only the bundled source code (/dist/jquery.kingtable.js); or the minified source (/dist/jquery.kingtable.min.js)
-It is also necessary to download the .css code: once again it is possible to use the .less source code; or download only the compiled .css.
+It is also necessary to download the Open Iconic fonts and the .css code: once again it is possible to use the .less source code; or download only the compiled .css.
+A list of possible options is available inside the dedicated [wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Options).
 
 ### How to integrate with server side code
 The KingTable logic defines an interface, in order to offer pagination and search out of the box.
