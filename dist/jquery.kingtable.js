@@ -2318,7 +2318,7 @@ R("jquery-kingtable", ["kingtable-core"], function (KingTable) {
   var methods = {
     init: function (data) {
       if (!data)
-        throw new Error("missing options to set up a smart table");
+        throw new Error("missing options to set up a king table");
 
       var table = new KingTable(_.extend({
         $el: $(this)
