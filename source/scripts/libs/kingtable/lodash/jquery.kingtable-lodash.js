@@ -77,6 +77,13 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
     }
   });
 
+  //use the following template settings; without overriding local settings
+  var templateSettings = {
+    escape: /\{\{(.+?)\}\}/g,
+    evaluate: /\{%(.+?)%\}/g,
+    interpolate: /\{#(.+?)#\}/g
+  };
+
   //NB: in newer versions of lodash, the template function returns a compiler function;
   //in older versions it returns directly a string
   var templateMode = typeof _.template("") == "string" ? 0 : 1;
@@ -97,7 +104,7 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
       switch (templateMode) {
         case 0:
           //legacy mode: _.template returns a string
-          return _.template(template, context);
+          return _.template(template, context, templateSettings);
         case 1:
           //newer mode: _.template returns a compiler function
           //is the template already compiled?
@@ -105,7 +112,7 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
             return data(context);
 
           //compile and store template cache
-          var compiler = $.KingTable.Templates[templateName] = _.template(data);
+          var compiler = $.KingTable.Templates[templateName] = _.template(data, templateSettings);
           return compiler(_.extend({}, context, this.templateHelpers()));
       }
     },
@@ -114,10 +121,10 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
       switch (templateMode) {
         case 0:
           //legacy mode: _.template returns a string
-          return _.template(template, context);
+          return _.template(template, context, templateSettings);
         case 1:
           //newer mode: _.template returns a compiler function
-          var compiler = _.template(template);
+          var compiler = _.template(template, templateSettings);
           return compiler(context);
       }
     },
