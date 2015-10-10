@@ -77,16 +77,9 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
     }
   });
 
-  //use the following template settings; without overriding local settings
-  var templateSettings = {
-    escape: /\{\{(.+?)\}\}/g,
-    evaluate: /\{%(.+?)%\}/g,
-    interpolate: /\{#(.+?)#\}/g
-  };
-
   //NB: in newer versions of lodash, the template function returns a compiler function;
   //in older versions it returns directly a string
-  var templateMode = typeof _.template("") == "string" ? 0 : 1;
+  var templateMode = typeof _.template("_", {}) == "string" ? 0 : 1;
 
   _.extend(KingTable.prototype, {
 
@@ -100,31 +93,32 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
     },
 
     template: function (templateName, context) {
-      var data = $.KingTable.Templates[templateName];
+      var data = $.KingTable.Templates[templateName], settings = this.templateHelpers();
       switch (templateMode) {
         case 0:
           //legacy mode: _.template returns a string
-          return _.template(template, context, templateSettings);
+          return _.template(data, _.extend(context, settings));
         case 1:
           //newer mode: _.template returns a compiler function
           //is the template already compiled?
           if (_.isFunction(data))
-            return data(context);
+            return data(_.extend(context, settings));
 
           //compile and store template cache
-          var compiler = $.KingTable.Templates[templateName] = _.template(data, templateSettings);
-          return compiler(_.extend({}, context, this.templateHelpers()));
+          var compiler = $.KingTable.Templates[templateName] = _.template(data, settings);
+          return compiler(_.extend({}, context, settings));
       }
     },
 
     templateSafe: function (template, context) {
+      var data = _.extend(context, this.templateHelpers());
       switch (templateMode) {
         case 0:
           //legacy mode: _.template returns a string
-          return _.template(template, context, templateSettings);
+          return _.template(template, data);
         case 1:
           //newer mode: _.template returns a compiler function
-          var compiler = _.template(template, templateSettings);
+          var compiler = _.template(template, data);
           return compiler(context);
       }
     },
@@ -644,6 +638,12 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
 
     //template helpers to build html with UnderscoreJs template function
     templateHelpers: function () {
+      //use the following template settings; without overriding local settings
+      var templateSettings = {
+        escape: /\{\{(.+?)\}\}/g,
+        evaluate: /\{%(.+?)%\}/g,
+        interpolate: /\{#(.+?)#\}/g
+      };
       var self = this,
           searchRule = self.filters.getRuleByKey("search"),
           pattern = searchRule ? new RegExp("(" + $.KingTable.Utils.Regex.escapeCharsForRegex(searchRule.value) + ")", "gi") : null;
@@ -663,7 +663,7 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
           var ratio = relWidth / origWidth;
           return Math.ceil(ratio * origHeight);
         }
-      }, self.options.templateHelpers);
+      }, self.options.templateHelpers, templateSettings);
     },
 
     openFiltersDialog: function () {
