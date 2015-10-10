@@ -2601,9 +2601,9 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
         if (!rowsToDisplay.length)
           return self.showEmptyView();
 
-        var html = [], rowTemplate = self.getRowTemplate(), helpers = self.templateHelpers();
+        var html = [], rowTemplate = self.getRowTemplate();
         _.each(rowsToDisplay, function (row) {
-          html.push(self.templateSafe(rowTemplate, _.extend(row, helpers)));
+          html.push(self.templateSafe(rowTemplate, row));
         });
         //inject all html at once
         self.$el.find(".king-table-body").html(html.join(""));
