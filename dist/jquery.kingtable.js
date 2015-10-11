@@ -1350,7 +1350,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
      *   someCustomProperty: 2 //this property will instead be cached inside the instance.options property
      * });
      */
-    baseProperties: ["initialize", "$el", "data"],
+    baseProperties: ["initialize", "$el", "data", "fixed"],
 
     /**
      * Upon instantiation; this function is called to merge the options inside the instance of KingTable.
@@ -2114,9 +2114,12 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
     },
 
     setRowCount: function (arr) {
-      if (!arr) arr = this.data;
+      var self = this,
+          pag = self.pagination,
+          offset = self.fixed ? 0 : ((pag.page - 1) * pag.resultsPerPage);
+      if (!arr) arr = self.data;
       for (var i = 0, l = arr.length; i < l; i++) {
-        arr[i].rowCount = i + 1;
+        arr[i].rowCount = i + 1 + offset;
       }
       return arr;
     },
