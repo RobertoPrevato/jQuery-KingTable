@@ -1278,8 +1278,10 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
   // Defines the core business logic of the jQuery-KingTable plugin.
   // The core is abstracted from jQuery itself;
   //
-  var KingTable = function (options) {
+  var KingTable = function (options, staticProperties) {
     var self = this;
+    if (staticProperties)
+      _.extend(self, staticProperties);
     self.mergeOptions(options).coreInit().initialize();
   };
 
@@ -1523,7 +1525,12 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
             return name;
         }
         throw new Error("jQuery-KingTable: cannot guess which property should be used as id. Please specify the getIdProperty function; to return the id property.");
-      }
+      },
+      
+      /**
+       * Whether the table should automatically refresh itself, when a filter changes; or not.
+       */
+      autorefresh: true
     },
 
     string: StringUtils,
@@ -1566,6 +1573,8 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
           });
         }
       }
+      //support custom filters
+      self.customFilters = {};
       self.loadSettings().checkHash();
       //set basic pagination data
       self.setPagination();
@@ -1598,6 +1607,14 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
           //set the results per page inside the options
           options.resultsPerPage = parseInt(s);
         }
+        
+        var reservedKeys = [options.searchQueryString, options.pageQueryString, options.resultsPerPageQueryString],
+          otherFilters = self.query.getAll(), x;
+          for (x in otherFilters) {
+            if (_.contains(reservedKeys, x))
+              delete otherFilters[x];
+          }
+        _.extend(self.customFilters, otherFilters);
       }
       //load from local storage
       if (options.useLocalStorage) {
@@ -1620,7 +1637,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
     checkHash: function () {
       if (!this.options.useQueryString) return this;
       //this is the only piece of code that actually refers to jQuery inside this file.
-      $(window).on("hashchange.kingtable", _.bind(function() {
+      $(window).on("hashchange.kingtable" + this.cid, _.bind(function() {
         var self = this,
           o = self.options,
           p = self.pagination,
@@ -1736,7 +1753,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
     getFilters: function () {
       var self = this,
           pagination = self.pagination;
-      return {
+      return _.extend({
         fixed: self.fixed || false,//whether the table requires server side pagination or not
         page: pagination.page,//page number
         size: pagination.resultsPerPage,//page size; i.e. results per page
@@ -1744,7 +1761,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         sortOrder: pagination.sortOrder || "",
         search: pagination.search,
         timestamp: self.anchorTimestamp//the timestamp of the first time the table was rendered
-      };
+      }, self.customFilters);
     },
 
     //function that loads data, eventually performing ajax calls
@@ -2229,6 +2246,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
     dispose: function () {
       var self = this;
       delete self.columns;
+      $(window).off("hashchange.kingtable" + self.cid);
       //trigger dispose event
       self.trigger("dispose");
       return self;
@@ -2377,7 +2395,9 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
     "click .pagination-bar-next-page": "goToNext",
     "click .pagination-bar-refresh": "refresh",
     "change .pagination-bar-page-number": "changePage",
-    "change .pagination-bar-results-select": "changeResultsNumber"
+    "change .pagination-bar-results-select": "changeResultsNumber",
+    "click .btn-advanced-filters": "toggleAdvancedFilters",
+    "click .btn-clear-filters": "clearFilters"
   };
 
   var tableEvents = {
@@ -2385,12 +2405,17 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
     "click .resize-handler": "toggleColumnResize"
   };
 
-  var searchEvents = {
+  var formsEvents = {
     "keyup .search-field": "onSearchKeyUp",
     "paste .search-field, cut .search-field": "onSearchChange",
-    "click .btn-filters-wizard": "openFiltersDialog"
+    "click .btn-filters-wizard": "openFiltersDialog",
+    "keyup .filters-region input[type='text']": "viewToModel",
+    "keyup .filters-region textarea": "viewToModel",
+    "change .filters-region input[type='checkbox']": "viewToModel",
+    "change .filters-region input[type='radio']": "viewToModel",
+    "change .filters-region select": "viewToModel"
   };
-
+  
   //extend the table default options
   _.extend(KingTable.prototype.defaults, {
     /**
@@ -2417,7 +2442,24 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
     /**
      * Allows to define additional event handlers
      */
-    events: null
+    events: null,
+    /**
+     * Allows to define a view for advanced filters
+     */
+    filtersView: null,
+    /**
+     * Allows to define whether the advanced filters view should be
+     * expandable; or always visible.
+     */
+    filtersViewExpandable: true,
+    /**
+     * Allows to specify that the filters view should be automatically displayed, upon table render.
+     */
+    filtersViewOpen: true,
+    /**
+     * Allows to define how the filters view should appear: slide | fade | none (immediate)
+     */
+    filtersViewAppearance: "slide"
   });
 
   // modifies the default schemas
@@ -2448,20 +2490,22 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
     },
 
     template: function (templateName, context) {
-      var data = $.KingTable.Templates[templateName], settings = this.templateHelpers();
+      var data = $.KingTable.Templates[templateName],
+          settings = this.templateHelpers(),
+          scope = _.extend({}, context, settings);
       switch (templateMode) {
         case 0:
           //legacy mode: _.template returns a string
-          return _.template(data, _.extend(context, settings));
+          return _.template(data, scope);
         case 1:
           //newer mode: _.template returns a compiler function
           //is the template already compiled?
           if (_.isFunction(data))
-            return data(_.extend(context, settings));
+            return data(scope);
 
           //compile and store template cache
           var compiler = $.KingTable.Templates[templateName] = _.template(data, settings);
-          return compiler(_.extend({}, context, settings));
+          return compiler(scope);
       }
     },
 
@@ -2505,7 +2549,7 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
       var html = $(template);
 
       if (!(self.$el instanceof $) || !self.$el.length)
-        throw new Error("the king-table is not bound to any element; it must be bound to a container element.");
+        throw new Error("KingTable: the table is not bound to any element; it must be bound to a container element.");
 
       var id = self.options.id;
       if (id)
@@ -2594,7 +2638,45 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
     },
 
     buildFiltersControls: function () {
-      return this.rebuild(this.$el.find(".pagination-bar-filters"), "pagination-bar-filters", this.pagination);
+      var self = this,
+          options = self.options,
+          filtersView = options.filtersView,
+          context = _.extend({}, self.pagination, {
+            advancedFiltersButton: filtersView && options.filtersViewExpandable
+          });
+      //rebuild the pagination filters
+      var paginationBar = self.$el.find(".pagination-bar-filters"),
+          filtersRegion = self.$el.find(".filters-region");
+      self.rebuild(paginationBar, "pagination-bar-filters", context);
+      //check if the user defined advanced filters view
+      if (filtersView) {
+        var template = self.getCustomFiltersView(filtersView);
+        //compile the template
+        var customFilters = self.customFilters;
+        var compiled = self.templateSafe(template, customFilters);
+        //convert in jQuery object and assign the values
+        var view = self.modelToView(customFilters, compiled);
+        if (!options.filtersViewExpandable || options.filtersViewOpen) {
+          filtersRegion.show();
+          self.customFiltersVisible = true;
+        }
+        self.trigger("on-filters-render", view);
+        filtersRegion.html(view);
+      }
+      return self;
+    },
+
+    getCustomFiltersView: function (option) {
+      var element = document.getElementById(option);
+      if (element != null) {
+        return element.innerText;
+      }
+      if ($.KingTable.Templates.hasOwnProperty(option))
+        return $.KingTable.Templates[option];
+      //try to return the option itself
+      if (_.isString(option))
+        return option;
+      throw new Error("KingTable: cannot obtain the custom filters view.");
     },
 
     buildBody: function (options) {
@@ -2744,7 +2826,7 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
       var events = this.events || {};
       if (_.isFunction(events)) events = events.call(this);
       //extends events object with validation events
-      return _.extend({}, paginationBarEvents, tableEvents, searchEvents, events, this.options.events);
+      return _.extend({}, paginationBarEvents, tableEvents, formsEvents, events, this.options.events);
     },
 
     // delegate events
@@ -3023,6 +3105,121 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
 
     openFiltersDialog: function () {
       //TODO
+    },
+
+    unsetValues: function (element) {
+      element.find("input[type='text'],textarea,select").val("");
+      element.find("input[type='checkbox'],input[type='radio']").each(function () {
+        this.checked = false;
+      });
+      return this;
+    },
+
+    setValueInElement: function (input, val) {
+      if (!input) return this;
+      if (!input instanceof $) input = $(input);
+      
+      input.each(function () {
+        var element = this, 
+          field = $(element),
+          type = element.type;
+        
+        switch (element.tagName.toLowerCase()) {
+          case "input":
+            if (type == "checkbox") {
+              element.checked = val ? true : false;
+            } else if (type == "radio") {
+              element.checked = val == element.value;
+            } else {
+              field.val(val);
+            }
+          break;
+          default:
+            //textarea; select
+            field.val(val);
+          break;
+        }
+        
+      });
+      return this;
+    },
+    
+    //provides automatic binding from a context to a view
+    modelToView: function (context, view) {
+      if (_.isString(view)) view = $(view);
+      var x, self = this, schema = self.schema;
+      for (x in context) {
+        var fields = view.find("[name=\"" + x + "\"]");
+        if (fields.length) {
+          self.setValueInElement(fields, context[x]);
+        }
+      }
+      return view;
+    },
+    
+    // provides automatic binding from form inputs to the model for filters
+    viewToModel: function (e) {
+      var self = this,
+        element = e.currentTarget,
+        type = element.type,
+        field = $(element),
+        value,
+        name = field.attr("name");
+      if (!name || field.hasClass("search-field")) return;
+      if (type == "checkbox") {
+        value = element.checked;
+      } else {
+        value = field.val();
+      }
+      //set the value inside the pagination filters
+      var a = "customFilters";
+      if (!self[a]) self[a] = {};
+      self[a][name] = value;
+      
+      if (self.fixed) {
+        //filtering must be done client side.
+        //todo: add a new rule to the filters manager
+        //sorry; this feature is not implemented yet...
+      }
+      if (self.options.useQueryString) {
+        //set the filter inside the query string
+        self.query.set(name, value);
+      }
+      
+      if (self.options.autorefresh) {
+        self.refresh();
+      }
+    },
+
+    toggleAdvancedFilters: function () {
+      var self = this, el = self.$el.find(".filters-region");
+      if (self.customFiltersVisible) {
+        self.customFiltersVisible = false;
+        //hide
+        el.hide();
+      } else {
+        self.customFiltersVisible = true;
+        //show
+        el.show();
+      }
+    },
+
+    /**
+     * Default function to clear the filters view.
+     */
+    clearFilters: function () {
+      var self = this,
+          el = self.$el.find(".filters-region"),
+          currentFilters = self.customFilters;
+      if ($.isEmptyObject(currentFilters))
+        return true;
+      self.customFilters = {};
+      var possibleValues = el.find("input[name]").map(function (i, o) { return o.name; });
+      _.each(possibleValues, function (o) {
+        self.query.set(o, "");
+      });
+      self.unsetValues(el);
+      self.refresh();
     }
 
   });
@@ -3037,13 +3234,13 @@ if (!$.KingTable.Templates) $.KingTable.Templates = {};
 (function (templates) {
   var o = {
     'king-table-preloader': '<div class="preloader-mask"> <div class="preloader-icon"></div> </div>',
-    'king-table-empty-view': '<tr class="king-table-empty"> <td colspan="{{colspan}}">{{$i("voc.NoResults")}}</td> </tr>',
+    'king-table-empty-view': '<tr class="king-table-empty"> <td colspan="{{colspan}}">{{I.t("voc.NoResults")}}</td> </tr>',
     'king-table-head-cell': '<th data-id="{{cid}}" class="{% if (obj.sortable) { %} sortable{%}%}"> {% if (name) { %} <div> <span>{{displayName}}</span> <span class="oi" data-glyph="{% if (obj.sort) { %}sort-{{obj.sort}}ending{%}%}" title="icon name" aria-hidden="true"></span> {% if (obj.resizable) { %} <span class="resize-handler"></span> {% } %} </div> {% } %} </th>',
     'king-table-empty-cell': '<th></th>',
-    'king-table-base': '<div class="king-table-region"> <div class="pagination-bar"></div> <div class="king-table-container"> <table class="king-table"> <thead class="king-table-head"></thead> <tbody class="king-table-body"></tbody> </table> </div> </div>',
+    'king-table-base': '<div class="king-table-region"> <div class="pagination-bar"></div> <div class="filters-region"></div> <div class="king-table-container"> <table class="king-table"> <thead class="king-table-head"></thead> <tbody class="king-table-body"></tbody> </table> </div> </div>',
     'king-table-error-view': '<tr class="king-table-error"> <td class="message" colspan="{{colspan}}"> <span>{{message}}</span> <span class="oi" data-glyph="warning" title="icon name" aria-hidden="true"></span> </td> </tr>',
-    'pagination-bar-buttons': '{% if (page > firstPage) { %} <span tabindex="0" class="pagination-button pagination-bar-first-page" title="{{$i(\'voc.FirstPage\')}}"></span> <span tabindex="0" class="pagination-button pagination-bar-prev-page" title="{{$i(\'voc.PrevPage\')}}"></span> {% } else { %} <span class="pagination-button-disabled pagination-bar-first-page-disabled"></span> <span class="pagination-button-disabled pagination-bar-prev-page-disabled"></span> {% } %} <span class="separator"></span> <span class="valigned">{{$i(\'voc.Page\')}} </span> {% if (totalPageCount > 1) { %} <input name="page-number" text="text" class="w30 must-integer pagination-bar-page-number" value="{{page}}" /> {% } else { %} <span class="valigned pagination-bar-page-number-disabled">{{page}}</span> {% } %} <span class="valigned" style="display:inline-block;min-width:30px;"> {{$i(\'voc.of\')}} {{totalPageCount}}</span> <span class="separator"></span> <span tabindex="0" class="pagination-button pagination-bar-refresh" title="{{$i(\'voc.Refresh\')}}"></span> <span class="separator"></span> {% if (page < totalPageCount) { %} <span tabindex="0" class="pagination-button pagination-bar-next-page" title="{{$i(\'voc.NextPage\')}}"></span> <span tabindex="0" class="pagination-button pagination-bar-last-page" title="{{$i(\'voc.LastPage\')}}"></span> {% } else { %} <span class="pagination-button-disabled pagination-bar-next-page-disabled"></span> <span class="pagination-button-disabled pagination-bar-last-page-disabled"></span> {% } %} <span class="separator"></span> <span class="valigned">{{$i(\'voc.ResultsPerPage\')}}</span> {% if (totalRowsCount) { %} <select name="pageresults" class="pagination-bar-results-select valigned"{% if (totalRowsCount <= 10) { %} disabled="disabled"{% } %}> {% _.each(resultsPerPageSelect, function (val) { %} <option value="{{val}}"{% if (val == resultsPerPage) { %} selected="selected"{%}%}>{{val}}</option> {% }) %} </select> {% } else { %} <select name="pageresults" class="pagination-bar-results-select valigned" disabled="disabled" readonly="readonly"></select> {% } %} <span class="separator"></span> <span class="valigned m0"> {% if (totalRowsCount) { %} {{$i(\'voc.Results\')}} {{firstObjectNumber}} - {{Math.min(lastObjectNumber, totalRowsCount)}} {{$i(\'voc.of\')}} {{totalRowsCount}} {% } else { %} 0 Results {% } %} </span> <span class="separator"></span>',
-    'pagination-bar-filters': '{% if (allowSearch) { %} <input type="text" class="search-field" value="{{search}}" /> {% } %} {% if (filtersWizard) { %} <button class="btn btn-filters-wizard">{{$i("voc.Filters")}}</button> {% } %}',
+    'pagination-bar-buttons': '{% if (page > firstPage) { %} <span tabindex="0" class="pagination-button pagination-bar-first-page" title="{{I.t(\'voc.FirstPage\')}}"></span> <span tabindex="0" class="pagination-button pagination-bar-prev-page" title="{{I.t(\'voc.PrevPage\')}}"></span> {% } else { %} <span class="pagination-button-disabled pagination-bar-first-page-disabled"></span> <span class="pagination-button-disabled pagination-bar-prev-page-disabled"></span> {% } %} <span class="separator"></span> <span class="valigned">{{I.t(\'voc.Page\')}} </span> {% if (totalPageCount > 1) { %} <input name="page-number" text="text" class="w30 must-integer pagination-bar-page-number" value="{{page}}" /> {% } else { %} <span class="valigned pagination-bar-page-number-disabled">{{page}}</span> {% } %} <span class="valigned" style="display:inline-block;min-width:30px;"> {{I.t(\'voc.of\')}} {{totalPageCount}}</span> <span class="separator"></span> <span tabindex="0" class="pagination-button pagination-bar-refresh" title="{{I.t(\'voc.Refresh\')}}"></span> <span class="separator"></span> {% if (page < totalPageCount) { %} <span tabindex="0" class="pagination-button pagination-bar-next-page" title="{{I.t(\'voc.NextPage\')}}"></span> <span tabindex="0" class="pagination-button pagination-bar-last-page" title="{{I.t(\'voc.LastPage\')}}"></span> {% } else { %} <span class="pagination-button-disabled pagination-bar-next-page-disabled"></span> <span class="pagination-button-disabled pagination-bar-last-page-disabled"></span> {% } %} <span class="separator"></span> <span class="valigned">{{I.t(\'voc.ResultsPerPage\')}}</span> {% if (totalRowsCount) { %} <select name="pageresults" class="pagination-bar-results-select valigned"{% if (totalRowsCount <= 10) { %} disabled="disabled"{% } %}> {% _.each(resultsPerPageSelect, function (val) { %} <option value="{{val}}"{% if (val == resultsPerPage) { %} selected="selected"{%}%}>{{val}}</option> {% }) %} </select> {% } else { %} <select name="pageresults" class="pagination-bar-results-select valigned" disabled="disabled" readonly="readonly"></select> {% } %} <span class="separator"></span> <span class="valigned m0"> {% if (totalRowsCount) { %} {{I.t(\'voc.Results\')}} {{firstObjectNumber}} - {{Math.min(lastObjectNumber, totalRowsCount)}} {{I.t(\'voc.of\')}} {{totalRowsCount}} {% } else { %} 0 Results {% } %} </span> <span class="separator"></span>',
+    'pagination-bar-filters': '{% if (allowSearch) { %} <input type="text" class="search-field" value="{{search}}" /> {% } %} {% if (advancedFiltersButton) { %} <button class="btn camo-btn btn-advanced-filters">{{I.t("voc.AdvancedFilters")}}</button> {% } %} {% if (filtersWizard) { %} <button class="btn btn-filters-wizard">{{I.t("voc.Filters")}}</button> {% } %}',
     'pagination-bar-layout': '<span class="pagination-bar-buttons"></span> <span class="pagination-bar-filters"></span>'
   };
   var x;
