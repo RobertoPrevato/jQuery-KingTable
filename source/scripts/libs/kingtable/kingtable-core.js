@@ -13,8 +13,10 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
   // Defines the core business logic of the jQuery-KingTable plugin.
   // The core is abstracted from jQuery itself;
   //
-  var KingTable = function (options) {
+  var KingTable = function (options, staticProperties) {
     var self = this;
+    if (staticProperties)
+      _.extend(self, staticProperties);
     self.mergeOptions(options).coreInit().initialize();
   };
 
@@ -258,7 +260,12 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
             return name;
         }
         throw new Error("jQuery-KingTable: cannot guess which property should be used as id. Please specify the getIdProperty function; to return the id property.");
-      }
+      },
+      
+      /**
+       * Whether the table should automatically refresh itself, when a filter changes; or not.
+       */
+      autorefresh: true
     },
 
     string: StringUtils,
@@ -301,6 +308,8 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
           });
         }
       }
+      //support custom filters
+      self.customFilters = {};
       self.loadSettings().checkHash();
       //set basic pagination data
       self.setPagination();
@@ -333,6 +342,14 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
           //set the results per page inside the options
           options.resultsPerPage = parseInt(s);
         }
+        
+        var reservedKeys = [options.searchQueryString, options.pageQueryString, options.resultsPerPageQueryString],
+          otherFilters = self.query.getAll(), x;
+          for (x in otherFilters) {
+            if (_.contains(reservedKeys, x))
+              delete otherFilters[x];
+          }
+        _.extend(self.customFilters, otherFilters);
       }
       //load from local storage
       if (options.useLocalStorage) {
@@ -355,7 +372,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
     checkHash: function () {
       if (!this.options.useQueryString) return this;
       //this is the only piece of code that actually refers to jQuery inside this file.
-      $(window).on("hashchange.kingtable", _.bind(function() {
+      $(window).on("hashchange.kingtable" + this.cid, _.bind(function() {
         var self = this,
           o = self.options,
           p = self.pagination,
@@ -471,7 +488,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
     getFilters: function () {
       var self = this,
           pagination = self.pagination;
-      return {
+      return _.extend({
         fixed: self.fixed || false,//whether the table requires server side pagination or not
         page: pagination.page,//page number
         size: pagination.resultsPerPage,//page size; i.e. results per page
@@ -479,7 +496,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         sortOrder: pagination.sortOrder || "",
         search: pagination.search,
         timestamp: self.anchorTimestamp//the timestamp of the first time the table was rendered
-      };
+      }, self.customFilters);
     },
 
     //function that loads data, eventually performing ajax calls
@@ -964,6 +981,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
     dispose: function () {
       var self = this;
       delete self.columns;
+      $(window).off("hashchange.kingtable" + self.cid);
       //trigger dispose event
       self.trigger("dispose");
       return self;

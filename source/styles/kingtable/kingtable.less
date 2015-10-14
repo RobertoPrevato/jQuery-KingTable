@@ -9,6 +9,7 @@
  * http://www.opensource.org/licenses/MIT
  */
 @import "pagination-bars.less";
+@import "filters-region.less";
 @import "menus.less";
 @import "themes.less";
 @import "preloaders.less";
@@ -43,6 +44,20 @@
       -moz-box-sizing: content-box;
     }
   }
+  .btn {
+    font-size: 12px;
+  }
+  .camo-btn {
+    background: none;
+    border: none;
+    padding: 3px 10px;
+    font-style: italic;
+    cursor: pointer;
+    &:focus, &:hover {
+      text-decoration: underline;
+    }
+  }
+
   select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input {
     margin-bottom: 10px;
     vertical-align: middle;

@@ -22,7 +22,9 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
     "click .pagination-bar-next-page": "goToNext",
     "click .pagination-bar-refresh": "refresh",
     "change .pagination-bar-page-number": "changePage",
-    "change .pagination-bar-results-select": "changeResultsNumber"
+    "change .pagination-bar-results-select": "changeResultsNumber",
+    "click .btn-advanced-filters": "toggleAdvancedFilters",
+    "click .btn-clear-filters": "clearFilters"
   };
 
   var tableEvents = {
@@ -30,12 +32,17 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
     "click .resize-handler": "toggleColumnResize"
   };
 
-  var searchEvents = {
+  var formsEvents = {
     "keyup .search-field": "onSearchKeyUp",
     "paste .search-field, cut .search-field": "onSearchChange",
-    "click .btn-filters-wizard": "openFiltersDialog"
+    "click .btn-filters-wizard": "openFiltersDialog",
+    "keyup .filters-region input[type='text']": "viewToModel",
+    "keyup .filters-region textarea": "viewToModel",
+    "change .filters-region input[type='checkbox']": "viewToModel",
+    "change .filters-region input[type='radio']": "viewToModel",
+    "change .filters-region select": "viewToModel"
   };
-
+  
   //extend the table default options
   _.extend(KingTable.prototype.defaults, {
     /**
@@ -62,7 +69,24 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
     /**
      * Allows to define additional event handlers
      */
-    events: null
+    events: null,
+    /**
+     * Allows to define a view for advanced filters
+     */
+    filtersView: null,
+    /**
+     * Allows to define whether the advanced filters view should be
+     * expandable; or always visible.
+     */
+    filtersViewExpandable: true,
+    /**
+     * Allows to specify that the filters view should be automatically displayed, upon table render.
+     */
+    filtersViewOpen: true,
+    /**
+     * Allows to define how the filters view should appear: slide | fade | none (immediate)
+     */
+    filtersViewAppearance: "slide"
   });
 
   // modifies the default schemas
@@ -93,20 +117,22 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
     },
 
     template: function (templateName, context) {
-      var data = $.KingTable.Templates[templateName], settings = this.templateHelpers();
+      var data = $.KingTable.Templates[templateName],
+          settings = this.templateHelpers(),
+          scope = _.extend({}, context, settings);
       switch (templateMode) {
         case 0:
           //legacy mode: _.template returns a string
-          return _.template(data, _.extend(context, settings));
+          return _.template(data, scope);
         case 1:
           //newer mode: _.template returns a compiler function
           //is the template already compiled?
           if (_.isFunction(data))
-            return data(_.extend(context, settings));
+            return data(scope);
 
           //compile and store template cache
           var compiler = $.KingTable.Templates[templateName] = _.template(data, settings);
-          return compiler(_.extend({}, context, settings));
+          return compiler(scope);
       }
     },
 
@@ -150,7 +176,7 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
       var html = $(template);
 
       if (!(self.$el instanceof $) || !self.$el.length)
-        throw new Error("the king-table is not bound to any element; it must be bound to a container element.");
+        throw new Error("KingTable: the table is not bound to any element; it must be bound to a container element.");
 
       var id = self.options.id;
       if (id)
@@ -239,7 +265,45 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
     },
 
     buildFiltersControls: function () {
-      return this.rebuild(this.$el.find(".pagination-bar-filters"), "pagination-bar-filters", this.pagination);
+      var self = this,
+          options = self.options,
+          filtersView = options.filtersView,
+          context = _.extend({}, self.pagination, {
+            advancedFiltersButton: filtersView && options.filtersViewExpandable
+          });
+      //rebuild the pagination filters
+      var paginationBar = self.$el.find(".pagination-bar-filters"),
+          filtersRegion = self.$el.find(".filters-region");
+      self.rebuild(paginationBar, "pagination-bar-filters", context);
+      //check if the user defined advanced filters view
+      if (filtersView) {
+        var template = self.getCustomFiltersView(filtersView);
+        //compile the template
+        var customFilters = self.customFilters;
+        var compiled = self.templateSafe(template, customFilters);
+        //convert in jQuery object and assign the values
+        var view = self.modelToView(customFilters, compiled);
+        if (!options.filtersViewExpandable || options.filtersViewOpen) {
+          filtersRegion.show();
+          self.customFiltersVisible = true;
+        }
+        self.trigger("on-filters-render", view);
+        filtersRegion.html(view);
+      }
+      return self;
+    },
+
+    getCustomFiltersView: function (option) {
+      var element = document.getElementById(option);
+      if (element != null) {
+        return element.innerText;
+      }
+      if ($.KingTable.Templates.hasOwnProperty(option))
+        return $.KingTable.Templates[option];
+      //try to return the option itself
+      if (_.isString(option))
+        return option;
+      throw new Error("KingTable: cannot obtain the custom filters view.");
     },
 
     buildBody: function (options) {
@@ -389,7 +453,7 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
       var events = this.events || {};
       if (_.isFunction(events)) events = events.call(this);
       //extends events object with validation events
-      return _.extend({}, paginationBarEvents, tableEvents, searchEvents, events, this.options.events);
+      return _.extend({}, paginationBarEvents, tableEvents, formsEvents, events, this.options.events);
     },
 
     // delegate events
@@ -668,6 +732,121 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
 
     openFiltersDialog: function () {
       //TODO
+    },
+
+    unsetValues: function (element) {
+      element.find("input[type='text'],textarea,select").val("");
+      element.find("input[type='checkbox'],input[type='radio']").each(function () {
+        this.checked = false;
+      });
+      return this;
+    },
+
+    setValueInElement: function (input, val) {
+      if (!input) return this;
+      if (!input instanceof $) input = $(input);
+      
+      input.each(function () {
+        var element = this, 
+          field = $(element),
+          type = element.type;
+        
+        switch (element.tagName.toLowerCase()) {
+          case "input":
+            if (type == "checkbox") {
+              element.checked = val ? true : false;
+            } else if (type == "radio") {
+              element.checked = val == element.value;
+            } else {
+              field.val(val);
+            }
+          break;
+          default:
+            //textarea; select
+            field.val(val);
+          break;
+        }
+        
+      });
+      return this;
+    },
+    
+    //provides automatic binding from a context to a view
+    modelToView: function (context, view) {
+      if (_.isString(view)) view = $(view);
+      var x, self = this, schema = self.schema;
+      for (x in context) {
+        var fields = view.find("[name=\"" + x + "\"]");
+        if (fields.length) {
+          self.setValueInElement(fields, context[x]);
+        }
+      }
+      return view;
+    },
+    
+    // provides automatic binding from form inputs to the model for filters
+    viewToModel: function (e) {
+      var self = this,
+        element = e.currentTarget,
+        type = element.type,
+        field = $(element),
+        value,
+        name = field.attr("name");
+      if (!name || field.hasClass("search-field")) return;
+      if (type == "checkbox") {
+        value = element.checked;
+      } else {
+        value = field.val();
+      }
+      //set the value inside the pagination filters
+      var a = "customFilters";
+      if (!self[a]) self[a] = {};
+      self[a][name] = value;
+      
+      if (self.fixed) {
+        //filtering must be done client side.
+        //todo: add a new rule to the filters manager
+        //sorry; this feature is not implemented yet...
+      }
+      if (self.options.useQueryString) {
+        //set the filter inside the query string
+        self.query.set(name, value);
+      }
+      
+      if (self.options.autorefresh) {
+        self.refresh();
+      }
+    },
+
+    toggleAdvancedFilters: function () {
+      var self = this, el = self.$el.find(".filters-region");
+      if (self.customFiltersVisible) {
+        self.customFiltersVisible = false;
+        //hide
+        el.hide();
+      } else {
+        self.customFiltersVisible = true;
+        //show
+        el.show();
+      }
+    },
+
+    /**
+     * Default function to clear the filters view.
+     */
+    clearFilters: function () {
+      var self = this,
+          el = self.$el.find(".filters-region"),
+          currentFilters = self.customFilters;
+      if ($.isEmptyObject(currentFilters))
+        return true;
+      self.customFilters = {};
+      var possibleValues = el.find("input[name]").map(function (i, o) { return o.name; });
+      _.each(possibleValues, function (o) {
+        self.query.set(o, "");
+      });
+      self.unsetValues(el);
+      self.refresh();
     }
 
   });

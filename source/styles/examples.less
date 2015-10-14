@@ -20,6 +20,48 @@ body {
   background: #000;
   padding: 0 20px;
 }
+//NB: the following code is intentionally not included in the library css;
+//the custom filters view is meant to be custom;
+#colors-table {
+  .filters-region {
+    min-width: 750px;
+    .left-column {
+      float: left;
+      width: 400px;
+      padding-top: 1px;
+    }
+    .right-column {
+      margin-left: 400px;
+      padding-top: 1px;
+    }
+    .break {
+      clear: both;
+    }
+    dl {
+      dt {
+        width: 82px;
+        text-align: right;
+        padding-right: 20px;
+        float: left;
+        label:after {
+          content: ":";
+        }
+      }
+      dd {
+
+        label {
+          vertical-align: top;
+        }
+        input[type="radio"] {
+          padding: 0;
+          vertical-align: top;
+          margin: 0 15px 0 5px;
+        }
+      }
+    }
+  }
+}
+
 #content-1 {
   width: 50%;
   float: left;

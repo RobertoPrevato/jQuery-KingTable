@@ -1,6 +1,9 @@
 {% if (allowSearch) { %}
 <input type="text" class="search-field" value="{{search}}" />
 {% } %}
+{% if (advancedFiltersButton) { %}
+<button class="btn camo-btn btn-advanced-filters">{{I.t("voc.AdvancedFilters")}}</button>
+{% } %}
 {% if (filtersWizard) { %}
 <button class="btn btn-filters-wizard">{{I.t("voc.Filters")}}</button>
 {% } %}
