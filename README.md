@@ -1,6 +1,6 @@
 # jQuery-KingTable
 Table widget for administrative tables that are able to build themselves, on the basis of their input data.
-Supports client and server side pagination; client and server side search.
+Supports client and server side pagination; client and server side search; custom filters views.
 
 ## Objectives of the plugin
 * Allow the implementation of administrative tables with the smallest amount of code possible.
@@ -154,7 +154,7 @@ python server.py
 
 ## Code organization
 * The source code is organized in modules, defined using the library [R.js](https://github.com/RobertoPrevato/R.js), of my creation.
-* The core business logic of the KingTable is abstracted from DOM manipulation logic and also from jQuery.fn function.
+* The core business logic of the KingTable is abstracted from DOM manipulation logic.
 * The DOM manipulation logic can be implemented in different ways: currently the plugin offers an implementation that uses Lodash *template* function.
 
 ## Dependencies
