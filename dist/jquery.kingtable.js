@@ -1211,8 +1211,9 @@ R("filters-manager", ["string", "regex", "array-search", "extend"], function (St
       switch (filter.type) {
         case 'search':
           return this.search(arr, filter.value, filter);
+        case 'fn':
         case 'function':
-          return _.filter(arr, filter.fn);
+          return _.filter(arr, _.partial(filter.fn.bind(filter.context || this), filter));
       }
       return arr;
     },
@@ -2455,7 +2456,7 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
     /**
      * Allows to specify that the filters view should be automatically displayed, upon table render.
      */
-    filtersViewOpen: true,
+    filtersViewOpen: false,
     /**
      * Allows to define how the filters view should appear: slide | fade | none (immediate)
      */
@@ -2836,12 +2837,17 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
         delegateEventSplitter = /^(\S+)\s*(.*)$/;
       self.undelegateEvents();
       for (var key in events) {
-        var method = events[key];
+        var val = events[key],
+          method = val;
         if (!_.isFunction(method)) method = self[method];
+        if (!method && self.options.hasOwnProperty(val))
+          // try to read from options
+          method = self.options[val];
+        
         if (!method) throw new Error("method not defined inside the model: " + events[key]);
         var match = key.match(delegateEventSplitter);
         var eventName = match[1], selector = match[2];
-        method = _.bind(method, this);
+        method = _.bind(method, self);
         eventName += '.delegate';
         if (selector === '') {
           self.$el.on(eventName, method);
@@ -3178,8 +3184,7 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
       
       if (self.fixed) {
         //filtering must be done client side.
-        //todo: add a new rule to the filters manager
-        //sorry; this feature is not implemented yet...
+        self.tryApplyClientSideFilter(name, value);
       }
       if (self.options.useQueryString) {
         //set the filter inside the query string
@@ -3191,6 +3196,35 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
       }
     },
 
+    tryApplyClientSideFilter: function (name, value) {
+      if (_.isUndefined(value) || _.isNull(value)) {
+        return this.filters.removeRuleByKey(name);
+      }
+      var self = this,
+        filters = self.options.filters;
+      if (!filters) 
+        throw "KingTable: missing filtering functions for a fixed table.";
+      var filter = filters[name];
+      if (!filter) 
+        throw "KingTable: missing filter definition for: " + name;
+      if (_.isFunction(filter)) {
+        self.filters.set({
+          type: "fn",
+          key: name,
+          value: value,
+          fn: filter
+        });
+      } else if (_.isPlainObject(filter)) {
+        self.filters.set(_.extend({
+          key: name,
+          value: value
+        }, filter));
+      } else {
+        throw "KingTable: invalid filter definition for: " + name;
+      }
+      return self;
+    },
+    
     toggleAdvancedFilters: function () {
       var self = this, el = self.$el.find(".filters-region");
       if (self.customFiltersVisible) {
@@ -3217,6 +3251,7 @@ R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
       var possibleValues = el.find("input[name]").map(function (i, o) { return o.name; });
       _.each(possibleValues, function (o) {
         self.query.set(o, "");
+        self.filters.removeRuleByKey(o);
       });
       self.unsetValues(el);
       self.refresh();
