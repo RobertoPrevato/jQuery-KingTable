@@ -110,8 +110,9 @@ R("filters-manager", ["string", "regex", "array-search", "extend"], function (St
       switch (filter.type) {
         case 'search':
           return this.search(arr, filter.value, filter);
+        case 'fn':
         case 'function':
-          return _.filter(arr, filter.fn);
+          return _.filter(arr, _.partial(filter.fn.bind(filter.context || this), filter));
       }
       return arr;
     },
