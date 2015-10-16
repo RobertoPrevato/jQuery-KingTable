@@ -11,6 +11,7 @@ Supports client and server side pagination; client and server side search; custo
 ## Live demo
 The following demos show fixed tables:
 * [Live demo](http://ugrose.com/content/demos/kingtable/index.html)
+* [Demo with complex filters](http://ugrose.com/content/demos/kingtable/complex-filters.html)
 * [Double table: two tables displayed in the same page](http://ugrose.com/content/demos/kingtable/double.html)
 
 ## Documentation
