@@ -15,7 +15,7 @@ The following demos show fixed tables:
 * [Double table: two tables displayed in the same page](http://ugrose.com/content/demos/kingtable/double.html)
 
 ## Documentation
-Please refer to the wiki page.
+Please refer to the [wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki).
 A full list of possible options is available inside the dedicated [wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Options).
 
 ## Modes
@@ -108,8 +108,14 @@ $("#table-container").kingtable({
 ```
 
 ## About localization
+For full information, refer to the [dedicated wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Implementing-localization).
 The KingTable widget requires an utility to implement client side localization, which is used to display proper names of buttons (_refresh, page number, results per page, etc.).
-Currently only the included utility function, inside the file *i.js*, is supported; but soon I will add support for a more complex i18n js implementation.
+Currently the KingTable supports these two libraries:
+* [I.js](https://github.com/RobertoPrevato/I.js)
+* [i18n-js](https://github.com/fnando/i18n-js)
+
+The first should be used only if advanced features like parsing of dates; support for currencies; are not needed.
+The second should be used if advanced localization features are required.
 
 ## How to integrate with your project
 In order to use the jQuery-KingTable plugin, there are two options:
@@ -163,7 +169,7 @@ python server.py
 * [Lodash](https://lodash.com/)
 * [R.js](https://github.com/RobertoPrevato/R.js)
 * [OPEN iconic](https://useiconic.com/open/)
-* A function to implement client side localization: like the provided _i.js_
+* A function to implement client side localization: like the provided _i.js_, or [i18n-js](https://github.com/fnando/i18n-js)
 
 ## Development tools
 The source code makes use of the following two tools, of my creation:
