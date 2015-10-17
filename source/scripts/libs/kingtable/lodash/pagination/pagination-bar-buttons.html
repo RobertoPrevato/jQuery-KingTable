@@ -1,30 +1,30 @@
 {% if (page > firstPage) { %}
-	<span tabindex="0" class="pagination-button pagination-bar-first-page" title="{{I.t('voc.FirstPage')}}"></span>
-	<span tabindex="0" class="pagination-button pagination-bar-prev-page" title="{{I.t('voc.PrevPage')}}"></span>
+	<span tabindex="0" class="pagination-button pagination-bar-first-page" title="{{$i('voc.FirstPage')}}"></span>
+	<span tabindex="0" class="pagination-button pagination-bar-prev-page" title="{{$i('voc.PrevPage')}}"></span>
 {% } else { %}
 	<span class="pagination-button-disabled pagination-bar-first-page-disabled"></span>
 	<span class="pagination-button-disabled pagination-bar-prev-page-disabled"></span>
 {% } %}
 <span class="separator"></span>
-<span class="valigned">{{I.t('voc.Page')}} </span>
+<span class="valigned">{{$i('voc.Page')}} </span>
 {% if (totalPageCount > 1) { %}
 	<input name="page-number" text="text" class="w30 must-integer pagination-bar-page-number" value="{{page}}" />
 {% } else { %}
 	<span class="valigned pagination-bar-page-number-disabled">{{page}}</span>
 {% } %}
-<span class="valigned" style="display:inline-block;min-width:30px;"> {{I.t('voc.of')}} {{totalPageCount}}</span>
+<span class="valigned" style="display:inline-block;min-width:30px;"> {{$i('voc.of')}} {{totalPageCount}}</span>
 <span class="separator"></span>
-<span tabindex="0" class="pagination-button pagination-bar-refresh" title="{{I.t('voc.Refresh')}}"></span>
+<span tabindex="0" class="pagination-button pagination-bar-refresh" title="{{$i('voc.Refresh')}}"></span>
 <span class="separator"></span>
 {% if (page < totalPageCount) { %}
-	<span tabindex="0" class="pagination-button pagination-bar-next-page" title="{{I.t('voc.NextPage')}}"></span>
-	<span tabindex="0" class="pagination-button pagination-bar-last-page" title="{{I.t('voc.LastPage')}}"></span>
+	<span tabindex="0" class="pagination-button pagination-bar-next-page" title="{{$i('voc.NextPage')}}"></span>
+	<span tabindex="0" class="pagination-button pagination-bar-last-page" title="{{$i('voc.LastPage')}}"></span>
 {% } else { %}
 	<span class="pagination-button-disabled pagination-bar-next-page-disabled"></span>
 	<span class="pagination-button-disabled pagination-bar-last-page-disabled"></span>
 {% } %}
 <span class="separator"></span>
-<span class="valigned">{{I.t('voc.ResultsPerPage')}}</span>
+<span class="valigned">{{$i('voc.ResultsPerPage')}}</span>
 {% if (totalRowsCount) { %}
 <select name="pageresults" class="pagination-bar-results-select valigned"{% if (totalRowsCount <= 10) { %} disabled="disabled"{% } %}>
 	{% _.each(resultsPerPageSelect, function (val) { %}
@@ -37,7 +37,7 @@
 <span class="separator"></span>
 <span class="valigned m0">
 {% if (totalRowsCount) { %}
-	{{I.t('voc.Results')}} {{firstObjectNumber}} - {{Math.min(lastObjectNumber, totalRowsCount)}} {{I.t('voc.of')}} {{totalRowsCount}}
+	{{$i('voc.Results')}} {{firstObjectNumber}} - {{Math.min(lastObjectNumber, totalRowsCount)}} {{$i('voc.of')}} {{totalRowsCount}}
 {% } else { %}
 	0 Results
 {% } %}

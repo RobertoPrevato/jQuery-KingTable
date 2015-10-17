@@ -8,7 +8,7 @@
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
-R("kingtable-lodash", ["kingtable-core"], function (KingTable) {
+R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
   //
   //  Extends jQuery KingTable prototype with functions to use it with jQuery and Lodash.
   //  These functions are separated from the business logic, and contain DOM manipulation code.

@@ -14,6 +14,7 @@ module.exports = function (grunt) {
     "../../source/scripts/shared/data/object-analyzer.js",
     "../../source/scripts/shared/data/sanitizer.js",
     "../../source/scripts/shared/data/query.js",
+    "../../source/scripts/shared/data/i18n.js",
     "../../source/scripts/shared/filters/filters-manager.js",
     "../../source/scripts/libs/kingtable/kingtable-core.js",
     "../../source/scripts/libs/kingtable/jquery.kingtable.js",
