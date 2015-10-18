@@ -1747,7 +1747,8 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         //initialize columns
         self.initializeColumns()
           .formatData()
-          .sortColumns();
+          .sortColumns()
+          .setTools();
 
         self.build(isSynchronous);
         if (self.afterRender)
@@ -2099,6 +2100,38 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       return this;
     },
 
+    setTools: function () {
+      var self = this,
+        additionaltools = self.options.tools,
+        tools = [
+          // columns menu
+          {
+            items: [
+              {
+                name: "Columns",
+                menu: {
+                  items: _(self.columns).reject(function (o) {
+                    return o.secret === true;
+                  }).map(function (o) {
+                    //TODO: checkbox!!
+                    return {
+                      name: o.displayName
+                    };
+                  }).value()
+                }
+              }
+            ]
+          }
+        ];
+
+      if (additionaltools)
+        //the user defined some tools
+        tools = tools.concat(additionaltools);
+
+      self.tools = tools;
+      return self;
+    },
+
     setColumns: function (columns) {
       this.columns = columns;
       return this;
@@ -2398,14 +2431,14 @@ R("jquery-kingtable", ["kingtable-core"], function (KingTable) {
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
-R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
+R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, Menu, I) {
   //
   //  Extends jQuery KingTable prototype with functions to use it with jQuery and Lodash.
   //  These functions are separated from the business logic, and contain DOM manipulation code.
   //  It is possible to define different "connector" that, following the same interface used by the business logic,
   //  use different approach to build the interface.
   //
-  var paginationBarEvents = {
+  var baseevents = {
     "click .pagination-bar-first-page": "goToFirst",
     "click .pagination-bar-last-page": "goToLast",
     "click .pagination-bar-prev-page": "goToPrev",
@@ -2414,15 +2447,11 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
     "change .pagination-bar-page-number": "changePage",
     "change .pagination-bar-results-select": "changeResultsNumber",
     "click .btn-advanced-filters": "toggleAdvancedFilters",
-    "click .btn-clear-filters": "clearFilters"
-  };
-
-  var tableEvents = {
+    "click .btn-clear-filters": "clearFilters",
+    "click .ui-expander": "expandMenu",
+    "click .ui-submenu": "expandSubMenu",
     "click .king-table-head th": "sort",
-    "click .resize-handler": "toggleColumnResize"
-  };
-
-  var formsEvents = {
+    "click .resize-handler": "toggleColumnResize",
     "keyup .search-field": "onSearchKeyUp",
     "paste .search-field, cut .search-field": "onSearchChange",
     "click .btn-filters-wizard": "openFiltersDialog",
@@ -2430,9 +2459,10 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
     "keyup .filters-region textarea": "viewToModel",
     "change .filters-region input[type='checkbox']": "viewToModel",
     "change .filters-region input[type='radio']": "viewToModel",
-    "change .filters-region select": "viewToModel"
+    "change .filters-region select": "viewToModel",
+    "keydown span[tabindex]": "checkEnter"
   };
-  
+
   //extend the table default options
   _.extend(KingTable.prototype.defaults, {
     /**
@@ -2495,7 +2525,7 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
   //in older versions it returns directly a string
   var templateMode = typeof _.template("_", {}) == "string" ? 0 : 1;
 
-  _.extend(KingTable.prototype, {
+  _.extend(KingTable.prototype, Menu.functions, {
 
     connectorInit: function () {
       //register a missing data event handler
@@ -2549,6 +2579,7 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
       self.buildSkeleton()
         .buildHead()
         .buildPagination()
+        .buildMenu()
         .buildHead()
         .buildBody({
           dataJustFetched: !isSynchronous
@@ -2633,6 +2664,13 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
       if (!self.options.paginationEnabled) return self;
       self.$el.find(".pagination-bar").html(self.template("pagination-bar-layout"));
       return self.buildPaginationControls().buildFiltersControls();
+    },
+
+    buildMenu: function () {
+      var self = this;
+      var html = Menu.builder(self.tools);
+      self.$el.find(".tools-region").append(html);
+      return self;
     },
 
     keepFocus: function (el) {
@@ -2729,17 +2767,26 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
           .bindWindowEvents();
     },
 
+    anyMenuIsOpen: function () {
+      return !!$(".ui-menu:visible:first").length;
+    },
+
     bindWindowEvents: function () {
       var self = this;
       //support moving changing page using the keyboard
       $("body").on("keydown.king-table", function (e) {
-        var isInputFocused = !!$(":input:focus").length;
-        if (isInputFocused) return true;
+        //if any menu is open, do nothing
+        if (self.anyMenuIsOpen()) return true;
+        //if any input is focused, do nothing
+        var anyInputFocused = !!$(":input:focus").length;
+        if (anyInputFocused) return true;
         var kc = e.keyCode;
+        //if the user clicked the left arrow, or A, go to previous page
         if (_.contains([37, 65], kc)) {
           //prev page
           self.goToPrev();
         }
+        //if the user clicked the right arrow, or D, go to next page
         if (_.contains([39, 68], kc)) {
           //next page
           self.goToNext();
@@ -2843,7 +2890,7 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
       var events = this.events || {};
       if (_.isFunction(events)) events = events.call(this);
       //extends events object with validation events
-      return _.extend({}, paginationBarEvents, tableEvents, formsEvents, events, this.options.events);
+      return _.extend({}, baseevents, events, this.options.events);
     },
 
     // delegate events
@@ -3121,6 +3168,17 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
         $relheight: function (origWidth, origHeight, relWidth) {
           var ratio = relWidth / origWidth;
           return Math.ceil(ratio * origHeight);
+        },
+        $attr: function (item) {
+          var stringempty = "";
+          if (!item) return stringempty;
+          var attr = item.attr;
+          if (!attr) return stringempty;
+          var f = [], sep = "\"";
+          for (var x in attr) {
+            f.push([sep, x, sep, "=", sep, attr[x], sep].join(stringempty));
+          }
+          return f.join(" ");
         }
       }, self.options.templateHelpers, templateSettings);
     },
@@ -3271,6 +3329,14 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
       });
       self.unsetValues(el);
       self.refresh();
+    },
+
+    checkEnter: function (e) {
+      var l = $(e.currentTarget);
+      if (!l.is(":visible")) return;
+      if (e.which == 13) {
+        l.click(); //trigger click on the element
+      }
     }
 
   });
@@ -3290,9 +3356,9 @@ if (!$.KingTable.Templates) $.KingTable.Templates = {};
     'king-table-empty-cell': '<th></th>',
     'king-table-base': '<div class="king-table-region"> <div class="pagination-bar"></div> <div class="filters-region"></div> <div class="king-table-container"> <table class="king-table"> <thead class="king-table-head"></thead> <tbody class="king-table-body"></tbody> </table> </div> </div>',
     'king-table-error-view': '<tr class="king-table-error"> <td class="message" colspan="{{colspan}}"> <span>{{message}}</span> <span class="oi" data-glyph="warning" aria-hidden="true"></span> </td> </tr>',
-    'pagination-bar-buttons': '{% if (page > firstPage) { %} <span tabindex="0" class="pagination-button pagination-bar-first-page" title="{{$i(\'voc.FirstPage\')}}"></span> <span tabindex="0" class="pagination-button pagination-bar-prev-page" title="{{$i(\'voc.PrevPage\')}}"></span> {% } else { %} <span class="pagination-button-disabled pagination-bar-first-page-disabled"></span> <span class="pagination-button-disabled pagination-bar-prev-page-disabled"></span> {% } %} <span class="separator"></span> <span class="valigned">{{$i(\'voc.Page\')}} </span> {% if (totalPageCount > 1) { %} <input name="page-number" text="text" class="w30 must-integer pagination-bar-page-number" value="{{page}}" /> {% } else { %} <span class="valigned pagination-bar-page-number-disabled">{{page}}</span> {% } %} <span class="valigned" style="display:inline-block;min-width:30px;"> {{$i(\'voc.of\')}} {{totalPageCount}}</span> <span class="separator"></span> <span tabindex="0" class="pagination-button pagination-bar-refresh" title="{{$i(\'voc.Refresh\')}}"></span> <span class="separator"></span> {% if (page < totalPageCount) { %} <span tabindex="0" class="pagination-button pagination-bar-next-page" title="{{$i(\'voc.NextPage\')}}"></span> <span tabindex="0" class="pagination-button pagination-bar-last-page" title="{{$i(\'voc.LastPage\')}}"></span> {% } else { %} <span class="pagination-button-disabled pagination-bar-next-page-disabled"></span> <span class="pagination-button-disabled pagination-bar-last-page-disabled"></span> {% } %} <span class="separator"></span> <span class="valigned">{{$i(\'voc.ResultsPerPage\')}}</span> {% if (totalRowsCount) { %} <select name="pageresults" class="pagination-bar-results-select valigned"{% if (totalRowsCount <= 10) { %} disabled="disabled"{% } %}> {% _.each(resultsPerPageSelect, function (val) { %} <option value="{{val}}"{% if (val == resultsPerPage) { %} selected="selected"{%}%}>{{val}}</option> {% }) %} </select> {% } else { %} <select name="pageresults" class="pagination-bar-results-select valigned" disabled="disabled" readonly="readonly"></select> {% } %} <span class="separator"></span> <span class="valigned m0"> {% if (totalRowsCount) { %} {{$i(\'voc.Results\')}} {{firstObjectNumber}} - {{Math.min(lastObjectNumber, totalRowsCount)}} {{$i(\'voc.of\')}} {{totalRowsCount}} {% } else { %} 0 Results {% } %} </span> <span class="separator"></span>',
+    'pagination-bar-buttons': '{% if (page > firstPage) { %} <span tabindex="0" class="pagination-button pagination-bar-first-page" title="{{$i(\'voc.FirstPage\')}}"></span> <span tabindex="0" class="pagination-button pagination-bar-prev-page" title="{{$i(\'voc.PrevPage\')}}"></span> {% } else { %} <span class="pagination-button-disabled pagination-bar-first-page-disabled"></span> <span class="pagination-button-disabled pagination-bar-prev-page-disabled"></span> {% } %} <span class="separator"></span> <span class="valigned">{{$i(\'voc.Page\')}} </span> {% if (totalPageCount > 1) { %} <input name="page-number" text="text" class="w30 must-integer pagination-bar-page-number" value="{{page}}" /> {% } else { %} <span class="valigned pagination-bar-page-number-disabled">{{page}}</span> {% } %} <span class="valigned total-page-count"> {{$i(\'voc.of\')}} {{totalPageCount}}</span> <span class="separator"></span> <span tabindex="0" class="pagination-button pagination-bar-refresh" title="{{$i(\'voc.Refresh\')}}"></span> <span class="separator"></span> {% if (page < totalPageCount) { %} <span tabindex="0" class="pagination-button pagination-bar-next-page" title="{{$i(\'voc.NextPage\')}}"></span> <span tabindex="0" class="pagination-button pagination-bar-last-page" title="{{$i(\'voc.LastPage\')}}"></span> {% } else { %} <span class="pagination-button-disabled pagination-bar-next-page-disabled"></span> <span class="pagination-button-disabled pagination-bar-last-page-disabled"></span> {% } %} <span class="separator"></span> <span class="valigned">{{$i(\'voc.ResultsPerPage\')}}</span> {% if (totalRowsCount) { %} <select name="pageresults" class="pagination-bar-results-select valigned"{% if (totalRowsCount <= 10) { %} disabled="disabled"{% } %}> {% _.each(resultsPerPageSelect, function (val) { %} <option value="{{val}}"{% if (val == resultsPerPage) { %} selected="selected"{%}%}>{{val}}</option> {% }) %} </select> {% } else { %} <select name="pageresults" class="pagination-bar-results-select valigned" disabled="disabled" readonly="readonly"></select> {% } %} <span class="separator"></span> <span class="valigned m0"> {% if (totalRowsCount) { %} {{$i(\'voc.Results\')}} {{firstObjectNumber}} - {{Math.min(lastObjectNumber, totalRowsCount)}} {{$i(\'voc.of\')}} {{totalRowsCount}} {% } else { %} 0 Results {% } %} </span> <span class="separator"></span>',
     'pagination-bar-filters': '{% if (allowSearch) { %} <input type="text" class="search-field" value="{{search}}" /> {% } %} {% if (advancedFiltersButton) { %} <button class="btn camo-btn btn-advanced-filters">{{$i("voc.AdvancedFilters")}}</button> {% } %} {% if (filtersWizard) { %} <button class="btn btn-filters-wizard">{{$i("voc.Filters")}}</button> {% } %}',
-    'pagination-bar-layout': '<span class="pagination-bar-buttons"></span> <span class="pagination-bar-filters"></span>'
+    'pagination-bar-layout': '<div class="tools-region"> <span tabindex="0" class="oi ui-expander" data-glyph="cog"></span> </div> <span class="pagination-bar-buttons"></span> <span class="pagination-bar-filters"></span>'
   };
   var x;
   for (x in o) {

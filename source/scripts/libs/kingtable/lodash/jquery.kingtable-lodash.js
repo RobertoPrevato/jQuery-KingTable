@@ -8,14 +8,14 @@
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
-R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
+R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, Menu, I) {
   //
   //  Extends jQuery KingTable prototype with functions to use it with jQuery and Lodash.
   //  These functions are separated from the business logic, and contain DOM manipulation code.
   //  It is possible to define different "connector" that, following the same interface used by the business logic,
   //  use different approach to build the interface.
   //
-  var paginationBarEvents = {
+  var baseevents = {
     "click .pagination-bar-first-page": "goToFirst",
     "click .pagination-bar-last-page": "goToLast",
     "click .pagination-bar-prev-page": "goToPrev",
@@ -24,15 +24,11 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
     "change .pagination-bar-page-number": "changePage",
     "change .pagination-bar-results-select": "changeResultsNumber",
     "click .btn-advanced-filters": "toggleAdvancedFilters",
-    "click .btn-clear-filters": "clearFilters"
-  };
-
-  var tableEvents = {
+    "click .btn-clear-filters": "clearFilters",
+    "click .ui-expander": "expandMenu",
+    "click .ui-submenu": "expandSubMenu",
     "click .king-table-head th": "sort",
-    "click .resize-handler": "toggleColumnResize"
-  };
-
-  var formsEvents = {
+    "click .resize-handler": "toggleColumnResize",
     "keyup .search-field": "onSearchKeyUp",
     "paste .search-field, cut .search-field": "onSearchChange",
     "click .btn-filters-wizard": "openFiltersDialog",
@@ -40,9 +36,10 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
     "keyup .filters-region textarea": "viewToModel",
     "change .filters-region input[type='checkbox']": "viewToModel",
     "change .filters-region input[type='radio']": "viewToModel",
-    "change .filters-region select": "viewToModel"
+    "change .filters-region select": "viewToModel",
+    "keydown span[tabindex]": "checkEnter"
   };
-  
+
   //extend the table default options
   _.extend(KingTable.prototype.defaults, {
     /**
@@ -105,7 +102,7 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
   //in older versions it returns directly a string
   var templateMode = typeof _.template("_", {}) == "string" ? 0 : 1;
 
-  _.extend(KingTable.prototype, {
+  _.extend(KingTable.prototype, Menu.functions, {
 
     connectorInit: function () {
       //register a missing data event handler
@@ -159,6 +156,7 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
       self.buildSkeleton()
         .buildHead()
         .buildPagination()
+        .buildMenu()
         .buildHead()
         .buildBody({
           dataJustFetched: !isSynchronous
@@ -243,6 +241,13 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
       if (!self.options.paginationEnabled) return self;
       self.$el.find(".pagination-bar").html(self.template("pagination-bar-layout"));
       return self.buildPaginationControls().buildFiltersControls();
+    },
+
+    buildMenu: function () {
+      var self = this;
+      var html = Menu.builder(self.tools);
+      self.$el.find(".tools-region").append(html);
+      return self;
     },
 
     keepFocus: function (el) {
@@ -339,17 +344,26 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
           .bindWindowEvents();
     },
 
+    anyMenuIsOpen: function () {
+      return !!$(".ui-menu:visible:first").length;
+    },
+
     bindWindowEvents: function () {
       var self = this;
       //support moving changing page using the keyboard
       $("body").on("keydown.king-table", function (e) {
-        var isInputFocused = !!$(":input:focus").length;
-        if (isInputFocused) return true;
+        //if any menu is open, do nothing
+        if (self.anyMenuIsOpen()) return true;
+        //if any input is focused, do nothing
+        var anyInputFocused = !!$(":input:focus").length;
+        if (anyInputFocused) return true;
         var kc = e.keyCode;
+        //if the user clicked the left arrow, or A, go to previous page
         if (_.contains([37, 65], kc)) {
           //prev page
           self.goToPrev();
         }
+        //if the user clicked the right arrow, or D, go to next page
         if (_.contains([39, 68], kc)) {
           //next page
           self.goToNext();
@@ -453,7 +467,7 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
       var events = this.events || {};
       if (_.isFunction(events)) events = events.call(this);
       //extends events object with validation events
-      return _.extend({}, paginationBarEvents, tableEvents, formsEvents, events, this.options.events);
+      return _.extend({}, baseevents, events, this.options.events);
     },
 
     // delegate events
@@ -731,6 +745,17 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
         $relheight: function (origWidth, origHeight, relWidth) {
           var ratio = relWidth / origWidth;
           return Math.ceil(ratio * origHeight);
+        },
+        $attr: function (item) {
+          var stringempty = "";
+          if (!item) return stringempty;
+          var attr = item.attr;
+          if (!attr) return stringempty;
+          var f = [], sep = "\"";
+          for (var x in attr) {
+            f.push([sep, x, sep, "=", sep, attr[x], sep].join(stringempty));
+          }
+          return f.join(" ");
         }
       }, self.options.templateHelpers, templateSettings);
     },
@@ -881,6 +906,14 @@ R("kingtable-lodash", ["kingtable-core", "i18n"], function (KingTable, I) {
       });
       self.unsetValues(el);
       self.refresh();
+    },
+
+    checkEnter: function (e) {
+      var l = $(e.currentTarget);
+      if (!l.is(":visible")) return;
+      if (e.which == 13) {
+        l.click(); //trigger click on the element
+      }
     }
 
   });

@@ -465,7 +465,8 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         //initialize columns
         self.initializeColumns()
           .formatData()
-          .sortColumns();
+          .sortColumns()
+          .setTools();
 
         self.build(isSynchronous);
         if (self.afterRender)
@@ -815,6 +816,39 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       for (var i = 0, l = columns.length; i < l; i++)
         columns[i].position = i;
       return this;
+    },
+
+    setTools: function () {
+      var self = this,
+        additionaltools = self.options.tools,
+        tools = [
+          // columns menu
+          //TODO: IMPROVE THE DESIGN..
+          {
+            items: [
+              {
+                name: "Columns",
+                menu: {
+                  items: _(self.columns).reject(function (o) {
+                    return o.secret === true;
+                  }).map(function (o) {
+                    //TODO: checkbox!!
+                    return {
+                      name: o.displayName
+                    };
+                  }).value()
+                }
+              }
+            ]
+          }
+        ];
+
+      if (additionaltools)
+        //the user defined some tools
+        tools = tools.concat(additionaltools);
+
+      self.tools = tools;
+      return self;
     },
 
     setColumns: function (columns) {
