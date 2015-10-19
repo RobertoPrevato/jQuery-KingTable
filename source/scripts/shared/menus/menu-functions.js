@@ -4,10 +4,13 @@
 R("menu-functions", [], function () {
 
   var toggle = ".ui-menu,.ui-submenu";
-  
+  function protected(e) {
+    return /input|select|textarea|label/i.test(e.target.tagName);
+  }
   var menufunctions = {
 
     closeMenus: function (e) {
+      if (protected(e)) return true;
       var self = this;
       if (e && e.which === 3) return
       $(toggle).each(function () {
@@ -35,6 +38,7 @@ R("menu-functions", [], function () {
     },
 
     expandMenu: function (e) {
+      if (protected(e)) return true;
       var self = this,
           el = $(e.currentTarget);
       if (el.is(".disabled, :disabled")) return;
@@ -59,6 +63,7 @@ R("menu-functions", [], function () {
     },
 
     expandSubMenu: function (e) {
+      if (protected(e)) return true;
       var self = this,
         open = "open",
         el = $(e.currentTarget),

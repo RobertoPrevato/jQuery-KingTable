@@ -832,13 +832,48 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
                   items: _(self.columns).reject(function (o) {
                     return o.secret === true;
                   }).map(function (o) {
-                    //TODO: checkbox!!
                     return {
-                      name: o.displayName
+                      name: o.displayName,
+                      checked: !o.hidden,
+                      type: "checkbox"
                     };
                   }).value()
                 }
-              }
+              }/*,
+              {
+                name: "Order by",
+                menu: {
+                  items: _(self.columns).reject(function (o) {
+                    return o.secret === true;
+                  }).map(function (o) {
+                    return {
+                      name: o.displayName,
+                      attr: {
+                        name: "group-by"
+                      },
+                      value: o.name,
+                      type: "checkbox"
+                    };
+                  }).value()
+                }
+              },
+              {
+                name: "Group by",
+                menu: {
+                  items: _(self.columns).reject(function (o) {
+                    return o.secret === true;
+                  }).map(function (o) {
+                    return {
+                      name: o.displayName,
+                      attr: {
+                        name: "group-by"
+                      },
+                      value: o.name,
+                      type: "radio"
+                    };
+                  }).value()
+                }
+              }*/
             ]
           }
         ];

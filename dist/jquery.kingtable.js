@@ -2105,6 +2105,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         additionaltools = self.options.tools,
         tools = [
           // columns menu
+          //TODO: IMPROVE THE DESIGN..
           {
             items: [
               {
@@ -2113,9 +2114,27 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
                   items: _(self.columns).reject(function (o) {
                     return o.secret === true;
                   }).map(function (o) {
-                    //TODO: checkbox!!
                     return {
-                      name: o.displayName
+                      name: o.displayName,
+                      checked: !o.hidden,
+                      type: "checkbox"
+                    };
+                  }).value()
+                }
+              },
+              {
+                name: "Group by",
+                menu: {
+                  items: _(self.columns).reject(function (o) {
+                    return o.secret === true;
+                  }).map(function (o) {
+                    return {
+                      name: o.displayName,
+                      attr: {
+                        name: "group-by"
+                      },
+                      value: o.name,
+                      type: "radio"
                     };
                   }).value()
                 }
@@ -3176,7 +3195,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
           if (!attr) return stringempty;
           var f = [], sep = "\"";
           for (var x in attr) {
-            f.push([sep, x, sep, "=", sep, attr[x], sep].join(stringempty));
+            f.push([x, "=", sep, attr[x], sep].join(stringempty));
           }
           return f.join(" ");
         }

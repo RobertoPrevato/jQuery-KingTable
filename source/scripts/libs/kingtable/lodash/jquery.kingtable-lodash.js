@@ -753,7 +753,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
           if (!attr) return stringempty;
           var f = [], sep = "\"";
           for (var x in attr) {
-            f.push([sep, x, sep, "=", sep, attr[x], sep].join(stringempty));
+            f.push([x, "=", sep, attr[x], sep].join(stringempty));
           }
           return f.join(" ");
         }
