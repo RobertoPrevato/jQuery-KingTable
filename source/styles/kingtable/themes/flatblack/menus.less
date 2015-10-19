@@ -1,0 +1,26 @@
+.theme-flatblack {
+  .king-table-region {
+    .ui-menu {
+      box-shadow: 0 6px 12px #691010;
+      background: #111;
+      color: #DADAD4;
+      
+      li {
+        border-bottom: 1px solid #4A1111;
+        span, a, label {
+          color: #DADAD4;
+          &:focus, &:hover {
+            color: #DADAD4;
+            background-color: #2D0303;
+          }
+        }
+        
+        &.open {
+          > span, > a, > label {
+            background-color: #2D0303;
+          }
+        }
+      }
+    }
+  }
+}

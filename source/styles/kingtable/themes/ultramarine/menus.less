@@ -1,0 +1,26 @@
+.theme-ultramarine {
+  .king-table-region {
+    .ui-menu {
+      box-shadow: 0 6px 12px #081125;
+      background: #619CD6;
+      color: #000;
+      
+      li {
+        border-bottom: 1px solid #2873AC;
+        span, a, label {
+          color: #455b1b;
+          &:focus, &:hover {
+            color: #455b1b;
+            background-color: #7DB3EF;
+          }
+        }
+        
+        &.open {
+          > span, > a, > label {
+            background-color: #7DB3EF;
+          }
+        }
+      }
+    }
+  }
+}

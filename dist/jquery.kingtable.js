@@ -1115,6 +1115,249 @@ R("i18n", [], function () {
   throw "Missing implementation of i18n. Please refer to https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Implementing-localization";
 });
 
+//
+// Function to build menus, given a schema
+//
+R("menu-builder", [], function () {
+
+  function attr(obj) {
+    if (!obj || !obj.attr) return "";
+    var a = [], sep = "\"", attr = obj.attr;
+    for (var x in attr)
+      a.push([x, "=", sep, attr[x], sep].join(""));
+    return a.join(" ");
+  };
+
+  var menuBuilder = function (menus) {
+    if (!menus) throw "missing menus";
+    if (_.isPlainObject(menus)) return menuBuilder([menus]);
+    if (!menus instanceof Array || !menus.length) throw "missing menus";
+    //normalize schema, if needed
+    var first = menus[0];
+    if (!first.items && first.menu) {
+      menus = [{ items: menus }];
+    }
+    var push = "push";
+    var a = [], caret = "<span class=\"oi\" data-glyph=\"caret-right\"></span>";
+    _.each(menus, function (menu) {
+      var id = menu.id;
+      a[push]("<ul" + (id ? " id=\"" + id + "\"": "")+ " class=\"ui-menu\">");
+
+      _.each(menu.items, function (item) {
+        var hasSubmenu = item.menu,
+          type = item.type,
+          href = item.href,
+          name = item.name;
+        a[push]("<li" + (hasSubmenu ? " class=\"ui-submenu\">" : ">"));
+        //a[push]("<div>"); // mod
+        switch (type) {
+          case "checkbox":
+            var cid = _.uniqueId("mnck-");
+            var checked = item.checked ? " checked=\"checked\"" : "";
+            a[push]("<input id=\"" + cid + "\" type=\"checkbox\"" + attr(item) + checked +" />");
+            a[push]("<label for=\"" + cid + "\">" + name + "</label>");
+            break;
+          case "radio":
+            if (!item.value) throw "missing value for radio";
+            var cid = _.uniqueId("mnrd-");
+            a[push]("<input id=\"" + cid + "\" type=\"radio\" value=\"" + item.value + "\"" + attr(item) + " />");
+            a[push]("<label for=\"" + cid + "\">" + name + "</label>");
+            break;
+          default:
+            if (href) {
+              a[push]("<a href=\"" + href + "\">" + name + (hasSubmenu ? caret : "") + "</a>");
+            } else {
+              a[push]("<span tabindex=\"0\">" + name + (hasSubmenu ? caret : "") + "</span>");
+            }
+            break;
+        }
+
+        if (hasSubmenu)
+          a[push](menuBuilder([item.menu]));
+
+        //a[push]("</div>"); // mod
+        a[push]("</li>");
+      });
+      a[push]("</ul>");
+    });
+
+    return a.join("");
+  };
+
+  return menuBuilder;
+});
+
+//
+// Menu functions
+//
+R("menu-functions", [], function () {
+
+  var toggle = ".ui-menu,.ui-submenu";
+  function protected(e) {
+    return /input|select|textarea|label/i.test(e.target.tagName);
+  }
+  var menufunctions = {
+
+    closeMenus: function (e) {
+      if (protected(e)) return true;
+      var self = this;
+      if (e && e.which === 3) return
+      $(toggle).each(function () {
+        var el = $(this)
+        var parent = self.getParent(el);
+  
+        if (!parent.hasClass("open")) return;
+  
+        if (e && e.type == "click" && /input|textarea/i.test(e.target.tagName) && $.contains(parent[0], e.target)) return;
+  
+        if (e.isDefaultPrevented()) return;
+        el.attr("aria-expanded", "false");
+        parent.removeClass("open");
+      });
+    },
+
+    getParent: function (el) {
+      var selector = el.attr("data-target");
+      if (!selector) {
+        selector = el.attr("href");
+        selector = selector && /#[A-Za-z]/.test(selector) && selector.replace(/.*(?=#[^\s]*$)/, "");
+      }
+      var $parent = selector && $(selector);
+      return $parent && $parent.length ? $parent : el.parent();
+    },
+
+    expandMenu: function (e) {
+      if (protected(e)) return true;
+      var self = this,
+          el = $(e.currentTarget);
+      if (el.is(".disabled, :disabled")) return;
+      var parent  = self.getParent(el);
+      var isActive = parent.hasClass("open");
+
+      self.closeMenus(e);
+
+      if (!isActive) {
+        if ("ontouchstart" in document.documentElement && !parent.closest(".navbar-nav").length) {
+          // if mobile we use a backdrop because click events don't delegate
+          $(document.createElement("div"))
+            .addClass("dropdown-backdrop")
+            .insertAfter($(this))
+            .on("click", closeMenus);
+        }
+        if (e.isDefaultPrevented()) return;
+        el.trigger("focus").attr("aria-expanded", "true");
+        parent.toggleClass("open");
+      }
+      return false;
+    },
+
+    expandSubMenu: function (e) {
+      if (protected(e)) return true;
+      var self = this,
+        open = "open",
+        el = $(e.currentTarget),
+          submenu = el.find(".ui-menu:first");
+      //close siblings submenus
+      el.siblings().removeClass(open).find("." + open).removeClass(open);
+      //position submenu
+      self.positionSubMenu(el, submenu);
+      el.addClass(open);
+      return false;
+    },
+
+    positionSubMenu: function (parent, submenu) {
+      var pos = "positioned";
+      if (submenu.data(pos)) return this;
+      submenu.css({
+        left:  "+=" + parent.width()
+      });
+      submenu.data(pos, true);
+      return this;
+    }
+
+  };
+
+  function prevent(e) {
+    e.preventDefault();
+  }
+
+  function globalKeydown(e) {
+    if (protected(e)) return true;
+    prevent(e);
+    var anyMenuOpen = !!$(".ui-menu:visible:first").length;
+    var keycode = e.which;
+    var focused = $(":focus");
+    if (anyMenuOpen && /37|38|39|40/.test(keycode)) {
+      var el = focused.length && focused.closest(".ui-menu").length
+              ? focused
+              : $(".ui-menu:visible:first").find("li:first a"),
+          parent = el.parent();
+      if (keycode == 38) {
+        //up
+        var prev = focused.prev(),
+          prevIsMenu = prev.hasClass("ui-menu");
+        if (prevIsMenu) {
+          prev.children(":first").find("a:first,span[tabindex]:first,label:first").trigger("focus");
+        } else {
+          parent.prev().find("a:first,span[tabindex]:first,label:first").trigger("focus");
+        }
+      }
+      if (keycode == 40) {
+        //down
+        var next = focused.next(),
+          nextIsMenu = next.hasClass("ui-menu");
+        if (nextIsMenu && !parent.hasClass("ui-submenu")) {
+          next.children(":first").find("a:first,span[tabindex]:first,label:first").trigger("focus");
+        } else {
+          parent.next().find("a:first,span[tabindex]:first,label:first").trigger("focus");
+        }
+      }
+      if (keycode == 37) {
+        //left
+        var parentSub = parent.closest(".ui-submenu");
+        if (parentSub.length) {
+          if (parentSub.get(0) === parent.get(0)) {
+            parentSub = parentSub.parent().closest(".ui-submenu");
+          }
+          if (parentSub.length) {
+            parentSub.removeClass("open");
+            _.defer(function () {
+              parentSub.find("a:first,span[tabindex]:first,label:first").trigger("focus");
+            });
+          }
+        }
+      }
+      if (keycode == 39) {
+        //right
+        if (parent.hasClass("ui-submenu")) {
+          parent.trigger("click");
+          _.defer(function () {
+            parent.find("li:first > a,li:first > span[tabindex],li:first > label").trigger("focus");
+          });
+        }
+      }
+      return true;
+    }
+  };
+
+  var bind = "bind";
+  $(document)
+    .on("click.menus", menufunctions.closeMenus[bind](menufunctions))
+    .on("click.menus", toggle, menufunctions.expandMenu[bind](menufunctions))
+    .on("keydown.menus", globalKeydown);
+
+  return menufunctions;
+});
+//
+// Proxy module for menus modules.
+//
+R("menu", ["menu-builder", "menu-functions"], function (MenuBuilder, MenuFunctions) {
+  return {
+    builder: MenuBuilder,
+    functions: MenuFunctions
+  };
+});
+
 /**
  * jQuery-KingTable.
  * https://github.com/RobertoPrevato/jQuery-KingTable
@@ -1330,7 +1573,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       date: function (columnSchema, objSchema) {
         return {
           format: function (value) {
-            return this.date.format(value, 'dd/MM/yyyy hh:mm');
+            return this.date.format(value, "dd/MM/yyyy hh:mm");
           }
         };
       }
@@ -1342,14 +1585,16 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
      */
     DefaultByName: {
       id: {
-        name: 'id',
-        type: 'id',
-        hidden: true
+        name: "id",
+        type: "id",
+        hidden: true,
+        secret: true
       },
       guid: {
-        name: 'guid',
-        type: 'guid',
-        hidden: true
+        name: "guid",
+        type: "guid",
+        hidden: true,
+        secret: true
       }
     }
   };
@@ -1485,6 +1730,11 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
        * The local storage key, to use when storing the results per page settings.
        */
       resultsPerPageStorageKey: "kt-results-per-page",
+      
+      /**
+       * The local storage key, to use when storing the columns order.
+       */
+      columnsOrderStorageKey: "kt-columns-order",
 
       /**
        * The query string to use, when storing the page inside the query string.
@@ -1554,6 +1804,10 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
 
     query: Query,
 
+    json: function (o) {
+      return JSON.stringify(o);
+    },
+    
     raiseError: function (message) {
       throw new Error("jQuery-KingTable: " + message + ". Please refer to official documentation at https://github.com/RobertoPrevato/jQuery-KingTable");
     },
@@ -1788,7 +2042,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       var def = new $.Deferred(), self = this;
 
       //if the table is a fixed table, then resolve automatically the promise
-      if (options.dataJustFetched || self.fixed && self.hasData()) {
+      if (options.nofetch || self.fixed && self.hasData()) {
         def.resolveWith(self, [self.data, true]);
       } else {
         //an ajax call is required
@@ -1907,7 +2161,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         contentType: "application/json"
       });
       if (!_.isString(params.data)) {
-        params.data = JSON.stringify(params.data);
+        params.data = this.json(params.data);
       }
       return $.ajax(params);
     },
@@ -1981,9 +2235,27 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       return self.objAnalyzer.getCollectionStructure(self.data, { clear: false, limit: limit });
     },
 
+    getMemory: function (key) {
+      var self = this,
+        k = self.getKey(self.options[key]);
+      return localStorage.getItem(k);
+    },
+
+    setMemory: function (key, val) {
+      var self = this,
+        k = self.getKey(self.options[key]);
+      return localStorage.setItem(k, val);
+    },
+
     getColumnsPositionData: function () {
-      //TODO: load columns position from preferences.
-      return {};
+      var self = this, 
+        val = self.getMemory("columnsOrderStorageKey");
+      try {
+        if (val) {
+          return JSON.parse(val);
+        }
+      } catch (ex) {}
+      return null;
     },
 
     initializeColumns: function () {
@@ -2047,8 +2319,8 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         //replace the column template name placeholder with the actual field name
         col.template = col.template.replace(/##\s*Name\s*##/, '{{' + x + '}}');
 
-        if (posData.hasOwnProperty(x)) {
-          col.position = posData[x];
+        if (posData) {
+          col.position = _.indexOf(posData, x);
         }
 
         if (!_.isString(col.displayName))
@@ -2105,41 +2377,24 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         additionaltools = self.options.tools,
         tools = [
           // columns menu
-          //TODO: IMPROVE THE DESIGN..
           {
-            items: [
-              {
-                name: "Columns",
-                menu: {
-                  items: _(self.columns).reject(function (o) {
-                    return o.secret === true;
-                  }).map(function (o) {
-                    return {
-                      name: o.displayName,
-                      checked: !o.hidden,
-                      type: "checkbox"
-                    };
-                  }).value()
-                }
-              },
-              {
-                name: "Group by",
-                menu: {
-                  items: _(self.columns).reject(function (o) {
-                    return o.secret === true;
-                  }).map(function (o) {
-                    return {
-                      name: o.displayName,
-                      attr: {
-                        name: "group-by"
-                      },
-                      value: o.name,
-                      type: "radio"
-                    };
-                  }).value()
-                }
-              }
-            ]
+            name: I.t("voc.Columns"),
+            menu: {
+              id: "columns-menu",
+              items: _(self.columns).reject(function (o) {
+                return o.secret === true;
+              }).map(function (o) {
+                return {
+                  name: o.displayName,
+                  checked: !o.hidden,
+                  type: "checkbox",
+                  attr: {
+                    "name": o.name,
+                    "class": "visibility-check"
+                  }
+                };
+              }).value()
+            }
           }
         ];
 
@@ -2381,6 +2636,21 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       pag.sortOrder = sortOrder;
       self.refresh();
       return this;
+    },
+    
+    getKey: function (key) {
+      if (typeof location != "undefined")
+        return location.pathname + key;
+      return key;
+    },
+    
+    saveColumnsOrder: function () {
+      var self = this,
+        order = _.map(self.columns, function (o) {
+          return o.name;
+        });
+      self.setMemory("columnsOrderStorageKey", self.json(order));
+      return self;
     }
   });
 
@@ -2479,7 +2749,9 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     "change .filters-region input[type='checkbox']": "viewToModel",
     "change .filters-region input[type='radio']": "viewToModel",
     "change .filters-region select": "viewToModel",
-    "keydown span[tabindex]": "checkEnter"
+    "keydown span[tabindex]": "checkEnter",
+    "keydown input[type='checkbox']": "checkEnter",
+    "change .visibility-check": "onColumnVisibilityChange"
   };
 
   //extend the table default options
@@ -2598,10 +2870,10 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       self.buildSkeleton()
         .buildHead()
         .buildPagination()
-        .buildMenu()
+        .buildTools()
         .buildHead()
         .buildBody({
-          dataJustFetched: !isSynchronous
+          nofetch: !isSynchronous
         }).focusSearchField();
       self.on("search-qs-change", function () {
         self.buildPagination().buildBody().focusSearchField();
@@ -2685,10 +2957,39 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       return self.buildPaginationControls().buildFiltersControls();
     },
 
-    buildMenu: function () {
+    buildTools: function () {
       var self = this;
       var html = Menu.builder(self.tools);
       self.$el.find(".tools-region").append(html);
+      return self.onToolsBuilt();
+    },
+    
+    onToolsBuilt: function () {
+      //set event handlers for the common tools:
+      var self = this;
+      
+      //allow to sort the columns; but only if jQuery.sortable has been loaded
+      if ($.fn.sortable) {
+        //NB: jQuery automatically removes event handlers attached using its functions, when removing elements from the DOM.
+        $("#columns-menu").sortable({
+          update: function (e, ui) {
+            var columns = self.columns,
+              items = $(e.target).find("[name]").map(function (a, o) { return o.name; }),
+              indexOf = _.indexOf,
+              name = "name";
+            columns.sort(function (a, b) {
+              if (indexOf(items, a[name]) > indexOf(items, b[name])) return 1;
+              if (indexOf(items, a[name]) < indexOf(items, b[name])) return -1;
+              return 0;
+            });
+            
+            self.saveColumnsOrder().buildHead().buildBody({
+              nofetch: true
+            });
+          }
+        });
+      }
+      
       return self;
     },
 
@@ -3356,6 +3657,24 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       if (e.which == 13) {
         l.click(); //trigger click on the element
       }
+    },
+    
+    /**
+     * Column visibility checkbox, change event handler
+     */
+    onColumnVisibilityChange: function (e) {
+      var self = this,
+        element = e.currentTarget,
+        name = element.name,
+        col = _.find(self.columns, function (o) {
+          return o.name === name;
+        });
+      if (col) {
+        col.hidden = !element.checked;
+      }
+      return self.buildHead().buildBody({
+        nofetch: true
+      });
     }
 
   });

@@ -1,0 +1,26 @@
+.theme-bronze {
+  .king-table-region {
+    .ui-menu {
+      box-shadow: 0 6px 12px #691010;
+      background: #FFA92D;
+      color: #3a1700;
+      
+      li {
+        border-bottom: 1px solid #4A1111;
+        span, a, label {
+          color: #3a1700;
+          &:focus, &:hover {
+            color: #3a1700;
+            background-color: #ffecb5;
+          }
+        }
+        
+        &.open {
+          > span, > a, > label {
+            background-color: #ffecb5;
+          }
+        }
+      }
+    }
+  }
+}

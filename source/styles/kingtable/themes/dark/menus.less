@@ -1,0 +1,26 @@
+.theme-dark {
+  .king-table-region {
+    .ui-menu {
+      box-shadow: 0 6px 12px #000;
+      background: #313131;
+      color: #DEDEDE;
+      
+      li {
+        border-bottom: 1px solid grey;
+        span, a, label {
+          color: #DEDEDE;
+          &:focus, &:hover {
+            color: #DEDEDE;
+            background-color: #222;
+          }
+        }
+        
+        &.open {
+          > span, > a, > label {
+            background-color: #222;
+          }
+        }
+      }
+    }
+  }
+}

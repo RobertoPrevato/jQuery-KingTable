@@ -11,14 +11,20 @@ R("menu-builder", [], function () {
     return a.join(" ");
   };
 
-  //TODO: MAKE EASIER THE MENU MANAGEMENT
   var menuBuilder = function (menus) {
     if (!menus) throw "missing menus";
     if (_.isPlainObject(menus)) return menuBuilder([menus]);
+    if (!menus instanceof Array || !menus.length) throw "missing menus";
+    //normalize schema, if needed
+    var first = menus[0];
+    if (!first.items && first.menu) {
+      menus = [{ items: menus }];
+    }
     var push = "push";
     var a = [], caret = "<span class=\"oi\" data-glyph=\"caret-right\"></span>";
     _.each(menus, function (menu) {
-      a[push]("<ul class=\"ui-menu\">");
+      var id = menu.id;
+      a[push]("<ul" + (id ? " id=\"" + id + "\"": "")+ " class=\"ui-menu\">");
 
       _.each(menu.items, function (item) {
         var hasSubmenu = item.menu,
@@ -26,8 +32,7 @@ R("menu-builder", [], function () {
           href = item.href,
           name = item.name;
         a[push]("<li" + (hasSubmenu ? " class=\"ui-submenu\">" : ">"));
-
-        //TODO: SUPPORT FOR ICONS; AND SORTABLE LISTS!
+        //a[push]("<div>"); // mod
         switch (type) {
           case "checkbox":
             var cid = _.uniqueId("mnck-");
@@ -53,6 +58,7 @@ R("menu-builder", [], function () {
         if (hasSubmenu)
           a[push](menuBuilder([item.menu]));
 
+        //a[push]("</div>"); // mod
         a[push]("</li>");
       });
       a[push]("</ul>");

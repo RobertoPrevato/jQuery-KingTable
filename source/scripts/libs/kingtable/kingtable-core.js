@@ -48,7 +48,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       date: function (columnSchema, objSchema) {
         return {
           format: function (value) {
-            return this.date.format(value, 'dd/MM/yyyy hh:mm');
+            return this.date.format(value, "dd/MM/yyyy hh:mm");
           }
         };
       }
@@ -60,14 +60,16 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
      */
     DefaultByName: {
       id: {
-        name: 'id',
-        type: 'id',
-        hidden: true
+        name: "id",
+        type: "id",
+        hidden: true,
+        secret: true
       },
       guid: {
-        name: 'guid',
-        type: 'guid',
-        hidden: true
+        name: "guid",
+        type: "guid",
+        hidden: true,
+        secret: true
       }
     }
   };
@@ -203,6 +205,11 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
        * The local storage key, to use when storing the results per page settings.
        */
       resultsPerPageStorageKey: "kt-results-per-page",
+      
+      /**
+       * The local storage key, to use when storing the columns order.
+       */
+      columnsOrderStorageKey: "kt-columns-order",
 
       /**
        * The query string to use, when storing the page inside the query string.
@@ -272,6 +279,10 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
 
     query: Query,
 
+    json: function (o) {
+      return JSON.stringify(o);
+    },
+    
     raiseError: function (message) {
       throw new Error("jQuery-KingTable: " + message + ". Please refer to official documentation at https://github.com/RobertoPrevato/jQuery-KingTable");
     },
@@ -506,7 +517,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       var def = new $.Deferred(), self = this;
 
       //if the table is a fixed table, then resolve automatically the promise
-      if (options.dataJustFetched || self.fixed && self.hasData()) {
+      if (options.nofetch || self.fixed && self.hasData()) {
         def.resolveWith(self, [self.data, true]);
       } else {
         //an ajax call is required
@@ -625,7 +636,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         contentType: "application/json"
       });
       if (!_.isString(params.data)) {
-        params.data = JSON.stringify(params.data);
+        params.data = this.json(params.data);
       }
       return $.ajax(params);
     },
@@ -699,9 +710,27 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       return self.objAnalyzer.getCollectionStructure(self.data, { clear: false, limit: limit });
     },
 
+    getMemory: function (key) {
+      var self = this,
+        k = self.getKey(self.options[key]);
+      return localStorage.getItem(k);
+    },
+
+    setMemory: function (key, val) {
+      var self = this,
+        k = self.getKey(self.options[key]);
+      return localStorage.setItem(k, val);
+    },
+
     getColumnsPositionData: function () {
-      //TODO: load columns position from preferences.
-      return {};
+      var self = this, 
+        val = self.getMemory("columnsOrderStorageKey");
+      try {
+        if (val) {
+          return JSON.parse(val);
+        }
+      } catch (ex) {}
+      return null;
     },
 
     initializeColumns: function () {
@@ -765,8 +794,8 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         //replace the column template name placeholder with the actual field name
         col.template = col.template.replace(/##\s*Name\s*##/, '{{' + x + '}}');
 
-        if (posData.hasOwnProperty(x)) {
-          col.position = posData[x];
+        if (posData) {
+          col.position = _.indexOf(posData, x);
         }
 
         if (!_.isString(col.displayName))
@@ -823,58 +852,24 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         additionaltools = self.options.tools,
         tools = [
           // columns menu
-          //TODO: IMPROVE THE DESIGN..
           {
-            items: [
-              {
-                name: "Columns",
-                menu: {
-                  items: _(self.columns).reject(function (o) {
-                    return o.secret === true;
-                  }).map(function (o) {
-                    return {
-                      name: o.displayName,
-                      checked: !o.hidden,
-                      type: "checkbox"
-                    };
-                  }).value()
-                }
-              }/*,
-              {
-                name: "Order by",
-                menu: {
-                  items: _(self.columns).reject(function (o) {
-                    return o.secret === true;
-                  }).map(function (o) {
-                    return {
-                      name: o.displayName,
-                      attr: {
-                        name: "group-by"
-                      },
-                      value: o.name,
-                      type: "checkbox"
-                    };
-                  }).value()
-                }
-              },
-              {
-                name: "Group by",
-                menu: {
-                  items: _(self.columns).reject(function (o) {
-                    return o.secret === true;
-                  }).map(function (o) {
-                    return {
-                      name: o.displayName,
-                      attr: {
-                        name: "group-by"
-                      },
-                      value: o.name,
-                      type: "radio"
-                    };
-                  }).value()
-                }
-              }*/
-            ]
+            name: I.t("voc.Columns"),
+            menu: {
+              id: "columns-menu",
+              items: _(self.columns).reject(function (o) {
+                return o.secret === true;
+              }).map(function (o) {
+                return {
+                  name: o.displayName,
+                  checked: !o.hidden,
+                  type: "checkbox",
+                  attr: {
+                    "name": o.name,
+                    "class": "visibility-check"
+                  }
+                };
+              }).value()
+            }
           }
         ];
 
@@ -1116,6 +1111,21 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       pag.sortOrder = sortOrder;
       self.refresh();
       return this;
+    },
+    
+    getKey: function (key) {
+      if (typeof location != "undefined")
+        return location.pathname + key;
+      return key;
+    },
+    
+    saveColumnsOrder: function () {
+      var self = this,
+        order = _.map(self.columns, function (o) {
+          return o.name;
+        });
+      self.setMemory("columnsOrderStorageKey", self.json(order));
+      return self;
     }
   });
 

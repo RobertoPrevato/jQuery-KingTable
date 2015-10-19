@@ -1,0 +1,26 @@
+.theme-olive {
+  .king-table-region {
+    .ui-menu {
+      box-shadow: 0 6px 12px #475F15;
+      background: #DDE979;
+      color: #455b1b;
+      
+      li {
+        border-bottom: 1px solid #BEBD63;
+        span, a, label {
+          color: #455b1b;
+          &:focus, &:hover {
+            color: #455b1b;
+            background-color: #e6f0a3;
+          }
+        }
+        
+        &.open {
+          > span, > a, > label {
+            background-color: #e6f0a3;
+          }
+        }
+      }
+    }
+  }
+}

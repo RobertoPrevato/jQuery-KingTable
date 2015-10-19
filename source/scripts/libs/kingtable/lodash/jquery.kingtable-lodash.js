@@ -37,7 +37,9 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     "change .filters-region input[type='checkbox']": "viewToModel",
     "change .filters-region input[type='radio']": "viewToModel",
     "change .filters-region select": "viewToModel",
-    "keydown span[tabindex]": "checkEnter"
+    "keydown span[tabindex]": "checkEnter",
+    "keydown input[type='checkbox']": "checkEnter",
+    "change .visibility-check": "onColumnVisibilityChange"
   };
 
   //extend the table default options
@@ -156,10 +158,10 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       self.buildSkeleton()
         .buildHead()
         .buildPagination()
-        .buildMenu()
+        .buildTools()
         .buildHead()
         .buildBody({
-          dataJustFetched: !isSynchronous
+          nofetch: !isSynchronous
         }).focusSearchField();
       self.on("search-qs-change", function () {
         self.buildPagination().buildBody().focusSearchField();
@@ -243,10 +245,39 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       return self.buildPaginationControls().buildFiltersControls();
     },
 
-    buildMenu: function () {
+    buildTools: function () {
       var self = this;
       var html = Menu.builder(self.tools);
       self.$el.find(".tools-region").append(html);
+      return self.onToolsBuilt();
+    },
+    
+    onToolsBuilt: function () {
+      //set event handlers for the common tools:
+      var self = this;
+      
+      //allow to sort the columns; but only if jQuery.sortable has been loaded
+      if ($.fn.sortable) {
+        //NB: jQuery automatically removes event handlers attached using its functions, when removing elements from the DOM.
+        $("#columns-menu").sortable({
+          update: function (e, ui) {
+            var columns = self.columns,
+              items = $(e.target).find("[name]").map(function (a, o) { return o.name; }),
+              indexOf = _.indexOf,
+              name = "name";
+            columns.sort(function (a, b) {
+              if (indexOf(items, a[name]) > indexOf(items, b[name])) return 1;
+              if (indexOf(items, a[name]) < indexOf(items, b[name])) return -1;
+              return 0;
+            });
+            
+            self.saveColumnsOrder().buildHead().buildBody({
+              nofetch: true
+            });
+          }
+        });
+      }
+      
       return self;
     },
 
@@ -914,6 +945,24 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       if (e.which == 13) {
         l.click(); //trigger click on the element
       }
+    },
+    
+    /**
+     * Column visibility checkbox, change event handler
+     */
+    onColumnVisibilityChange: function (e) {
+      var self = this,
+        element = e.currentTarget,
+        name = element.name,
+        col = _.find(self.columns, function (o) {
+          return o.name === name;
+        });
+      if (col) {
+        col.hidden = !element.checked;
+      }
+      return self.buildHead().buildBody({
+        nofetch: true
+      });
     }
 
   });

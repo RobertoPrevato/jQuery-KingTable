@@ -67,7 +67,7 @@ R("menu-functions", [], function () {
       var self = this,
         open = "open",
         el = $(e.currentTarget),
-          submenu = el.children(".ui-menu");
+          submenu = el.find(".ui-menu:first");
       //close siblings submenus
       el.siblings().removeClass(open).find("." + open).removeClass(open);
       //position submenu
@@ -88,13 +88,17 @@ R("menu-functions", [], function () {
 
   };
 
+  function prevent(e) {
+    e.preventDefault();
+  }
+
   function globalKeydown(e) {
+    if (protected(e)) return true;
+    prevent(e);
     var anyMenuOpen = !!$(".ui-menu:visible:first").length;
     var keycode = e.which;
     var focused = $(":focus");
     if (anyMenuOpen && /37|38|39|40/.test(keycode)) {
-      //avoid scrolling
-      e.preventDefault();
       var el = focused.length && focused.closest(".ui-menu").length
               ? focused
               : $(".ui-menu:visible:first").find("li:first a"),
@@ -104,9 +108,9 @@ R("menu-functions", [], function () {
         var prev = focused.prev(),
           prevIsMenu = prev.hasClass("ui-menu");
         if (prevIsMenu) {
-          prev.children(":first").children("a").trigger("focus");
+          prev.children(":first").find("a:first,span[tabindex]:first,label:first").trigger("focus");
         } else {
-          parent.prev().children("a").trigger("focus");
+          parent.prev().find("a:first,span[tabindex]:first,label:first").trigger("focus");
         }
       }
       if (keycode == 40) {
@@ -114,9 +118,9 @@ R("menu-functions", [], function () {
         var next = focused.next(),
           nextIsMenu = next.hasClass("ui-menu");
         if (nextIsMenu && !parent.hasClass("ui-submenu")) {
-          next.children(":first").children("a").trigger("focus");
+          next.children(":first").find("a:first,span[tabindex]:first,label:first").trigger("focus");
         } else {
-          parent.next().children("a").trigger("focus");
+          parent.next().find("a:first,span[tabindex]:first,label:first").trigger("focus");
         }
       }
       if (keycode == 37) {
@@ -129,7 +133,7 @@ R("menu-functions", [], function () {
           if (parentSub.length) {
             parentSub.removeClass("open");
             _.defer(function () {
-              parentSub.children("a:first").trigger("focus");
+              parentSub.find("a:first,span[tabindex]:first,label:first").trigger("focus");
             });
           }
         }
@@ -139,10 +143,11 @@ R("menu-functions", [], function () {
         if (parent.hasClass("ui-submenu")) {
           parent.trigger("click");
           _.defer(function () {
-            parent.find("li:first a").trigger("focus");
+            parent.find("li:first > a,li:first > span[tabindex],li:first > label").trigger("focus");
           });
         }
       }
+      return true;
     }
   };
 
