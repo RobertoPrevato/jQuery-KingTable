@@ -1199,7 +1199,7 @@ R("menu-functions", [], function () {
   var menufunctions = {
 
     closeMenus: function (e) {
-      if (protected(e)) return true;
+      if (e && protected(e)) return true;
       var self = this;
       if (e && e.which === 3) return
       $(toggle).each(function () {
@@ -1210,7 +1210,7 @@ R("menu-functions", [], function () {
   
         if (e && e.type == "click" && /input|textarea/i.test(e.target.tagName) && $.contains(parent[0], e.target)) return;
   
-        if (e.isDefaultPrevented()) return;
+        if (e && e.isDefaultPrevented()) return;
         el.attr("aria-expanded", "false");
         parent.removeClass("open");
       });
@@ -1282,12 +1282,15 @@ R("menu-functions", [], function () {
   }
 
   function globalKeydown(e) {
-    if (protected(e)) return true;
+    if (protected(e) && !$(e.target).closest(".ui-menu").length) return true;
     prevent(e);
     var anyMenuOpen = !!$(".ui-menu:visible:first").length;
     var keycode = e.which;
     var focused = $(":focus");
-    if (anyMenuOpen && /37|38|39|40/.test(keycode)) {
+
+    if (anyMenuOpen && /27|37|38|39|40/.test(keycode)) {
+      if (keycode == 27)
+        return menufunctions.closeMenus(), true;
       var el = focused.length && focused.closest(".ui-menu").length
               ? focused
               : $(".ui-menu:visible:first").find("li:first a"),
