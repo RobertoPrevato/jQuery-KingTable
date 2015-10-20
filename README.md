@@ -9,7 +9,7 @@ Supports client and server side pagination; client and server side search; custo
 * Support both collections that require server side pagination, and collections that doesn't require server side pagination, but may still benefit from client side pagination.
 
 ## Live demo
-The following demos show fixed tables:
+The following demos are available online:
 * [Live demo](http://ugrose.com/content/demos/kingtable/index.html)
 * [Demo with complex filters](http://ugrose.com/content/demos/kingtable/complex-filters.html)
 * [Double table: two tables displayed in the same page](http://ugrose.com/content/demos/kingtable/double.html)
