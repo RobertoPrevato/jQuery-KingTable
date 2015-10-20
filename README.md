@@ -14,8 +14,10 @@ The following demos show fixed tables:
 * [Demo with complex filters](http://ugrose.com/content/demos/kingtable/complex-filters.html)
 * [Double table: two tables displayed in the same page](http://ugrose.com/content/demos/kingtable/double.html)
 
+[![Tools](http://ugrose.com/content/demos/kingtable/images/tools.gif)](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Table-tools)
+
 ## Documentation
-Please refer to the [wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki).
+Refer to the [wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki).
 A full list of possible options is available inside the dedicated [wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Options).
 
 ## Modes

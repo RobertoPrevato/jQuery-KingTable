@@ -1120,11 +1120,15 @@ R("i18n", [], function () {
 //
 R("menu-builder", [], function () {
 
+  var map = {
+    "css": "class"
+  };
+
   function attr(obj) {
     if (!obj || !obj.attr) return "";
     var a = [], sep = "\"", attr = obj.attr;
     for (var x in attr)
-      a.push([x, "=", sep, attr[x], sep].join(""));
+      a.push([map[x] ? map[x] : x, "=", sep, attr[x], sep].join(""));
     return a.join(" ");
   };
 
@@ -1165,9 +1169,9 @@ R("menu-builder", [], function () {
             break;
           default:
             if (href) {
-              a[push]("<a href=\"" + href + "\">" + name + (hasSubmenu ? caret : "") + "</a>");
+              a[push]("<a href=\"" + href + "\"" + attr(item) + ">" + name + (hasSubmenu ? caret : "") + "</a>");
             } else {
-              a[push]("<span tabindex=\"0\">" + name + (hasSubmenu ? caret : "") + "</span>");
+              a[push]("<span tabindex=\"0\"" + attr(item) + ">" + name + (hasSubmenu ? caret : "") + "</span>");
             }
             break;
         }
@@ -2402,9 +2406,10 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
           }
         ];
 
-      if (additionaltools)
+      if (additionaltools) {
         //the user defined some tools
-        tools = tools.concat(additionaltools);
+        tools = tools.concat(additionaltools.call(self));
+      }
 
       self.tools = tools;
       return self;
