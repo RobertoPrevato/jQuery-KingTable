@@ -873,9 +873,10 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
           }
         ];
 
-      if (additionaltools)
+      if (additionaltools) {
         //the user defined some tools
-        tools = tools.concat(additionaltools);
+        tools = tools.concat(additionaltools.call(self));
+      }
 
       self.tools = tools;
       return self;
