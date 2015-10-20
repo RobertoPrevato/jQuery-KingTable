@@ -1283,12 +1283,13 @@ R("menu-functions", [], function () {
 
   function globalKeydown(e) {
     if (protected(e) && !$(e.target).closest(".ui-menu").length) return true;
-    prevent(e);
-    var anyMenuOpen = !!$(".ui-menu:visible:first").length;
     var keycode = e.which;
+    if (keycode === 9) return true;
+    var anyMenuOpen = !!$(".ui-menu:visible:first").length;
     var focused = $(":focus");
 
     if (anyMenuOpen && /27|37|38|39|40/.test(keycode)) {
+      prevent(e);
       if (keycode == 27)
         return menufunctions.closeMenus(), true;
       var el = focused.length && focused.closest(".ui-menu").length
