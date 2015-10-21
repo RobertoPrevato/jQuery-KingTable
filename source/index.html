@@ -103,6 +103,40 @@
           hslSaturation: "Saturation (HSL)",
           hsvSaturation: "Saturation (HSV)",
           hsvValue: "Value (HSV)"
+        },
+        tools: function () {
+          var self = this;
+          return [
+            {
+              name: "Extra menu",
+              menu: {
+                id: "extra-menu",
+                items: [
+                  {
+                    name: "Say A",
+                    attr: {
+                      "css": "something-a"
+                    }
+                  },
+                  {
+                    name: "Say B",
+                    attr: {
+                      "css": "something-b"
+                    }
+                  }
+                ]
+              }
+            }
+          ];
+        },
+        //events definition
+        events: {
+          "click .something-a": function (e) {
+            alert("A");
+          },
+          "click .something-b": function (e) {
+            alert("B");
+          }
         }
       });
       table.render();

@@ -181,6 +181,6 @@ The source code makes use of the following two tools, of my creation:
 
 ## Themes
 The jQuery-KingTable includes different themes, included in the provided **kingtable.css** file:
-* ![Themes](http://ugrose.com/content/demos/kingtable/images/themes.gif)
+![Themes](http://ugrose.com/content/demos/kingtable/images/themes.gif)
 Separating the themes in different css files has not being considered of high priority, since the final css file weights just 94kB.
 For more information about the themes, refer to the [dedicated wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Themes).
