@@ -1,6 +1,7 @@
 # jQuery-KingTable
 Table widget for administrative tables that are able to build themselves, on the basis of their input data.
-Supports client and server side pagination; client and server side search; custom filters views.
+Supports client and server side pagination; client and server side search; custom filters views; automatic menu to hide 
+and reorder columns and support for custom tools.
 
 ## Objectives of the plugin
 * Allow the implementation of administrative tables with the smallest amount of code possible.
@@ -179,12 +180,7 @@ The source code makes use of the following two tools, of my creation:
 * [Base64, pictures to base64 bulk converter](https://github.com/RobertoPrevato/Base64)
 
 ## Themes
-The jQuery-KingTable offers the following themes, included in the provided **kingtable.css** file:
-* ![Flat white](http://ugrose.com/content/demos/kingtable/images/theme-flatwhite.png)
-* ![Flat black](http://ugrose.com/content/demos/kingtable/images/theme-flatblack.png)
-* ![Clear](http://ugrose.com/content/demos/kingtable/images/theme-clear.png)
-* ![Dark](http://ugrose.com/content/demos/kingtable/images/theme-dark.png)
-* ![Midnight](http://ugrose.com/content/demos/kingtable/images/theme-midnight.png)
-* ![Olive](http://ugrose.com/content/demos/kingtable/images/theme-olive.png)
-* ![Bronze](http://ugrose.com/content/demos/kingtable/images/theme-bronze.png)
-* ![Ultramarine](http://ugrose.com/content/demos/kingtable/images/theme-ultramarine.png)
+The jQuery-KingTable includes different themes, included in the provided **kingtable.css** file:
+* ![Themes](http://ugrose.com/content/demos/kingtable/images/themes.gif)
+Separating the themes in different css files has not being considered of high priority, since the final css file weights just 94kB.
+For more information about the themes, refer to the [dedicated wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Themes).
