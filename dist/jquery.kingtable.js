@@ -1263,20 +1263,8 @@ R("menu-functions", [], function () {
           submenu = el.find(".ui-menu:first");
       //close siblings submenus
       el.siblings().removeClass(open).find("." + open).removeClass(open);
-      //position submenu
-      self.positionSubMenu(el, submenu);
       el.addClass(open);
       return false;
-    },
-
-    positionSubMenu: function (parent, submenu) {
-      var pos = "positioned";
-      if (submenu.data(pos)) return this;
-      submenu.css({
-        left:  "+=" + parent.width()
-      });
-      submenu.data(pos, true);
-      return this;
     }
 
   };
