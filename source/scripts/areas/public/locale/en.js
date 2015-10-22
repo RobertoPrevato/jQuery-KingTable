@@ -2,6 +2,7 @@ _.extend(I.regional, {
   
   "en": {
     "voc": {
+      "Export": "Export",
       "Columns": "Columns",
       "OrderBy": "Order by",
       "GroupBy": "Group by",
@@ -19,9 +20,6 @@ _.extend(I.regional, {
       "ErrorLoadingContents": "An error occurred while loading contents.",
       "GoToDetailsLink": "Go to details",
       "AdvancedFilters": "Advanced filters"
-    },
-    "columns": {
-      //"KeyName": "KeyName"
     }
   }
   

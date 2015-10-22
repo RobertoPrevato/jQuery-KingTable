@@ -31,6 +31,7 @@ R("menu-builder", [], function () {
       a[push]("<ul" + (id ? " id=\"" + id + "\"": "")+ " class=\"ui-menu\">");
 
       _.each(menu.items, function (item) {
+        if (item === null) return;
         var hasSubmenu = item.menu,
           type = item.type,
           href = item.href,

@@ -8,7 +8,9 @@
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
-R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "query", "object-analyzer", "sanitizer", "filters-manager"], function (Extend, Events, StringUtils, RegexUtils, ArraySearch, Query, Analyzer, Sanitizer, FiltersManager) {
+R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "query", "object-analyzer", "sanitizer",
+  "filters-manager", "csv", "file"], function (Extend, Events, StringUtils, RegexUtils, ArraySearch, Query, Analyzer,
+                                               Sanitizer, FiltersManager, Csv, FileUtil) {
   //
   // Defines the core business logic of the jQuery-KingTable plugin.
   // The core is abstracted from jQuery itself;
@@ -870,9 +872,8 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
                 };
               }).value()
             }
-          }
+          }, self.getExportTools()
         ];
-
       if (additionaltools) {
         //the user defined some tools
         tools = tools.concat(additionaltools.call(self));
@@ -880,6 +881,37 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
 
       self.tools = tools;
       return self;
+    },
+
+    getExportTools: function () {
+      return FileUtil.supportsCsExport() ? {
+        name: I.t("voc.Export"),
+        menu: {
+          items: [
+            {
+              name: "Csv",
+              attr: {
+                css: "export-btn",
+                "data-format": "csv"
+              }
+            },
+            {
+              name: "Json",
+              attr: {
+                css: "export-btn",
+                "data-format": "json"
+              }
+            },
+            {
+              name: "Xml",
+              attr: {
+                css: "export-btn",
+                "data-format": "xml"
+              }
+            }
+          ]
+        }
+      } : null;
     },
 
     setColumns: function (columns) {
@@ -1127,6 +1159,90 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         });
       self.setMemory("columnsOrderStorageKey", self.json(order));
       return self;
+    },
+
+    getExportFileName: function (format) {
+      return _.result(this.options, "collectionName", "data") + "." + format;
+    },
+
+    /**
+     * Optimizes a collection; making its structure smaller by removing the property names.
+     * @param data
+     */
+    optimizeCollection: function (data) {
+      var columns = this.columns,
+        a = [_.map(columns, function (o) {
+        return o.displayName;
+      })], len = "length", push = "push";
+      for (var i = 0, l = data[len]; i < l; i++) {
+        var b = [];
+        for (var k = 0, j = columns[len]; k < j; k++) {
+          b[push](data[i][columns[k].name]);
+        }
+        a[push](b);
+      }
+      return a;
+    },
+
+    /**
+     * Exports the current collection to the given format.
+     * @param format
+     */
+    exportTo: function (format) {
+      if (!format) throw "missing format";
+      var self = this;
+      var filename = self.getExportFileName(format);
+      self.getRowsToDisplay().done(function (rowsToDisplay) {
+        var contents = "", type = "";
+        switch (format) {
+          case "csv":
+            var data = self.optimizeCollection(rowsToDisplay);
+            contents = Csv.serialize(data);
+            type = "text/csv";
+            break;
+          case "json":
+            contents = JSON.stringify(rowsToDisplay, 2, 2);
+            type = "application/json";
+            break;
+          case "xml":
+            contents = self.dataToXml(rowsToDisplay);
+            type = "text/xml";
+            break;
+          default:
+            throw "export format " + format + "not implemented";
+        }
+        FileUtil.exportfile(filename, contents, type);
+      });
+    },
+
+    /**
+     * Basic function to convert the given data into an xml structure.
+     */
+    dataToXml: function (data) {
+      var self = this,
+        columns = self.columns,
+        options = self.options,
+        len = "length",
+        d = document,
+        s = new XMLSerializer(),
+        root = d.createElement(options.collectionName || "collection");
+      for (var i = 0, l = data[len]; i < l; i++) {
+        var item = d.createElement(options.entityName || "item");
+        for (var k = 0, j = columns[len]; k < j; k++) {
+          var col = columns[k], name = col.name, value = data[i][name];
+          if (options.entityUseProperties) {
+            //use properties
+            item.setAttribute(name, value);
+          } else {
+            //use elements
+            var subitem = d.createElement(name);
+            subitem.innerText = value;
+            item.appendChild(subitem);
+          }
+        }
+        root.appendChild(item);
+      }
+      return s.serializeToString(root);
     }
   });
 

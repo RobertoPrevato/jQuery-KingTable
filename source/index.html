@@ -67,6 +67,8 @@
   <script src="scripts/shared/components/reflection.js"></script>
   <script src="scripts/shared/components/array-search.js"></script>
   <script src="scripts/shared/data/object-analyzer.js"></script>
+  <script src="scripts/shared/data/csv.js"></script>
+  <script src="scripts/shared/data/file.js"></script>
   <script src="scripts/shared/data/sanitizer.js"></script>
   <script src="scripts/shared/data/query.js"></script>
   <script src="scripts/shared/data/i18n.js"></script>
@@ -85,6 +87,8 @@
       //add reference to window, just for debugging purpose
       var table = window.kingtable = new $.KingTable({
         id: "colors-table",
+        collectionName: "colors",
+        entityName: "color",
         $el: $("#content"),
         url: "/api/colors",
         orderBy: "name",

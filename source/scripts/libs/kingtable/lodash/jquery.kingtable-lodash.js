@@ -38,8 +38,8 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     "change .filters-region input[type='radio']": "viewToModel",
     "change .filters-region select": "viewToModel",
     "keydown span[tabindex]": "checkEnter",
-    //"keydown input[type='checkbox']": "checkEnter",//TODO: fix for Opera (it already triggers click)
-    "change .visibility-check": "onColumnVisibilityChange"
+    "change .visibility-check": "onColumnVisibilityChange",
+    "click .export-btn": "onExportClick"
   };
 
   //extend the table default options
@@ -964,6 +964,13 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       return self.buildHead().buildBody({
         nofetch: true
       });
+    },
+
+    onExportClick: function (e) {
+      var el = $(e.currentTarget),
+        format = el.data("format");
+      if (!format) throw "missing [data-format]";
+      this.exportTo(format);
     }
 
   });

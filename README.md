@@ -1,7 +1,7 @@
 # jQuery-KingTable
 Table widget for administrative tables that are able to build themselves, on the basis of their input data.
 Supports client and server side pagination; client and server side search; custom filters views; automatic menu to hide 
-and reorder columns and support for custom tools.
+and reorder columns and support for custom tools. Client side export feature into: csv, json and xml formats.
 
 ## Objectives of the plugin
 * Allow the implementation of administrative tables with the smallest amount of code possible.
