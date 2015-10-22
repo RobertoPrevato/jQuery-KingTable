@@ -1100,6 +1100,144 @@ R("query", [], function () {
 
 
 //
+// Files utilities
+//
+R("file", [], function () {
+
+  return {
+
+    /**
+     * Returns a value indicating whether the client side export is supported
+     * by the client, or not.
+     * @returns {*}
+     */
+    supportsCsExport: function () {
+      return navigator.msSaveBlob || (function () {
+        var link = document.createElement("a");
+        return link.download !== undefined;
+      })();
+    },
+
+   /**
+     * Exports a csv file; prompting the user for download.
+     * @param filename
+     * @param lines
+     */
+    exportfile: function (filename, text, type) {
+      var setAttribute = "setAttribute", msSaveBlob = navigator.msSaveBlob;
+      var blob = new Blob([text], { type: type });
+      if (msSaveBlob) { // IE 10+
+        msSaveBlob(blob, filename);
+      } else {
+        var link = document.createElement("a");
+        if (link.download !== undefined) { // feature detection
+          // Browsers that support HTML5 download attribute
+          var url = URL.createObjectURL(blob);
+          link[setAttribute]("href", url);
+          link[setAttribute]("download", filename);
+          var style = {
+            visibility: "hidden",
+            position: "absolute",
+            left: "-9999px"
+          };
+          for (var x in style)
+            link.style[x] = style[x];
+          //inject
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
+    }
+  };
+
+});
+
+//
+// Csv utilities
+//
+R("csv", [], function () {
+
+  var setAttribute = "setAttribute";
+
+  var TypeHandling = {
+    allStrings: 1,
+    keepType: 2
+  };
+
+  return {
+
+    typeHandling: TypeHandling,
+
+    //null value handling option
+    defaults: {
+      /**
+       * Separator to use
+       */
+      separator: ",",
+      /**
+       * Whether to add a separator line at the beginning of the file, or not.
+       * (May be useful for excel)
+       */
+      addSeparatorLine: false,
+      /**
+       * How the types should be handled: allStrings to manage all properties as strings (all will be quoted)
+       */
+      typeHandling: TypeHandling.allStrings
+    },
+
+    /**
+     * Serializes the given collection in csv format.
+     * Assumes that the collection is optimized (the first row contains properties, the other only values)
+     * @param data collection
+     * @param options
+     */
+    serialize: function (data, options) {
+      options = _.extend({}, this.defaults, options);
+      var re = [],
+        push = "push",
+        toString = "toString",
+        len = "length",
+        rep = "replace",
+        test = "test",
+        sep = options.separator,
+        dobquote = "\"";
+      if (options.addSeparatorLine) {
+        //for excel
+        re[push]("sep=" + sep);
+      }
+      for (var i = 0, l = data[len]; i < l; i++) {
+        var a = [], row = data[i];
+        //assume that the first row contains the columns
+        for (var k = 0, j = row[len]; k < j; k++) {
+          var v = row[k];
+          if (v instanceof Date) {
+            v = v.toLocaleString();
+          } else {
+            if (typeof v != "string")
+              v = v[toString] ? v[toString]() : "";
+          }
+          v = v[rep](/"/g, '""');
+          //escape quotes - RFC-4180, paragraph "If double-quotes are used to enclose fields, then a double-quote
+          //appearing inside a field must be escaped by preceding it with another double quote."
+          if (/"/[test](v))
+            v = v[rep](/"/g, "\"\"");
+          //https://en.wikipedia.org/wiki/Comma-separated_values
+          //Fields with embedded commas or double-quote characters must be quoted. (by standard, so even if CsvTypeHandling is different than "AllStrings")
+          //1997, Ford, E350, "Super, ""luxurious"" truck"
+          //1997, Ford, E350, "Super, luxurious truck"
+          if (options.typeHandling == TypeHandling.allStrings || /"|\n/[test](v) || v.indexOf(sep) > -1)
+            v = dobquote + v + dobquote;
+          a[push](v);
+        }
+        re[push](a.join(sep));
+      }
+      return re.join("\n");
+    }
+  };
+});
+
+//
 // Returns a common interface for internazionalization, supporting scoped translations.
 //
 R("i18n", [], function () {

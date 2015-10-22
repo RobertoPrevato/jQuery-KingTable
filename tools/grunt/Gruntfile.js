@@ -14,6 +14,8 @@ module.exports = function (grunt) {
     "../../source/scripts/shared/data/object-analyzer.js",
     "../../source/scripts/shared/data/sanitizer.js",
     "../../source/scripts/shared/data/query.js",
+    "../../source/scripts/shared/data/file.js",
+    "../../source/scripts/shared/data/csv.js",
     "../../source/scripts/shared/data/i18n.js",
     "../../source/scripts/shared/menus/menu-builder.js",
     "../../source/scripts/shared/menus/menu-functions.js",
