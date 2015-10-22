@@ -7,7 +7,7 @@ and reorder columns and support for custom tools.
 * Allow the implementation of administrative tables with the smallest amount of code possible.
 * Even without configuration, the table must be able to build itself on the basis of its input data.
 * Allow for easy customization of generated HTML, to adapt to different needs: e.g. displaying pictures thumbnails, anchor tags, etc.
-* Support both collections that require server side pagination, and collections that doesn't require server side pagination, but may still benefit from client side pagination.
+* Support both collections that require server side pagination, and collections that don't require server side pagination, but may still benefit from client side pagination.
 
 ## Live demo
 The following demos are available online:
