@@ -38,7 +38,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     "change .filters-region input[type='radio']": "viewToModel",
     "change .filters-region select": "viewToModel",
     "keydown span[tabindex]": "checkEnter",
-    "keydown input[type='checkbox']": "checkEnter",
+    //"keydown input[type='checkbox']": "checkEnter",//TODO: fix for Opera (it already triggers click)
     "change .visibility-check": "onColumnVisibilityChange"
   };
 
@@ -175,7 +175,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       var template = self.getTemplate();
       var html = $(template);
 
-      if (!(self.$el instanceof $) || !self.$el.length)
+      if (!self.$el || !self.$el.length)
         throw new Error("KingTable: the table is not bound to any element; it must be bound to a container element.");
 
       var id = self.options.id;
@@ -282,7 +282,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     },
 
     keepFocus: function (el) {
-      var focused = el.find(":focus:first");
+      var focused = el.find(":focus");
       if (focused.length)
         _.defer(function () {
           el.find("[class='" + focused.attr("class") + "']").trigger("focus");
@@ -376,18 +376,20 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     },
 
     anyMenuIsOpen: function () {
-      return !!$(".ui-menu:visible:first").length;
+      return !!$(".ui-menu:visible").length;
+    },
+
+    anyInputFocused: function () {
+      var a = document.activeElement;
+      return a && /input|select|textarea/i.test(a.tagName);
     },
 
     bindWindowEvents: function () {
       var self = this;
       //support moving changing page using the keyboard
       $("body").on("keydown.king-table", function (e) {
-        //if any menu is open, do nothing
-        if (self.anyMenuIsOpen()) return true;
-        //if any input is focused, do nothing
-        var anyInputFocused = !!$(":input:focus").length;
-        if (anyInputFocused) return true;
+        //if any menu is open, or any input is focused, do nothing
+        if (self.anyInputFocused() || self.anyMenuIsOpen()) return true;
         var kc = e.keyCode;
         //if the user clicked the left arrow, or A, go to previous page
         if (_.contains([37, 65], kc)) {
@@ -404,7 +406,6 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       self.on("dispose", function () {
         $("body").off("keydown.king-table");
       });
-
       //TODO: support swipe events; using HammerJs library
       return self;
     },

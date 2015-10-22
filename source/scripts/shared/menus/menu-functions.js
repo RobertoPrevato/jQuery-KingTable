@@ -64,10 +64,8 @@ R("menu-functions", [], function () {
 
     expandSubMenu: function (e) {
       if (protected(e)) return true;
-      var self = this,
-        open = "open",
-        el = $(e.currentTarget),
-          submenu = el.find(".ui-menu:first");
+      var open = "open",
+        el = $(e.currentTarget);
       //close siblings submenus
       el.siblings().removeClass(open).find("." + open).removeClass(open);
       el.addClass(open);
@@ -80,12 +78,24 @@ R("menu-functions", [], function () {
     e.preventDefault();
   }
 
+  function firstitem(el) {
+    var len = "length",
+      find = "find",
+      first = ":first-of-type",
+      a = el[find]("a" + first);
+    if (a[len]) return a;
+    a = el[find]("span[tabindex]" + first);
+    if (a[len]) return a;
+    a = el[find]("label" + first);
+    return a;
+  }
+
   function globalKeydown(e) {
     if (protected(e) && !$(e.target).closest(".ui-menu").length) return true;
     var keycode = e.which;
     if (keycode === 9) return true;
-    var anyMenuOpen = !!$(".ui-menu:visible:first").length;
-    var focused = $(":focus");
+    var anyMenuOpen = !!$(".ui-menu:visible").length;
+    var focused = $(":focus"), focus = "focus";
 
     if (anyMenuOpen && /27|37|38|39|40/.test(keycode)) {
       prevent(e);
@@ -93,16 +103,20 @@ R("menu-functions", [], function () {
         return menufunctions.closeMenus(), true;
       var el = focused.length && focused.closest(".ui-menu").length
               ? focused
-              : $(".ui-menu:visible:first").find("li:first a"),
+              : firstitem($($(".ui-menu:visible")[0]).find("li:first")),
           parent = el.parent();
+      if (focused.hasClass("ui-expander")) {
+        firstitem(parent).trigger(focus);
+        return true;
+      }
       if (keycode == 38) {
         //up
         var prev = focused.prev(),
           prevIsMenu = prev.hasClass("ui-menu");
         if (prevIsMenu) {
-          prev.children(":first").find("a:first,span[tabindex]:first,label:first").trigger("focus");
+          firstitem(prev.children(":first")).trigger(focus);
         } else {
-          parent.prev().find("a:first,span[tabindex]:first,label:first").trigger("focus");
+          firstitem(parent.prev()).trigger(focus);
         }
       }
       if (keycode == 40) {
@@ -110,9 +124,9 @@ R("menu-functions", [], function () {
         var next = focused.next(),
           nextIsMenu = next.hasClass("ui-menu");
         if (nextIsMenu && !parent.hasClass("ui-submenu")) {
-          next.children(":first").find("a:first,span[tabindex]:first,label:first").trigger("focus");
+          firstitem(next.children(":first")).trigger(focus);
         } else {
-          parent.next().find("a:first,span[tabindex]:first,label:first").trigger("focus");
+          firstitem(parent.next()).trigger(focus);
         }
       }
       if (keycode == 37) {
@@ -125,7 +139,7 @@ R("menu-functions", [], function () {
           if (parentSub.length) {
             parentSub.removeClass("open");
             _.defer(function () {
-              parentSub.find("a:first,span[tabindex]:first,label:first").trigger("focus");
+              firstitem(parentSub).trigger(focus);
             });
           }
         }
@@ -135,13 +149,13 @@ R("menu-functions", [], function () {
         if (parent.hasClass("ui-submenu")) {
           parent.trigger("click");
           _.defer(function () {
-            parent.find("li:first > a,li:first > span[tabindex],li:first > label").trigger("focus");
+            firstitem(parent.find("li:first-of-type")).trigger(focus);
           });
         }
       }
       return true;
     }
-  };
+  }
 
   var bind = "bind";
   $(document)

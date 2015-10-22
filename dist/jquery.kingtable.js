@@ -1257,10 +1257,8 @@ R("menu-functions", [], function () {
 
     expandSubMenu: function (e) {
       if (protected(e)) return true;
-      var self = this,
-        open = "open",
-        el = $(e.currentTarget),
-          submenu = el.find(".ui-menu:first");
+      var open = "open",
+        el = $(e.currentTarget);
       //close siblings submenus
       el.siblings().removeClass(open).find("." + open).removeClass(open);
       el.addClass(open);
@@ -1273,12 +1271,24 @@ R("menu-functions", [], function () {
     e.preventDefault();
   }
 
+  function firstitem(el) {
+    var len = "length",
+      find = "find",
+      first = ":first-of-type",
+      a = el[find]("a" + first);
+    if (a[len]) return a;
+    a = el[find]("span[tabindex]" + first);
+    if (a[len]) return a;
+    a = el[find]("label" + first);
+    return a;
+  }
+
   function globalKeydown(e) {
     if (protected(e) && !$(e.target).closest(".ui-menu").length) return true;
     var keycode = e.which;
     if (keycode === 9) return true;
-    var anyMenuOpen = !!$(".ui-menu:visible:first").length;
-    var focused = $(":focus");
+    var anyMenuOpen = !!$(".ui-menu:visible").length;
+    var focused = $(":focus"), focus = "focus";
 
     if (anyMenuOpen && /27|37|38|39|40/.test(keycode)) {
       prevent(e);
@@ -1286,16 +1296,20 @@ R("menu-functions", [], function () {
         return menufunctions.closeMenus(), true;
       var el = focused.length && focused.closest(".ui-menu").length
               ? focused
-              : $(".ui-menu:visible:first").find("li:first a"),
+              : firstitem($($(".ui-menu:visible")[0]).find("li:first")),
           parent = el.parent();
+      if (focused.hasClass("ui-expander")) {
+        firstitem(parent).trigger(focus);
+        return true;
+      }
       if (keycode == 38) {
         //up
         var prev = focused.prev(),
           prevIsMenu = prev.hasClass("ui-menu");
         if (prevIsMenu) {
-          prev.children(":first").find("a:first,span[tabindex]:first,label:first").trigger("focus");
+          firstitem(prev.children(":first")).trigger(focus);
         } else {
-          parent.prev().find("a:first,span[tabindex]:first,label:first").trigger("focus");
+          firstitem(parent.prev()).trigger(focus);
         }
       }
       if (keycode == 40) {
@@ -1303,9 +1317,9 @@ R("menu-functions", [], function () {
         var next = focused.next(),
           nextIsMenu = next.hasClass("ui-menu");
         if (nextIsMenu && !parent.hasClass("ui-submenu")) {
-          next.children(":first").find("a:first,span[tabindex]:first,label:first").trigger("focus");
+          firstitem(next.children(":first")).trigger(focus);
         } else {
-          parent.next().find("a:first,span[tabindex]:first,label:first").trigger("focus");
+          firstitem(parent.next()).trigger(focus);
         }
       }
       if (keycode == 37) {
@@ -1318,7 +1332,7 @@ R("menu-functions", [], function () {
           if (parentSub.length) {
             parentSub.removeClass("open");
             _.defer(function () {
-              parentSub.find("a:first,span[tabindex]:first,label:first").trigger("focus");
+              firstitem(parentSub).trigger(focus);
             });
           }
         }
@@ -1328,13 +1342,13 @@ R("menu-functions", [], function () {
         if (parent.hasClass("ui-submenu")) {
           parent.trigger("click");
           _.defer(function () {
-            parent.find("li:first > a,li:first > span[tabindex],li:first > label").trigger("focus");
+            firstitem(parent.find("li:first-of-type")).trigger(focus);
           });
         }
       }
       return true;
     }
-  };
+  }
 
   var bind = "bind";
   $(document)
@@ -2747,7 +2761,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     "change .filters-region input[type='radio']": "viewToModel",
     "change .filters-region select": "viewToModel",
     "keydown span[tabindex]": "checkEnter",
-    "keydown input[type='checkbox']": "checkEnter",
+    //"keydown input[type='checkbox']": "checkEnter",//TODO: fix for Opera (it already triggers click)
     "change .visibility-check": "onColumnVisibilityChange"
   };
 
@@ -2884,7 +2898,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       var template = self.getTemplate();
       var html = $(template);
 
-      if (!(self.$el instanceof $) || !self.$el.length)
+      if (!self.$el || !self.$el.length)
         throw new Error("KingTable: the table is not bound to any element; it must be bound to a container element.");
 
       var id = self.options.id;
@@ -2991,7 +3005,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     },
 
     keepFocus: function (el) {
-      var focused = el.find(":focus:first");
+      var focused = el.find(":focus");
       if (focused.length)
         _.defer(function () {
           el.find("[class='" + focused.attr("class") + "']").trigger("focus");
@@ -3085,18 +3099,20 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     },
 
     anyMenuIsOpen: function () {
-      return !!$(".ui-menu:visible:first").length;
+      return !!$(".ui-menu:visible").length;
+    },
+
+    anyInputFocused: function () {
+      var a = document.activeElement;
+      return a && /input|select|textarea/i.test(a.tagName);
     },
 
     bindWindowEvents: function () {
       var self = this;
       //support moving changing page using the keyboard
       $("body").on("keydown.king-table", function (e) {
-        //if any menu is open, do nothing
-        if (self.anyMenuIsOpen()) return true;
-        //if any input is focused, do nothing
-        var anyInputFocused = !!$(":input:focus").length;
-        if (anyInputFocused) return true;
+        //if any menu is open, or any input is focused, do nothing
+        if (self.anyInputFocused() || self.anyMenuIsOpen()) return true;
         var kc = e.keyCode;
         //if the user clicked the left arrow, or A, go to previous page
         if (_.contains([37, 65], kc)) {
@@ -3113,7 +3129,6 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       self.on("dispose", function () {
         $("body").off("keydown.king-table");
       });
-
       //TODO: support swipe events; using HammerJs library
       return self;
     },
