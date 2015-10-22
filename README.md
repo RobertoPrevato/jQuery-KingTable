@@ -21,6 +21,16 @@ The following demos are available online:
 Refer to the [wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki).
 A full list of possible options is available inside the dedicated [wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Options).
 
+## Zepto support
+Despite being designed primarily as a jQuery plugin, the KingTable widget supports [zepto.js](http://zeptojs.com/).
+In order to use it with zepto, the callbacks, deferred and selector plugins are required.
+```html
+  <script src="scripts/libs/zepto.js"></script>
+  <script src="scripts/libs/zepto.callbacks.js"></script>
+  <script src="scripts/libs/zepto.deferred.js"></script>
+  <script src="scripts/libs/zepto.selector.js"></script>
+```
+
 ## Modes
 The jQuery-KingTable implements two working modes:
 * fixed
@@ -168,7 +178,7 @@ python server.py
 * The DOM manipulation logic can be implemented in different ways: currently the plugin offers an implementation that uses Lodash *template* function.
 
 ## Dependencies
-* [jQuery](https://jquery.com/)
+* [jQuery](https://jquery.com/); or [zepto.js](http://zeptojs.com/)
 * [Lodash](https://lodash.com/)
 * [R.js](https://github.com/RobertoPrevato/R.js)
 * [OPEN iconic](https://useiconic.com/open/)
