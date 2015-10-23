@@ -1948,7 +1948,28 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       /**
        * Whether the table should automatically refresh itself, when a filter changes; or not.
        */
-      autorefresh: true
+      autorefresh: true,
+
+      /**
+       * Default export formats.
+       */
+      exportFormats: [
+        {
+          name: "Csv",
+          format: "csv",
+          type: "text/csv"
+        },
+        {
+          name: "Json",
+          format: "json",
+          type: "application/json"
+        },
+        {
+          name: "Xml",
+          format: "xml",
+          type: "text/xml"
+        }
+      ]
     },
 
     string: StringUtils,
@@ -2558,32 +2579,21 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
     },
 
     getExportTools: function () {
+      var exportFormats = this.options.exportFormats;
+      if (!exportFormats) return null;
+      //normalize
+      _.each(exportFormats, function (o) {
+        _.extend(o, {
+          attr: {
+            css: "export-btn",
+            "data-format": o.format
+          }
+        });
+      });
       return FileUtil.supportsCsExport() ? {
         name: I.t("voc.Export"),
         menu: {
-          items: [
-            {
-              name: "Csv",
-              attr: {
-                css: "export-btn",
-                "data-format": "csv"
-              }
-            },
-            {
-              name: "Json",
-              attr: {
-                css: "export-btn",
-                "data-format": "json"
-              }
-            },
-            {
-              name: "Xml",
-              attr: {
-                css: "export-btn",
-                "data-format": "xml"
-              }
-            }
-          ]
+          items: exportFormats
         }
       } : null;
     },
@@ -2865,27 +2875,35 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
     exportTo: function (format) {
       if (!format) throw "missing format";
       var self = this;
-      var filename = self.getExportFileName(format);
+      var filename = self.getExportFileName(format),
+        exportFormat = _.find(self.options.exportFormats, function (o) {
+          return o.format === format;
+        });
+      if (!exportFormat || !exportFormat.type) throw "missing format information";
       self.getRowsToDisplay().done(function (rowsToDisplay) {
-        var contents = "", type = "";
-        switch (format) {
-          case "csv":
-            var data = self.optimizeCollection(rowsToDisplay);
-            contents = Csv.serialize(data);
-            type = "text/csv";
-            break;
-          case "json":
-            contents = JSON.stringify(rowsToDisplay, 2, 2);
-            type = "application/json";
-            break;
-          case "xml":
-            contents = self.dataToXml(rowsToDisplay);
-            type = "text/xml";
-            break;
-          default:
-            throw "export format " + format + "not implemented";
+        var contents = "";
+        if (exportFormat.handler) {
+          //user defined handler
+          contents = exportFormat.handler.call(self, rowsToDisplay);
+        } else {
+          //use default export handlers
+          switch (format) {
+            case "csv":
+              var data = self.optimizeCollection(rowsToDisplay);
+              contents = Csv.serialize(data);
+              break;
+            case "json":
+              contents = JSON.stringify(rowsToDisplay, 2, 2);
+              break;
+            case "xml":
+              contents = self.dataToXml(rowsToDisplay);
+              break;
+            default:
+              throw "export format " + format + "not implemented";
+          }
         }
-        FileUtil.exportfile(filename, contents, type);
+        if (contents)
+          FileUtil.exportfile(filename, contents, exportFormat.type);
       });
     },
 
