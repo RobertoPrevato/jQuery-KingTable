@@ -300,7 +300,12 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       /**
        * Whether to prettify xml when exporting, or not.
        */
-      prettyXml: true
+      prettyXml: true,
+
+      /**
+       * Allows to specify csv serialization options
+       */
+      csvOptions: {}
     },
 
     string: StringUtils,
@@ -1205,7 +1210,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
      */
     exportTo: function (format) {
       if (!format) throw "missing format";
-      var self = this;
+      var self = this, options = self.options;
       var filename = self.getExportFileName(format),
         exportFormat = _.find(self.options.exportFormats, function (o) {
           return o.format === format;
@@ -1221,7 +1226,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
           switch (format) {
             case "csv":
               var data = self.optimizeCollection(rowsToDisplay);
-              contents = Csv.serialize(data);
+              contents = Csv.serialize(data, options.csvOptions);
               break;
             case "json":
               contents = JSON.stringify(rowsToDisplay, 2, 2);
