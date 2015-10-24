@@ -9,8 +9,8 @@
  * http://www.opensource.org/licenses/MIT
  */
 R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "query", "object-analyzer", "sanitizer",
-  "filters-manager", "csv", "file"], function (Extend, Events, StringUtils, RegexUtils, ArraySearch, Query, Analyzer,
-                                               Sanitizer, FiltersManager, Csv, FileUtil) {
+  "filters-manager", "csv", "xml", "file"], function (Extend, Events, StringUtils, RegexUtils, ArraySearch, Query, Analyzer,
+                                               Sanitizer, FiltersManager, Csv, Xml, FileUtil) {
   //
   // Defines the core business logic of the jQuery-KingTable plugin.
   // The core is abstracted from jQuery itself;
@@ -295,7 +295,12 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
           format: "xml",
           type: "text/xml"
         }
-      ]
+      ],
+
+      /**
+       * Whether to prettify xml when exporting, or not.
+       */
+      prettyXml: true
     },
 
     string: StringUtils,
@@ -1243,9 +1248,11 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         len = "length",
         d = document,
         s = new XMLSerializer(),
-        root = d.createElement(options.collectionName || "collection");
+        createElement = "createElement",
+        appendChild = "appendChild",
+        root = d[createElement](options.collectionName || "collection");
       for (var i = 0, l = data[len]; i < l; i++) {
-        var item = d.createElement(options.entityName || "item");
+        var item = d[createElement](options.entityName || "item");
         for (var k = 0, j = columns[len]; k < j; k++) {
           var col = columns[k], name = col.name, value = data[i][name];
           if (options.entityUseProperties) {
@@ -1253,14 +1260,15 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
             item.setAttribute(name, value);
           } else {
             //use elements
-            var subitem = d.createElement(name);
+            var subitem = d[createElement](name);
             subitem.innerText = value;
-            item.appendChild(subitem);
+            item[appendChild](subitem);
           }
         }
-        root.appendChild(item);
+        root[appendChild](item);
       }
-      return s.serializeToString(root);
+      var xml = s.serializeToString(root);
+      return options.prettyXml ? Xml.pretty(xml) : Xml.normal(xml);
     }
   });
 
