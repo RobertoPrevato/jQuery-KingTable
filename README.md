@@ -193,4 +193,5 @@ The source code makes use of the following two tools, of my creation:
 ## Themes
 The jQuery-KingTable includes different themes, available in the provided **.css** files inside the **dist** folder:
 ![Themes](http://ugrose.com/content/demos/kingtable/images/themes.gif)
+
 For more information about the themes, refer to the [dedicated wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Themes).
