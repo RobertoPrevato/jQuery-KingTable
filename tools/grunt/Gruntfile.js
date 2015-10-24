@@ -34,13 +34,21 @@ module.exports = function (grunt) {
     less: {
       kingtable: {
         options: {
-          paths: [rel + "/styles/smartgrid/"],
           cleancss: true
         },
         files: {
           "../../source/styles/examples.css": "../../source/styles/examples.less",
           "../../source/styles/kingtable/kingtable.css": "../../source/styles/kingtable/kingtable.less",
-          "../../dist/styles/kingtable.css": "../../source/styles/kingtable/kingtable.less"
+          "../../dist/styles/kingtable.css": "../../source/styles/kingtable/kingtable.less",
+          "../../dist/styles/kingtable.core.css": "../../source/styles/kingtable/kingtable-core.less",
+          "../../dist/styles/kingtable.clear.css": "../../source/styles/kingtable/themes/clear/clear.less",
+          "../../dist/styles/kingtable.dark.css": "../../source/styles/kingtable/themes/dark/dark.less",
+        //"../../dist/styles/kingtable.flatwhite.css": "../../source/styles/kingtable/themes/flatwhite/flatwhite.less",
+          "../../dist/styles/kingtable.flatblack.css": "../../source/styles/kingtable/themes/flatblack/flatblack.less",
+          "../../dist/styles/kingtable.midnight.css": "../../source/styles/kingtable/themes/midnight/midnight.less",
+          "../../dist/styles/kingtable.bronze.css": "../../source/styles/kingtable/themes/bronze/bronze.less",
+          "../../dist/styles/kingtable.ultramarine.css": "../../source/styles/kingtable/themes/ultramarine/ultramarine.less",
+          "../../dist/styles/kingtable.olive.css": "../../source/styles/kingtable/themes/olive/olive.less"
         }
       }
     },

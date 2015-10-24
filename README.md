@@ -191,7 +191,6 @@ The source code makes use of the following two tools, of my creation:
 * [Base64, pictures to base64 bulk converter](https://github.com/RobertoPrevato/Base64)
 
 ## Themes
-The jQuery-KingTable includes different themes, included in the provided **kingtable.css** file:
+The jQuery-KingTable includes different themes, available in the provided **.css** files inside the **dist** folder:
 ![Themes](http://ugrose.com/content/demos/kingtable/images/themes.gif)
-Separating the themes in different css files has not being considered of high priority, since the final css file weights just 94kB.
 For more information about the themes, refer to the [dedicated wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Themes).
