@@ -33,8 +33,9 @@ In order to use it with zepto, the callbacks, deferred and selector plugins are 
 
 ## Modes
 The jQuery-KingTable implements two working modes:
-* fixed
-* normal
+* fixed (collections that do not require server side pagination)
+* normal (collections that require server side pagination)
+And supports both optimized and simple collections. Refer to the [dedicated wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Working-modes) for more information.
 
 ### Fixed mode
 A fixed table is displaying a collection that doesn't require server side pagination, but may still benefit from client side pagination.
