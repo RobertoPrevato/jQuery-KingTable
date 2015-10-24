@@ -332,6 +332,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       //if the table is instantiated with data; then consider it fixed (no need to fetch data using ajax)
       if (self.data) {
         self.fixed = true;
+        self.data = self.normalizeCollection(self.data);
       }
       //create an instance of object analyzer
       self.objAnalyzer = new Analyzer();
@@ -581,6 +582,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
             //The server returned an array, so take for good that this collection
             //is complete and doesn't require server side pagination. This is by design.
             //
+            catalog = self.normalizeCollection(catalog);
             self.fixed = true;
             self.filters.searchDisabled = false;
             if (self.columnsInitialized)
@@ -596,17 +598,18 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
             //
             //expect catalog structure (page count, page number, etc.)
             if (!catalog.subset) self.raiseError("The returned object is not a catalog");
-            if (self.columnsInitialized) self.formatData(catalog.subset);
+            var subset = self.normalizeCollection(catalog.subset);
+            if (self.columnsInitialized) self.formatData(subset);
             if (catalog.search) {
               //set last fetch filter to avoid useless ajax calls
               self.cache.lastFetchFilter = self.filters.regex.getMatchPattern(catalog.search);
             }
-            self.data = catalog.subset;
+            self.data = subset;
 
             if (typeof catalog.total !== "number")
               self.raiseError("Missing total items count in response object. Please provide the total rows count inside the catalog page response object");
             self.updatePagination(catalog.total);
-            def.resolveWith(self, [catalog.subset, false]);
+            def.resolveWith(self, [subset, false]);
           }
           self.checkPendingRender();
         }).fail(function () {
@@ -860,6 +863,27 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       //will contain names of formatted properties
       self.columns.formatted = [];
       return self;
+    },
+
+    normalizeCollection: function (collection) {
+      var len = "length";
+      if (!collection[len]) return collection;
+      var first = collection[0];
+      if (first instanceof Array) {
+        // assumes that the server is returning an optimized collection:
+        // the first array contains the column names; while the others the values.
+        var a = [];
+        for (var i = 1, l = collection[len]; i < l; i++) {
+          var o = {};
+          for (var k = 0, j = first[len]; k < j; k++) {
+            o[first[k]] = collection[i][k];
+          }
+          a.push(o);
+        }
+        return a;
+      }
+      // the collection is not optimized
+      return collection;
     },
 
     formatData: function () {

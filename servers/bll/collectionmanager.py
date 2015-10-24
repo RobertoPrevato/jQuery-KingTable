@@ -46,6 +46,8 @@ class CollectionManager:
         sort_order = data["sortOrder"]
         # get the collection
         collection, total_rows = self.get_catalog_page(page_number, page_size, search, order_by, sort_order)
+        # optimize the collection
+        collection = ListUtils.optimize_list(collection)
         result = {"subset": collection, "page": page_number, "total": total_rows}
         return result
 

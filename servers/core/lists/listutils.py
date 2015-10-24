@@ -10,6 +10,22 @@ class ListUtils:
         return selection[offset:(limit + offset if limit is not None else None)]
 
     @staticmethod
+    def optimize_list(collection):
+        """
+         Optimizes a collection of items; into a collection of arrays.
+         The first array contains the property names; the others the items values.
+        """
+        if len(collection) == 0:
+            return collection
+        first = collection[0]
+        data = []
+        data.append([x for x in first.keys()])
+        for o in collection:
+            data.append([x for x in o.values()])
+        return data
+
+
+    @staticmethod
     def search(collection, search, properties):
         """Simple search method, that supports only exact text."""
         # escape characters that need to be escaped
