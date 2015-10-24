@@ -305,7 +305,12 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       /**
        * Allows to specify csv serialization options
        */
-      csvOptions: {}
+      csvOptions: {},
+
+      /**
+       * Whether to include hidden properties in the export; or not.
+       */
+      exportHiddenProperties: false
     },
 
     string: StringUtils,
@@ -1185,19 +1190,30 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       return _.result(this.options, "collectionName", "data") + "." + format;
     },
 
+    getColumnsForExport: function () {
+      var columns = this.columns;
+      return this.options.exportHiddenProperties
+        ? columns
+        : _.reject(columns, function (o) {
+          return o.hidden || o.secret;
+        });
+    },
+
     /**
      * Optimizes a collection; making its structure smaller by removing the property names.
      * @param data
      */
     optimizeCollection: function (data) {
-      var columns = this.columns,
+      var columns = this.getColumnsForExport(),
         a = [_.map(columns, function (o) {
         return o.displayName;
       })], len = "length", push = "push";
       for (var i = 0, l = data[len]; i < l; i++) {
         var b = [];
         for (var k = 0, j = columns[len]; k < j; k++) {
-          b[push](data[i][columns[k].name]);
+          var colname = columns[k].name;
+          if (data[i].hasOwnProperty(colname))
+            b[push](data[i][colname]);
         }
         a[push](b);
       }
@@ -1214,9 +1230,13 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       var filename = self.getExportFileName(format),
         exportFormat = _.find(self.options.exportFormats, function (o) {
           return o.format === format;
-        });
+        }),
+        columns = self.getColumnsForExport();
       if (!exportFormat || !exportFormat.type) throw "missing format information";
       self.getRowsToDisplay().done(function (rowsToDisplay) {
+        rowsToDisplay = _.map(rowsToDisplay, function (o) {
+          return _.pick(o, _.map(columns, function (c) { return c.name; }));
+        });
         var contents = "";
         if (exportFormat.handler) {
           //user defined handler
@@ -1248,7 +1268,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
      */
     dataToXml: function (data) {
       var self = this,
-        columns = self.columns,
+        columns = self.getColumnsForExport(),
         options = self.options,
         len = "length",
         d = document,
