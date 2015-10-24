@@ -4,7 +4,7 @@ Supports client and server side pagination; client and server side search; custo
 and reorder columns and support for custom tools. Client side export feature into: csv, json and xml formats.
 
 ## Objectives of the plugin
-* Allow the implementation of administrative tables with the smallest amount of code possible.
+* Allow the implementation of administrative tables with the [smallest amount of code possible](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Minimum-effort).
 * Even without configuration, the table must be able to build itself on the basis of its input data.
 * Allow for easy customization of generated HTML, to adapt to different needs: e.g. displaying pictures thumbnails, anchor tags, etc.
 * Support both collections that require server side pagination, and collections that don't require server side pagination, but may still benefit from client side pagination.
@@ -191,7 +191,7 @@ The source code makes use of the following two tools, of my creation:
 * [Base64, pictures to base64 bulk converter](https://github.com/RobertoPrevato/Base64)
 
 ## Themes
-The jQuery-KingTable includes different themes, available in the provided **.css** files inside the **dist** folder:
+The KingTable includes different themes, available in the provided **.css** files inside the **dist** folder:
 ![Themes](http://ugrose.com/content/demos/kingtable/images/themes.gif)
 
 For more information about the themes, refer to the [dedicated wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Themes).
