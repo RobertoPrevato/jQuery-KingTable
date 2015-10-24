@@ -16,6 +16,7 @@ module.exports = function (grunt) {
     "../../source/scripts/shared/data/query.js",
     "../../source/scripts/shared/data/file.js",
     "../../source/scripts/shared/data/csv.js",
+    "../../source/scripts/shared/data/xml.js",
     "../../source/scripts/shared/data/i18n.js",
     "../../source/scripts/shared/menus/menu-builder.js",
     "../../source/scripts/shared/menus/menu-functions.js",
@@ -38,7 +39,8 @@ module.exports = function (grunt) {
         },
         files: {
           "../../source/styles/examples.css": "../../source/styles/examples.less",
-          "../../source/styles/kingtable/kingtable.css": "../../source/styles/kingtable/kingtable.less"
+          "../../source/styles/kingtable/kingtable.css": "../../source/styles/kingtable/kingtable.less",
+          "../../dist/styles/kingtable.css": "../../source/styles/kingtable/kingtable.less"
         }
       }
     },
@@ -62,6 +64,7 @@ module.exports = function (grunt) {
       }
     }
   });
+
   grunt.loadNpmTasks("grunt-contrib-concat");
   grunt.loadNpmTasks("grunt-contrib-less");
   grunt.loadNpmTasks("grunt-contrib-uglify");
