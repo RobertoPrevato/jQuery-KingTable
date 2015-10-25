@@ -30,12 +30,12 @@ R("jquery-kingtable", ["kingtable-core"], function (KingTable) {
       return this;
     },
     collection: function () {
-      var kt = this.data("king-table");
+      var kt = this.data("kingtable");
       if (kt) kt.data;
       return []
     },
     dispose: function () {
-      var kt = this.data("king-table");
+      var kt = this.data("kingtable");
       if (kt) kt.dispose();
       return this
     }
