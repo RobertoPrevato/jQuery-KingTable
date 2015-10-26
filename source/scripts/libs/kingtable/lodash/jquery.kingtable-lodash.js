@@ -125,11 +125,11 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       //load the view
       var self = this,
         options = self.options,
-        addViews = options.addViews,
+        extraViews = options.extraViews,
         view = self.getMemory("view");
-      if (view) self.view = view;
-      if (addViews)
-        options.views = options.views.concat(addViews);
+      self.view = view || "table";
+      if (extraViews)
+        options.views = options.views.concat(extraViews);
       //register a missing data event handler
       return self.on("missing-data", function () {
         //data is missing; and the table doesn't have columns info
