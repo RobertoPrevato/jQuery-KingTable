@@ -42,13 +42,14 @@ R("menu-builder", [], function () {
           case "checkbox":
             var cid = _.uniqueId("mnck-");
             var checked = item.checked ? " checked=\"checked\"" : "";
-            a[push]("<input id=\"" + cid + "\" type=\"checkbox\"" + attr(item) + checked +" />");
+            a[push]("<input id=\"" + cid + "\" type=\"checkbox\"" + attr(item) + checked + " />");
             a[push]("<label for=\"" + cid + "\">" + name + "</label>");
             break;
           case "radio":
             if (!item.value) throw "missing value for radio";
             var cid = _.uniqueId("mnrd-");
-            a[push]("<input id=\"" + cid + "\" type=\"radio\" value=\"" + item.value + "\"" + attr(item) + " />");
+            var checked = item.checked ? " checked=\"checked\"" : "";
+            a[push]("<input id=\"" + cid + "\" type=\"radio\" value=\"" + item.value + "\"" + attr(item) + checked + " />");
             a[push]("<label for=\"" + cid + "\">" + name + "</label>");
             break;
           default:

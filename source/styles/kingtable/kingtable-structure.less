@@ -1,0 +1,217 @@
+.king-table-region {
+
+  //overrides bootstrap arrogant default values for everything
+  * {
+    box-sizing: content-box;
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    &:after, &:before {
+      box-sizing: content-box;
+      -webkit-box-sizing: content-box;
+      -moz-box-sizing: content-box;
+    }
+  }
+  .btn {
+    font-size: 12px;
+  }
+  .camo-btn {
+    background: none;
+    border: none;
+    padding: 3px 10px;
+    font-style: italic;
+    cursor: pointer;
+    &:focus, &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input {
+    margin-bottom: 10px;
+    vertical-align: middle;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    -webkit-transition: border linear .2s,box-shadow linear .2s;
+    -moz-transition: border linear .2s,box-shadow linear .2s;
+    -o-transition: border linear .2s,box-shadow linear .2s;
+    transition: border linear .2s,box-shadow linear .2s;
+    display: inline-block;
+    padding: 2px 4px;
+    color: #555;
+    vertical-align: middle;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+
+}
+
+.king-table-head {
+  height: 19px;
+  white-space: nowrap;
+}
+
+.king-table-body {
+  padding: 0;
+  margin: 0;
+}
+
+.king-table-gallery {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  font-size: 12px;
+
+  > ul {
+    > li {
+      float: left;
+      padding: 10px 20px;
+      list-style: none;
+      margin: 0;
+      > span {
+        display: block;
+        padding: 3px 0;
+        border-bottom: 1px solid #E0E0E0;
+        cursor: default;
+      }
+      .item-number {
+        font-weight: bold;
+      }
+    }
+  }
+  .break {
+    clear: both;
+  }
+}
+
+.king-table-container {
+  position: relative;
+}
+
+.king-table-empty, .king-table-error {
+  height: 50px;
+  padding: 20px;
+  font-size: 12px;
+}
+.king-table-error {
+  .message {
+    .oi {
+      /*margin-left: 10px;*/
+    }
+  }
+}
+
+.king-table {
+  width: 100%;
+  cursor: default;
+  font-size: 12px;
+  border-collapse: collapse;
+
+  tr {
+    th, td {
+      font-size: 12px;
+      padding-left: 5px;
+      &.detail-link a {
+        padding: 4px;
+      }
+    }
+    th {
+      text-align: left;
+      font-family: Verdana,Tahoma,Helvetica,Geneva;
+    }
+    td {
+      padding: 5px 10px 5px 5px;
+    }
+  }
+
+    &.special-order {
+        .order-desc, .order-asc {
+            display: none;
+        }
+    }
+}
+
+.king-table .king-table-head tr th {
+  > div {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    > span:nth-child(1) {
+      -webkit-touch-callout: initial;
+      -webkit-user-select: initial;
+      -khtml-user-select: initial;
+      -moz-user-select: initial;
+      -ms-user-select: initial;
+      user-select: initial;
+    }
+  }
+}
+
+.king-table .king-table-head tr .order-desc {
+  background-repeat: no-repeat;
+  background-position: -60px 0px;
+  visibility: hidden;
+}
+
+.king-table .king-table-go-to-cell {
+    width: 30px;
+}
+
+.king-table .king-table-head tr .order-asc {
+  background-repeat: no-repeat;
+  background-position: 5px 0px;
+  visibility: hidden;
+}
+
+.king-table .king-table-head th.current-sort .order-asc,
+.king-table .king-table-head th.current-sort .order-desc {
+  visibility: visible;
+}
+
+.king-table.row-number-no-bgimg .row-number {
+  background-image: none !important;
+}
+
+.king-table-head th-container {
+  position: relative;
+  padding-left:4px;
+}
+
+.king-table-head th .smart-column-options {
+  background-repeat: no-repeat;
+  background-position: -194px -112px;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+
+.king-table-head th {
+  position:relative;
+}
+
+.king-table-head th .resize-handler {
+  cursor: col-resize;
+  position:absolute;
+  right:-1px;
+  top:-1px;
+  width:7px;
+  height:18px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.king-table-head th-container.tools-cell {
+  text-align: center;
+  padding-left: 0px;
+  cursor: pointer;
+}

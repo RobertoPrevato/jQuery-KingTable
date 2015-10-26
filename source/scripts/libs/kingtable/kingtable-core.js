@@ -322,7 +322,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
     },
     
     raiseError: function (message) {
-      throw new Error("jQuery-KingTable: " + message + ". Please refer to official documentation at https://github.com/RobertoPrevato/jQuery-KingTable");
+      throw new Error("KingTable: " + message + ". Please refer to official documentation at https://github.com/RobertoPrevato/jQuery-KingTable");
     },
 
     coreInit: function () {
@@ -338,7 +338,6 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       self.objAnalyzer = new Analyzer();
       self.filters = new FiltersManager();
       self.sanitizer = new Sanitizer();
-
       if (!self.fixed) {
         //if the table collection is not fixed;
         //then there is no need to perform search operations on the client side
@@ -575,7 +574,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
             //do nothing because there is a newer call to loadData
             return;
           }
-
+          self.onFetchDone();
           //check if returned data is an array or a catalog
           if (_.isArray(catalog)) {
             //
@@ -663,6 +662,11 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
      * Override this function to implement "onFetchError" logic.
      */
     onFetchError: function () {},
+
+    /**
+     * Override this function to implement "onFetchDone" logic.
+     */
+    onFetchDone: function () {},
 
     /**
      * Default function to post json data to the server, to fetch a collection.
@@ -932,7 +936,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
                 };
               }).value()
             }
-          }, self.getExportTools()
+          }, self.getViewTools(), self.getExportTools()
         ];
       if (additionaltools) {
         //the user defined some tools
@@ -1011,18 +1015,19 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       return 1;
     },
 
-    setRowCount: function (arr) {
+    setItemCount: function (arr) {
       var self = this,
           pag = self.pagination,
           offset = self.fixed ? 0 : ((pag.page - 1) * pag.resultsPerPage);
       if (!arr) arr = self.data;
+      if (!self.columnsInitialized) self.initializeColumns();
       for (var i = 0, l = arr.length; i < l; i++) {
         arr[i].rowCount = i + 1 + offset;
       }
       return arr;
     },
 
-    getRowsToDisplay: function (options) {
+    getItemsToDisplay: function (options) {
       options = options || {};
       var def = new $.Deferred(), self = this;
       var timestamp = self.lastFetchTimestamp = new Date().getTime();
@@ -1031,14 +1036,14 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         //make sure that the search filter is updated
         self.ensureSearchFilter();
         //apply filters here because we care about looking inside string representations of values
-        var a = self.filters.skim(a);
+        a = self.filters.skim(a);
         //update pagination, but only if the table is fixed;
         if (self.fixed) {
           self.updatePagination(a.length);
           self.sortClientSide(a);
         }
         //set row count inside the array:
-        self.setRowCount(a);
+        self.setItemCount(a);
         def.resolveWith(self, [self.data.length > self.pagination.resultsPerPage && self.options.paginationEnabled ? self.getSubSet(a) : a]);
       });
       return def.promise();
@@ -1257,26 +1262,26 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         }),
         columns = self.getColumnsForExport();
       if (!exportFormat || !exportFormat.type) throw "missing format information";
-      self.getRowsToDisplay().done(function (rowsToDisplay) {
-        rowsToDisplay = _.map(rowsToDisplay, function (o) {
+      self.getItemsToDisplay().done(function (itemsToDisplay) {
+        itemsToDisplay = _.map(itemsToDisplay, function (o) {
           return _.pick(o, _.map(columns, function (c) { return c.name; }));
         });
         var contents = "";
         if (exportFormat.handler) {
           //user defined handler
-          contents = exportFormat.handler.call(self, rowsToDisplay);
+          contents = exportFormat.handler.call(self, itemsToDisplay);
         } else {
           //use default export handlers
           switch (format) {
             case "csv":
-              var data = self.optimizeCollection(rowsToDisplay);
+              var data = self.optimizeCollection(itemsToDisplay);
               contents = Csv.serialize(data, options.csvOptions);
               break;
             case "json":
-              contents = JSON.stringify(rowsToDisplay, 2, 2);
+              contents = JSON.stringify(itemsToDisplay, 2, 2);
               break;
             case "xml":
-              contents = self.dataToXml(rowsToDisplay);
+              contents = self.dataToXml(itemsToDisplay);
               break;
             default:
               throw "export format " + format + "not implemented";

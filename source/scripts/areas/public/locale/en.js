@@ -2,8 +2,12 @@ _.extend(I.regional, {
   
   "en": {
     "voc": {
+      "View": "View",
+      "Table": "Table",
+      "Gallery": "Gallery",
       "Export": "Export",
       "Columns": "Columns",
+      "Properties": "Properties",
       "OrderBy": "Order by",
       "GroupBy": "Group by",
       "Page": "Page",

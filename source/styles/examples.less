@@ -26,6 +26,16 @@ body {
 //NB: the following code is intentionally not included in the library css;
 //the custom filters view is meant to be custom;
 #colors-table {
+
+  .king-table-gallery > ul > li {
+    width: 100px;
+    > span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
   .filters-region {
     min-width: 750px;
     .left-column {
@@ -139,22 +149,24 @@ h1 {
 }
 
 /* overrides default king-table style */
-.king-table tr td {
-  padding: 5px 10px 2px 5px;
-  &:nth-child(1) {
-    width: 30px;
-  }
-  &:nth-child(2) {
-    width: 200px;
-  }
-  &:nth-child(3),
-  &:nth-child(4),
-  &:nth-child(5),
-  &:nth-child(6),
-  &:nth-child(7),
-  &:nth-child(8),
-  &:nth-child(9),
-  &:nth-child(10){
-    width: 160px;
+.king-table tr {
+  th, td {
+    padding: 5px 10px 2px 5px;
+    &:nth-child(1) {
+      width: 30px;
+    }
+    &:nth-child(2) {
+      width: 200px;
+    }
+    &:nth-child(3),
+    &:nth-child(4),
+    &:nth-child(5),
+    &:nth-child(6),
+    &:nth-child(7),
+    &:nth-child(8),
+    &:nth-child(9),
+    &:nth-child(10) {
+      width: 160px;
+    }
   }
 }

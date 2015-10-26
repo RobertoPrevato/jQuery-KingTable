@@ -39,7 +39,8 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     "change .filters-region select": "viewToModel",
     "keydown span[tabindex]": "checkEnter",
     "change .visibility-check": "onColumnVisibilityChange",
-    "click .export-btn": "onExportClick"
+    "click .export-btn": "onExportClick",
+    "change [name='view-type']": "onViewChange"
   };
 
   //extend the table default options
@@ -85,12 +86,26 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     /**
      * Allows to define how the filters view should appear: slide | fade | none (immediate)
      */
-    filtersViewAppearance: "slide"
+    filtersViewAppearance: "slide",
+
+    /**
+     * View types.
+     */
+    views: [
+      {
+        name: I.t("voc.Table"),
+        value: "table"
+      },
+      {
+        name: I.t("voc.Gallery"),
+        value: "gallery"
+      }
+    ]
   });
 
   // modifies the default schemas
   _.extend(KingTable.Schemas.DefaultByType, {
-    boolean: function (columnSchema, objSchema) {
+    boolean: function (columnSchema) {
       var editable = this.editableCheckboxes;
       return {
         sortable: true,
@@ -107,8 +122,16 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
   _.extend(KingTable.prototype, Menu.functions, {
 
     connectorInit: function () {
+      //load the view
+      var self = this,
+        options = self.options,
+        addViews = options.addViews,
+        view = self.getMemory("view");
+      if (view) self.view = view;
+      if (addViews)
+        options.views = options.views.concat(addViews);
       //register a missing data event handler
-      return this.on("missing-data", function () {
+      return self.on("missing-data", function () {
         //data is missing; and the table doesn't have columns info
         //this may happen when the user refreshes the page when nothing is displayed
         this.buildSkeleton().buildPagination().showEmptyView().focusSearchField();
@@ -172,7 +195,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       var self = this, initialized = "skeletonInitialized";
       if (self[initialized]) return self;
       self[initialized] = true;
-      var template = self.getTemplate();
+      var template = self.getTemplate("king-table-base");
       var html = $(template);
 
       if (!self.$el || !self.$el.length)
@@ -181,6 +204,9 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       var id = self.options.id;
       if (id)
         html.attr("id", id);
+
+      var view = self.view, innertemplate = self.getTemplate("king-table-" + view);
+      html.find(".king-table-container").html(innertemplate);
 
       self.$el.html(html);
       self.bindUiElements();
@@ -199,11 +225,25 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       return self;
     },
 
-    getTemplate: function () {
-      return $.KingTable.Templates["king-table-base"];
-    },
-    
     buildHead: function () {
+      var self = this,
+        view = self.view,
+        fn = "build" + view.replace(/^(.)/, function (a) {
+          return a.toUpperCase();
+        }) + "Head";
+      if (self[fn])
+        self[fn]();
+      return self;
+    },
+
+    getViewSchema: function () {
+      var view = this.view;
+      return _.find(this.options.views, function (o) {
+        return o.value === view;
+      });
+    },
+
+    buildTableHead: function () {
       var self = this,
         options = self.options,
         rowTagName = options.rowTagName || "tr",
@@ -231,6 +271,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         _.delay(function () {
           self.$el.find(".king-table-head th").each(function () {
             var $t = $(this), w = "width";
+            if ($t.hasClass("row-number")) return;
             $t[w]($t[w]());
           });
         }, 20);
@@ -277,7 +318,6 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
           }
         });
       }
-      
       return self;
     },
 
@@ -313,7 +353,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       self.rebuild(paginationBar, "pagination-bar-filters", context);
       //check if the user defined advanced filters view
       if (filtersView) {
-        var template = self.getCustomFiltersView(filtersView);
+        var template = self.getTemplate(filtersView);
         //compile the template
         var customFilters = self.customFilters;
         var compiled = self.templateSafe(template, customFilters);
@@ -329,43 +369,50 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       return self;
     },
 
-    getCustomFiltersView: function (option) {
+    getTemplate: function (option) {
       var element = document.getElementById(option);
       if (element != null) {
         return element.innerText;
       }
       if ($.KingTable.Templates.hasOwnProperty(option))
         return $.KingTable.Templates[option];
-      //try to return the option itself
-      if (_.isString(option))
-        return option;
-      throw new Error("KingTable: cannot obtain the custom filters view.");
+      this.raiseError("cannot obtain the template: " + option);
     },
 
     buildBody: function (options) {
       var self = this;
 
-      self.getRowsToDisplay(options).done(function (rowsToDisplay) {
-        if (!rowsToDisplay.length)
+      self.getItemsToDisplay(options).done(function (items) {
+        if (!items.length)
           return self.showEmptyView();
+        self.removeEmptyView();
 
-        var html = [], rowTemplate = self.getRowTemplate();
-        _.each(rowsToDisplay, function (row) {
-          html.push(self.templateSafe(rowTemplate, row));
+        var html = [], rowTemplate = self.getItemTemplate();
+        _.each(items, function (item) {
+          html.push(self.templateSafe(rowTemplate, item));
         });
-        //inject all html at once
+        //inject all html at once inside the table body.
         self.$el.find(".king-table-body").html(html.join(""));
       });
       return self;
     },
 
+    removeEmptyView: function () {
+      var self = this;
+      var $empty = "$empty";
+      if (self[$empty]) {
+        self[$empty].remove();
+        delete self[$empty];
+      }
+      return self;
+    },
+
     showEmptyView: function () {
-      var self = this,
-          cols = self.columns,
-          html = self.templateSafe($.KingTable.Templates["king-table-empty-view"], {
-        colspan: cols ? cols.length + 1 : 1
-      });
-      this.$el.find(".king-table-body").html(html);
+      var self = this, $empty = "$empty";
+      if (self[$empty]) return self;
+      var html = self[$empty] = $(self.templateSafe($.KingTable.Templates["king-table-empty-view"], {}));
+      self.$el.find(".king-table-body").empty();
+      self.$el.find(".king-table-container").append(html);
       return this;
     },
 
@@ -419,12 +466,34 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       var detailRoute = options.detailRoute;
       return self.string.format("<{0} class=\"{1}\"><a href=\"{2}{{" + idProperty + "}}\"><span class=\"oi\" data-glyph=\"document\" title=\"{{I.t('voc.GoToDetailsLink')}}\" aria-hidden=\"true\"></span></a></{0}>", cellTagName, "detail-link", detailRoute);
     },
-    
-    /** 
-     * Returns a built template of a row, with cells in the proper order
-     * Assumes that Columns are already ordered by Position
+
+    /**
+     * Gets a template to display an item; depending on the current view.
+     * @returns string
      */
-    getRowTemplate: function () {
+    getItemTemplate: function () {
+      var self = this, view = self.view;
+      switch (view) {
+        case "table":
+          return self.getTableRowTemplate();
+        case "gallery":
+          return self.getGalleryItemTemplate();
+        default:
+          var viewSchema = _.find(self.options.views, function (o) {
+            return o.value == view;
+          });
+          if (!viewSchema) self.raiseError("The view \"" + view + "\" is not defined.");
+          var getTemplate = viewSchema.getItemTemplate;
+          if (!getTemplate) self.raiseError("The view \"" + view + "\" has no getTemplate function.");
+          return getTemplate.call(self);
+      }
+    },
+
+    /** 
+     * Returns a built template of a table row, with cells in the proper order
+     * Assumes that Columns are already ordered by Position.
+     */
+    getTableRowTemplate: function () {
       var sb = [],
         self = this,
         options = self.options,
@@ -434,9 +503,9 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       if (!self.columnsInitialized)
         self.initializeColumns();
 
-      sb.push(self.string.format("<{0}>", wrapperTagName));
+      sb.push("<" + wrapperTagName + ">");
       if (options.rowCount) {
-        sb.push(self.string.format("<{0} class=\"{1}\">{{rowCount}}</{0}>", cellTagName, "row-number"));
+        sb.push(self.string.format("<{0} class=\"row-number\">{{rowCount}}</{0}>", cellTagName));
       }
       
       if (options.detailRoute) {
@@ -456,7 +525,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         }
 
         var propertyToUse = _.contains(self.columns.formatted, column.name) ? (column.name + self.options.formattedSuffix) : column.name;
-        sb.push(this.string.format('<{0}>', cellTagName));
+        sb.push("<" + cellTagName + ">");
 
         //automatic highlight of searched properties: if the column template contains the $highlight function;
         //the programmer is specifying the template, so don't interfere!
@@ -467,11 +536,60 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
           //use the column template
           sb.push(column.template);
         }
-        sb.push(this.string.format("</{0}>", cellTagName));
+        sb.push("</" + cellTagName + ">");
       }
 
-      sb.push(this.string.format("</{0}>", wrapperTagName));
-      //sb.push("{%});%}");
+      sb.push("</" + wrapperTagName + ">");
+
+      var template = sb.join("");
+      return template;
+    },
+
+    /**
+     * Returns a built template of a table item.
+     * Assumes that Columns are already ordered by Position.
+     */
+    getGalleryItemTemplate: function () {
+      var sb = [],
+        self = this,
+        options = self.options,
+        wrapperTagName = "li",
+        cellTagName = "span";
+      if (!self.columnsInitialized)
+        self.initializeColumns();
+
+      sb.push(self.string.format("<{0}>", wrapperTagName));
+      if (options.rowCount) {
+        sb.push(self.string.format("<{0} class=\"item-number\">{{rowCount}}</{0}>", cellTagName));
+      }
+
+      var searchRule = self.filters.getRuleByKey("search");
+      for (var i = 0, l = self.columns.length; i < l; i++) {
+        //skip hidden columns
+        var column = self.columns[i];
+        if (column.hidden || !column.template) continue;
+
+        //super smart table
+        if (column.allowSearch) {
+          var looksOkForSearch = self.doesTemplateLookSearchable(column);
+          if (!looksOkForSearch) column.allowSearch = false;
+        }
+
+        var propertyToUse = _.contains(self.columns.formatted, column.name) ? (column.name + self.options.formattedSuffix) : column.name;
+
+        sb.push("<" + cellTagName + " title=\""  + self.sanitizer.escape(column.displayName) + "\">");
+        //automatic highlight of searched properties: if the column template contains the $highlight function;
+        //the programmer is specifying the template, so don't interfere!
+        if (searchRule && options.autoHighlightSearchProperties && column.allowSearch && !/\$highlight/.test(column.template)) {
+          //automatically highlight the searched property, if it contains any match
+          sb.push('{%print($highlight(' + propertyToUse + '))%}');
+        } else {
+          //use the column template
+          sb.push(column.template);
+        }
+        sb.push("</" + cellTagName + ">");
+      }
+      sb.push("</" + wrapperTagName + ">");
       var template = sb.join("");
       return template;
     },
@@ -590,14 +708,23 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       this.hidePreloader();
     },
 
+    onFetchDone: function () {
+      //fetch success
+      var self = this, $error = "$error";
+      if (self[$error]) {
+        self[$error].remove();
+        delete self[$error];
+      }
+    },
+
     onFetchError: function () {
-      var self = this,
-          html = self.templateSafe($.KingTable.Templates["king-table-error-view"], {
-        message: I.t("voc.ErrorLoadingContents"),
-        colspan: self.columns ? self.columns.length + 1 : 1
-      });
-      self.$el.find(".king-table-body").html(html);
-      return self;
+      var self = this, $error = "$error";
+      if (self[$error]) return self;
+      var html = self[$error] = $(self.templateSafe($.KingTable.Templates["king-table-error-view"], {
+        message: I.t("voc.ErrorLoadingContents")
+      }));
+      self.$el.find(".king-table-body").empty();
+      self.$el.find(".king-table-container").append(html);
     },
 
     toggleColumnResize: function (e) {
@@ -971,7 +1098,54 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         format = el.data("format");
       if (!format) throw "missing [data-format]";
       this.exportTo(format);
-    }
+    },
 
+    /**
+     * Returns the tools for the supported views.
+     * @returns {*}
+     */
+    getViewTools: function () {
+      var self = this,
+        views = self.options.views,
+        currentView = self.view;
+      if (!views || views.length < 2) return null;
+      //normalize
+      _.each(views, function (o) {
+        if (!o.value) self.raiseError("view missing [value]");
+        _.extend(o, {
+          attr: {
+            name: "view-type"
+          },
+          checked: o.value == currentView,
+          type: "radio"
+        });
+      });
+      return {
+        name: I.t("voc.View"),
+        menu: {
+          items: views
+        }
+      }
+    },
+
+    onViewChange: function (e) {
+      this.setView(e.currentTarget.value);
+    },
+
+    setView: function (view) {
+      var self = this;
+      self.view = view;
+      //change the body container
+      var template = self.getTemplate("king-table-" + view);
+      //remember the choice
+      self.setMemory("view", view);
+      //replace the body element
+      self.$el.find(".king-table-container").html(template);
+      //if (!self.$el.find(".king-table-body").length)
+      //  self.raiseError("The custom view " + view + " doesn't include an element with class 'king-table-body'");
+      return self.trigger("view:change", view)
+        .buildHead()
+        .buildBody();
+    }
   });
 });
