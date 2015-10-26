@@ -100,7 +100,12 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         name: I.t("voc.Gallery"),
         value: "gallery"
       }
-    ]
+    ],
+
+    /**
+     * Allows to disable any view other than table.
+     */
+    tableOnly: false
   });
 
   // modifies the default schemas
@@ -126,7 +131,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       var self = this,
         options = self.options,
         extraViews = options.extraViews,
-        view = self.getMemory("view");
+        view = options.tableOnly ? "table" : self.getMemory("view");
       self.view = view || "table";
       if (extraViews)
         options.views = options.views.concat(extraViews);
@@ -1108,7 +1113,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       var self = this,
         views = self.options.views,
         currentView = self.view;
-      if (!views || views.length < 2) return null;
+      if (!views || views.length < 2 || self.options.tableOnly) return null;
       //normalize
       _.each(views, function (o) {
         if (!o.value) self.raiseError("view missing [value]");
