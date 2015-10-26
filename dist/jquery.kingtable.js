@@ -1124,10 +1124,10 @@ R("file", [], function () {
      * @param lines
      */
     exportfile: function (filename, text, type) {
-      var setAttribute = "setAttribute", msSaveBlob = navigator.msSaveBlob;
+      var setAttribute = "setAttribute", msSaveBlob = "msSaveBlob";
       var blob = new Blob([text], { type: type });
-      if (msSaveBlob) { // IE 10+
-        msSaveBlob(blob, filename);
+      if (navigator[msSaveBlob]) { // IE 10+
+        navigator[msSaveBlob](blob, filename);
       } else {
         var link = document.createElement("a");
         if (link.download !== undefined) { // feature detection
