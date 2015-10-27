@@ -1146,11 +1146,11 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       self.setMemory("view", view);
       //replace the body element
       self.$el.find(".king-table-container").html(template);
-      //if (!self.$el.find(".king-table-body").length)
-      //  self.raiseError("The custom view " + view + " doesn't include an element with class 'king-table-body'");
+      if (!self.$el.find(".king-table-body").length)
+        self.raiseError("The custom view " + view + " doesn't include an element with class 'king-table-body'");
       return self.trigger("view:change", view)
         .buildHead()
-        .buildBody();
+        .buildBody({ nofetch: true });
     }
   });
 });
