@@ -251,6 +251,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     buildTableHead: function () {
       var self = this,
         options = self.options,
+        pag = self.pagination,
         rowTagName = options.rowTagName || "tr",
         headCellTagName = options.headCellTagName || "th",
         emptyCell = "<" + headCellTagName + " class=\"row-number\"></" + headCellTagName + ">",
@@ -262,10 +263,9 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       if (options.detailRoute)
         html.push(emptyCell);//for the go to details link
       _.each(columns, function (col) {
-        if (col.hidden) return;
-        //first time
+        if (col.hidden || col.secret) return;
         html.push(self.template("king-table-head-cell", _.extend(col, {
-          sort: options.orderBy == col.name ? options.sortOrder : ""
+          sort: pag.orderBy == col.name ? pag.sortOrder : ""
         })));
       });
       html.push("</" + rowTagName + ">");

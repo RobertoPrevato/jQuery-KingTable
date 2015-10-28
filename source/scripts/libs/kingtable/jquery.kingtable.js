@@ -25,7 +25,7 @@ R("jquery-kingtable", ["kingtable-core"], function (KingTable) {
       var table = new KingTable(_.extend({
         $el: $(this)
       }, data));
-      this.data("king-table", table);
+      this.data("kingtable", table);
       table.render();
       return this;
     },
