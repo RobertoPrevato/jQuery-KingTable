@@ -87,34 +87,6 @@ R("object-analyzer", ["reflection"], function (Reflection) {
       }
       return a;
     },
-    
-    listProperties: function (o, prefix) {
-      var a = [];
-      if (!prefix) prefix = '';
-      var parent = prefix ? Reflection.getPropertyValue(o, prefix) : o;
-      for (var x in o) {
-        var type = this.getType(o[x]);
-        a.push({
-          name: prefix + x,
-          type: this.getType(parent[x])
-        });
-        if (typeof o[x] == 'object') {
-          if (o[x] instanceof Array) {
-            //assumes that the array is composed of objects with the same structure
-            //todo: support derived classes
-            if (o[x].length) {
-              var f = o[x][0];
-              var b = this.listProperties(o[x][0], prefix + x + '.');
-              a = a.concat(b);
-            }
-          } else {
-            var b = this.listProperties(o[x], prefix + x + '.');
-            a = a.concat(b);
-          }
-        }
-      }
-      return a;
-    },
 
     listProperties: function (o, prefix) {
       var a = [];
@@ -148,7 +120,6 @@ R("object-analyzer", ["reflection"], function (Reflection) {
       var a = [];
       if (!prefix) prefix = '';
       for (var x in o) {
-        //TODO: remove following line, or make the properties configurable
         if (_.contains(['id', 'guid', 'rowcount', 'rownumber', 'rownum', 'thmguid'], x.toLowerCase())) continue;
         var type = this.getType(o[x]);
         if (_.contains(['string', 'number'], type)) {
@@ -159,7 +130,6 @@ R("object-analyzer", ["reflection"], function (Reflection) {
             //assumes that the array is composed of objects with the same structure
             //todo: support derived classes
             if (o[x].length) {
-              var f = o[x][0];
               var b = this.guessSearchableProperties(o[x][0], prefix + x + '.');
               a = a.concat(b);
             }

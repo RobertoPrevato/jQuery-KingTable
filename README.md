@@ -5,7 +5,6 @@ and reorder columns and support for custom tools. Client side export feature int
 
 ## Objectives of the plugin
 * Allow the implementation of administrative tables with the [smallest amount of code possible](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Minimum-effort).
-* Even without configuration, the table must be able to build itself on the basis of its input data.
 * Allow for easy customization of generated HTML, to adapt to different needs: e.g. displaying pictures thumbnails, anchor tags, etc.
 * Support both collections that require server side pagination, and collections that don't require server side pagination, but may still benefit from client side pagination.
 
@@ -32,9 +31,10 @@ In order to use it with zepto, the callbacks, deferred and selector plugins are 
 ```
 
 ## Modes
-The jQuery-KingTable implements two working modes:
+The KingTable widget implements two working modes:
 * fixed (collections that do not require server side pagination)
 * normal (collections that require server side pagination)
+
 And supports both optimized and simple collections. Refer to the [dedicated wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Working-modes) for more information.
 
 ### Fixed mode
@@ -98,25 +98,6 @@ $("#table-container").kingtable({
     color: {
       template: "<div class='color-row'>...</div>"
     }
-  }
-});
-```
-### How to implement links to detail views
-The KingTable offers options to generate automatically links to detailed views: *detailRoute* and *getIdProperty*.
-The detail route is used to render an anchor tag pointing to a generated url, including the id. the getIdProperty is a function used to obtain the name of the property
-that should be used to get the ids of collection items. By default, "id", "_id", "guid" or "_guid" properties are used (case insensitive).
-```js
-//example of go to details options:
-$("#table-container").kingtable({
-  url: "/api/products",
-  detailRoute: "/api/product/" //generates links to details view, to: /api/product/{{id}}
-});
-
-$("#table-container").kingtable({
-  url: "/api/products",
-  detailRoute: "/api/product/", //generates links to details view, to: /api/product/{{foo}}
-  getIdProperty: function () {
-    return "foo";//returns the name of the property that must be read, to obtain the items id
   }
 });
 ```
