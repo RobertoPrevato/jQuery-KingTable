@@ -131,10 +131,13 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       var self = this,
         options = self.options,
         extraViews = options.extraViews,
-        view = options.tableOnly ? "table" : self.getMemory("view");
-      self.view = view || "table";
+        defaultView = "table",
+        view = options.tableOnly ? defaultView : self.getMemory("view");
+      self.view = view || defaultView;
       if (extraViews)
         options.views = options.views.concat(extraViews);
+
+      if (!self.getViewSchema()) self.view = defaultView;
       //register a missing data event handler
       return self.on("missing-data", function () {
         //data is missing; and the table doesn't have columns info
@@ -210,7 +213,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       if (id)
         html.attr("id", id);
 
-      var view = self.view, innertemplate = self.getTemplate("king-table-" + view);
+      var view = self.view, innertemplate = self.getTemplate("king-table-" + view, true);
       html.find(".king-table-container").html(innertemplate);
 
       self.$el.html(html);
@@ -374,23 +377,29 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       return self;
     },
 
-    getTemplate: function (option) {
+    getTemplate: function (option, def) {
       var element = document.getElementById(option);
       if (element != null) {
         return element.innerText;
       }
       if ($.KingTable.Templates.hasOwnProperty(option))
         return $.KingTable.Templates[option];
+      if (def) return "<div class=\"king-table-body\"></div>";
       this.raiseError("cannot obtain the template: " + option);
     },
 
     buildBody: function (options) {
-      var self = this;
+      var self = this,
+        view = self.getViewSchema();
 
       self.getItemsToDisplay(options).done(function (items) {
         if (!items.length)
           return self.showEmptyView();
         self.removeEmptyView();
+
+        //if the view has a resolver function; call it directly
+        if (view.resolver)
+          return view.resolver.call(self, items);
 
         var html = [], rowTemplate = self.getItemTemplate();
         _.each(items, function (item) {
@@ -489,7 +498,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
           });
           if (!viewSchema) self.raiseError("The view \"" + view + "\" is not defined.");
           var getTemplate = viewSchema.getItemTemplate;
-          if (!getTemplate) self.raiseError("The view \"" + view + "\" has no getTemplate function.");
+          if (!getTemplate) self.raiseError("The view \"" + view + "\" has no getItemTemplate function.");
           return getTemplate.call(self);
       }
     },
@@ -1141,7 +1150,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       var self = this;
       self.view = view;
       //change the body container
-      var template = self.getTemplate("king-table-" + view);
+      var template = self.getTemplate("king-table-" + view, true);
       //remember the choice
       self.setMemory("view", view);
       //replace the body element
@@ -1152,5 +1161,6 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         .buildHead()
         .buildBody({ nofetch: true });
     }
+
   });
 });
