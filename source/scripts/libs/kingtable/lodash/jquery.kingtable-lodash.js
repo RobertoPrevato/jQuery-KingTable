@@ -26,7 +26,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     "click .btn-advanced-filters": "toggleAdvancedFilters",
     "click .btn-clear-filters": "clearFilters",
     "click .ui-expander": "expandMenu",
-    "click .ui-submenu": "expandSubMenu",
+    "click .ug-submenu": "expandSubMenu",
     "click .king-table-head th": "sort",
     "click .resize-handler": "toggleColumnResize",
     "keyup .search-field": "onSearchKeyUp",
@@ -437,7 +437,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     },
 
     anyMenuIsOpen: function () {
-      return !!$(".ui-menu:visible").length;
+      return !!$(".ug-menu:visible").length;
     },
 
     anyInputFocused: function () {

@@ -28,7 +28,7 @@ R("menu-builder", [], function () {
     var a = [], caret = "<span class=\"oi\" data-glyph=\"caret-right\"></span>";
     _.each(menus, function (menu) {
       var id = menu.id;
-      a[push]("<ul" + (id ? " id=\"" + id + "\"": "")+ " class=\"ui-menu\">");
+      a[push]("<ul" + (id ? " id=\"" + id + "\"": "")+ " class=\"ug-menu\">");
 
       _.each(menu.items, function (item) {
         if (item === null) return;
@@ -36,7 +36,7 @@ R("menu-builder", [], function () {
           type = item.type,
           href = item.href,
           name = item.name;
-        a[push]("<li" + (hasSubmenu ? " class=\"ui-submenu\">" : ">"));
+        a[push]("<li" + (hasSubmenu ? " class=\"ug-submenu\">" : ">"));
         //a[push]("<div>"); // mod
         switch (type) {
           case "checkbox":
