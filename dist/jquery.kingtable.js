@@ -1350,22 +1350,22 @@ R("menu-functions", [], function () {
 
   var toggle = ".ug-menu,.ug-submenu";
   function protected(e) {
-    return /input|select|textarea|label/i.test(e.target.tagName);
+    return /input|select|textarea|label|^a$/i.test(e.target.tagName);
   }
   var menufunctions = {
 
     closeMenus: function (e) {
       if (e && protected(e)) return true;
       var self = this;
-      if (e && e.which === 3) return
+      if (e && e.which === 3) return;
       $(toggle).each(function () {
-        var el = $(this)
+        if ($.contains(this, e.target)) return;
+        var el = $(this);
         var parent = self.getParent(el);
-  
         if (!parent.hasClass("open")) return;
-  
+
         if (e && e.type == "click" && /input|textarea/i.test(e.target.tagName) && $.contains(parent[0], e.target)) return;
-  
+
         if (e && e.isDefaultPrevented()) return;
         el.attr("aria-expanded", "false");
         parent.removeClass("open");
@@ -1385,16 +1385,15 @@ R("menu-functions", [], function () {
     expandMenu: function (e) {
       if (protected(e)) return true;
       var self = this,
-          el = $(e.currentTarget);
+        el = $(e.currentTarget);
       if (el.is(".disabled, :disabled")) return;
-      var parent  = self.getParent(el);
-      var isActive = parent.hasClass("open");
-
+      var target  = /li/i.test(e.currentTarget.tagName) ? el : self.getParent(el);
+      var isActive = target.hasClass("open");
       self.closeMenus(e);
       if (!isActive) {
         if (e.isDefaultPrevented()) return;
         el.trigger("focus").attr("aria-expanded", "true");
-        parent.toggleClass("open");
+        target.toggleClass("open");
       }
       return false;
     },
@@ -1439,10 +1438,10 @@ R("menu-functions", [], function () {
       if (keycode == 27)
         return menufunctions.closeMenus(), true;
       var el = focused.length && focused.closest(".ug-menu").length
-              ? focused
-              : firstitem($($(".ug-menu:visible")[0]).find("li:first")),
-          parent = el.parent();
-      if (focused.hasClass("ui-expander")) {
+          ? focused
+          : firstitem($($(".ug-menu:visible")[0]).find("li:first")),
+        parent = el.parent();
+      if (focused.hasClass("ug-expander")) {
         firstitem(parent).trigger(focus);
         return true;
       }
@@ -1463,7 +1462,8 @@ R("menu-functions", [], function () {
         if (nextIsMenu && !parent.hasClass("ug-submenu")) {
           firstitem(next.children(":first")).trigger(focus);
         } else {
-          firstitem(parent.next()).trigger(focus);
+          var isExpander = focused.hasClass("ug-expander");
+          firstitem(isExpander ? parent : parent.next()).trigger(focus);
         }
       }
       if (keycode == 37) {
@@ -1494,11 +1494,16 @@ R("menu-functions", [], function () {
     }
   }
 
-  var bind = "bind";
+  var bind = "bind",
+    click = "click.menus",
+    keydown = "keydown.menus";
   $(document)
-    .on("click.menus", menufunctions.closeMenus[bind](menufunctions))
-    .on("click.menus", toggle, menufunctions.expandMenu[bind](menufunctions))
-    .on("keydown.menus", globalKeydown);
+    .off(click)
+    .off(keydown)
+    .on(click, menufunctions.closeMenus[bind](menufunctions))
+    .on(click, ".ug-expander", menufunctions.expandMenu[bind](menufunctions))
+    .on(click, toggle, menufunctions.expandMenu[bind](menufunctions))
+    .on(keydown, globalKeydown);
 
   return menufunctions;
 });
@@ -3088,8 +3093,6 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     "change .pagination-bar-results-select": "changeResultsNumber",
     "click .btn-advanced-filters": "toggleAdvancedFilters",
     "click .btn-clear-filters": "clearFilters",
-    "click .ui-expander": "expandMenu",
-    "click .ug-submenu": "expandSubMenu",
     "click .king-table-head th": "sort",
     "click .resize-handler": "toggleColumnResize",
     "keyup .search-field": "onSearchKeyUp",
@@ -3359,6 +3362,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
 
     buildTools: function () {
       var self = this;
+      window.a = self.tools;
       var html = Menu.builder(self.tools);
       self.$el.find(".tools-region").append(html);
       return self.onToolsBuilt();
@@ -4246,7 +4250,7 @@ if (!$.KingTable.Templates) $.KingTable.Templates = {};
     'king-table-error-view': '<div class="king-table-error"> <span class="message"> <span>{{message}}</span> <span class="oi" data-glyph="warning" aria-hidden="true"></span> </span> </div>',
     'pagination-bar-buttons': '{% if (page > firstPage) { %} <span tabindex="0" class="pagination-button pagination-bar-first-page" title="{{$i(\'voc.FirstPage\')}}"></span> <span tabindex="0" class="pagination-button pagination-bar-prev-page" title="{{$i(\'voc.PrevPage\')}}"></span> {% } else { %} <span class="pagination-button-disabled pagination-bar-first-page-disabled"></span> <span class="pagination-button-disabled pagination-bar-prev-page-disabled"></span> {% } %} <span class="separator"></span> <span class="valigned">{{$i(\'voc.Page\')}} </span> {% if (totalPageCount > 1) { %} <input name="page-number" text="text" class="w30 must-integer pagination-bar-page-number" value="{{page}}" /> {% } else { %} <span class="valigned pagination-bar-page-number-disabled">{{page}}</span> {% } %} <span class="valigned total-page-count"> {{$i(\'voc.of\')}} {{totalPageCount}}</span> <span class="separator"></span> <span tabindex="0" class="pagination-button pagination-bar-refresh" title="{{$i(\'voc.Refresh\')}}"></span> <span class="separator"></span> {% if (page < totalPageCount) { %} <span tabindex="0" class="pagination-button pagination-bar-next-page" title="{{$i(\'voc.NextPage\')}}"></span> <span tabindex="0" class="pagination-button pagination-bar-last-page" title="{{$i(\'voc.LastPage\')}}"></span> {% } else { %} <span class="pagination-button-disabled pagination-bar-next-page-disabled"></span> <span class="pagination-button-disabled pagination-bar-last-page-disabled"></span> {% } %} <span class="separator"></span> <span class="valigned">{{$i(\'voc.ResultsPerPage\')}}</span> {% if (totalRowsCount) { %} <select name="pageresults" class="pagination-bar-results-select valigned"{% if (totalRowsCount <= 10) { %} disabled="disabled"{% } %}> {% _.each(resultsPerPageSelect, function (val) { %} <option value="{{val}}"{% if (val == resultsPerPage) { %} selected="selected"{%}%}>{{val}}</option> {% }) %} </select> {% } else { %} <select name="pageresults" class="pagination-bar-results-select valigned" disabled="disabled" readonly="readonly"></select> {% } %} <span class="separator"></span> <span class="valigned m0"> {% if (totalRowsCount) { %} {{$i(\'voc.Results\')}} {{firstObjectNumber}} - {{Math.min(lastObjectNumber, totalRowsCount)}} {{$i(\'voc.of\')}} {{totalRowsCount}} {% } else { %} 0 Results {% } %} </span> <span class="separator"></span>',
     'pagination-bar-filters': '{% if (allowSearch) { %} <input type="text" class="search-field" value="{{search}}" /> {% } %} {% if (advancedFiltersButton) { %} <button class="btn camo-btn btn-advanced-filters">{{$i("voc.AdvancedFilters")}}</button> {% } %} {% if (filtersWizard) { %} <button class="btn btn-filters-wizard">{{$i("voc.Filters")}}</button> {% } %}',
-    'pagination-bar-layout': '<div class="tools-region"> <span tabindex="0" class="oi ui-expander" data-glyph="cog"></span> </div> <span class="pagination-bar-buttons"></span> <span class="pagination-bar-filters"></span>'
+    'pagination-bar-layout': '<div class="tools-region"> <span tabindex="0" class="oi ug-expander" data-glyph="cog"></span> </div> <span class="pagination-bar-buttons"></span> <span class="pagination-bar-filters"></span>'
   };
   var x;
   for (x in o) {

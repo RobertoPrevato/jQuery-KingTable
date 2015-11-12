@@ -5,22 +5,22 @@ R("menu-functions", [], function () {
 
   var toggle = ".ug-menu,.ug-submenu";
   function protected(e) {
-    return /input|select|textarea|label/i.test(e.target.tagName);
+    return /input|select|textarea|label|^a$/i.test(e.target.tagName);
   }
   var menufunctions = {
 
     closeMenus: function (e) {
       if (e && protected(e)) return true;
       var self = this;
-      if (e && e.which === 3) return
+      if (e && e.which === 3) return;
       $(toggle).each(function () {
-        var el = $(this)
+        if ($.contains(this, e.target)) return;
+        var el = $(this);
         var parent = self.getParent(el);
-  
         if (!parent.hasClass("open")) return;
-  
+
         if (e && e.type == "click" && /input|textarea/i.test(e.target.tagName) && $.contains(parent[0], e.target)) return;
-  
+
         if (e && e.isDefaultPrevented()) return;
         el.attr("aria-expanded", "false");
         parent.removeClass("open");
@@ -40,16 +40,15 @@ R("menu-functions", [], function () {
     expandMenu: function (e) {
       if (protected(e)) return true;
       var self = this,
-          el = $(e.currentTarget);
+        el = $(e.currentTarget);
       if (el.is(".disabled, :disabled")) return;
-      var parent  = self.getParent(el);
-      var isActive = parent.hasClass("open");
-
+      var target  = /li/i.test(e.currentTarget.tagName) ? el : self.getParent(el);
+      var isActive = target.hasClass("open");
       self.closeMenus(e);
       if (!isActive) {
         if (e.isDefaultPrevented()) return;
         el.trigger("focus").attr("aria-expanded", "true");
-        parent.toggleClass("open");
+        target.toggleClass("open");
       }
       return false;
     },
@@ -94,10 +93,10 @@ R("menu-functions", [], function () {
       if (keycode == 27)
         return menufunctions.closeMenus(), true;
       var el = focused.length && focused.closest(".ug-menu").length
-              ? focused
-              : firstitem($($(".ug-menu:visible")[0]).find("li:first")),
-          parent = el.parent();
-      if (focused.hasClass("ui-expander")) {
+          ? focused
+          : firstitem($($(".ug-menu:visible")[0]).find("li:first")),
+        parent = el.parent();
+      if (focused.hasClass("ug-expander")) {
         firstitem(parent).trigger(focus);
         return true;
       }
@@ -118,7 +117,8 @@ R("menu-functions", [], function () {
         if (nextIsMenu && !parent.hasClass("ug-submenu")) {
           firstitem(next.children(":first")).trigger(focus);
         } else {
-          firstitem(parent.next()).trigger(focus);
+          var isExpander = focused.hasClass("ug-expander");
+          firstitem(isExpander ? parent : parent.next()).trigger(focus);
         }
       }
       if (keycode == 37) {
@@ -149,11 +149,16 @@ R("menu-functions", [], function () {
     }
   }
 
-  var bind = "bind";
+  var bind = "bind",
+    click = "click.menus",
+    keydown = "keydown.menus";
   $(document)
-    .on("click.menus", menufunctions.closeMenus[bind](menufunctions))
-    .on("click.menus", toggle, menufunctions.expandMenu[bind](menufunctions))
-    .on("keydown.menus", globalKeydown);
+    .off(click)
+    .off(keydown)
+    .on(click, menufunctions.closeMenus[bind](menufunctions))
+    .on(click, ".ug-expander", menufunctions.expandMenu[bind](menufunctions))
+    .on(click, toggle, menufunctions.expandMenu[bind](menufunctions))
+    .on(keydown, globalKeydown);
 
   return menufunctions;
 });

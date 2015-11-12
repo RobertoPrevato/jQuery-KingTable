@@ -25,8 +25,6 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     "change .pagination-bar-results-select": "changeResultsNumber",
     "click .btn-advanced-filters": "toggleAdvancedFilters",
     "click .btn-clear-filters": "clearFilters",
-    "click .ui-expander": "expandMenu",
-    "click .ug-submenu": "expandSubMenu",
     "click .king-table-head th": "sort",
     "click .resize-handler": "toggleColumnResize",
     "keyup .search-field": "onSearchKeyUp",
