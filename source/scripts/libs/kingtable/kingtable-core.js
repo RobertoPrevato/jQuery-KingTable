@@ -554,15 +554,6 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
     //function that obtains the current timestamp from the server side:
     //this represents the timestamp from the server point of view: useful to display properly fast-growing collections
     getAnchorTimestamp: function (data, xhr) {
-      //try to obtain the timestamp from headers
-      var headers = ["X-Timestamp", "Timestamp", "Date"], i, l;
-      for (i = 0, l = headers.length; i < l; i++) {
-        var header = headers[i];
-        var value = xhr.getResponseHeader(header);
-        if (value) {
-          return value;
-        }
-      }
       if (!_.isArray(data)) {
         //try to obtain the timestamp from the returned object
         var props = ["date", "timestamp", "time"];
@@ -572,6 +563,15 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
           if (value) {
             return value;
           }
+        }
+      }
+      //try to obtain the timestamp from headers
+      var headers = ["X-Timestamp", "Timestamp", "Date"], i, l;
+      for (i = 0, l = headers.length; i < l; i++) {
+        var header = headers[i];
+        var value = xhr.getResponseHeader(header);
+        if (value) {
+          return value;
         }
       }
       return null;
