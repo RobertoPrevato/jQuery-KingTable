@@ -1994,7 +1994,12 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       /**
        * Whether to include hidden properties in the export; or not.
        */
-      exportHiddenProperties: false
+      exportHiddenProperties: false,
+
+      /**
+       * Whether to go to the first page upon an hard refresh, or not
+       */
+      firstPageOnRefresh: true
     },
 
     string: StringUtils,
@@ -2176,9 +2181,6 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       } else {
         //it is necessary to load data
         var timestamp = self.lastFetchTimestamp = new Date().getTime();
-        if (!self.anchorTimestamp)
-          //store in memory the timestamp of the first fetch (useful for fast-growing collections)
-          self.anchorTimestamp = timestamp;
         self.loadData(null, timestamp).done(function (data, isSynchronous) {
           if (!data || !data.length && !self.columnsInitialized) {
             //there is no data: this may happen when the page is loaded
@@ -2233,6 +2235,32 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       }, self.customFilters);
     },
 
+    //function that obtains the current timestamp from the server side:
+    //this represents the timestamp from the server point of view: useful to display properly fast-growing collections
+    getAnchorTimestamp: function (data, xhr) {
+      //try to obtain the timestamp from headers
+      var headers = ["X-Timestamp", "Timestamp", "Date"], i, l;
+      for (i = 0, l = headers.length; i < l; i++) {
+        var header = headers[i];
+        var value = xhr.getResponseHeader(header);
+        if (value) {
+          return value;
+        }
+      }
+      if (!_.isArray(data)) {
+        //try to obtain the timestamp from the returned object
+        var props = ["date", "timestamp", "time"];
+        for (i = 0, l = props.length; i < l; i++) {
+          var prop = props[i];
+          var value = data[prop];
+          if (value) {
+            return value;
+          }
+        }
+      }
+      return null;
+    },
+
     //function that loads data, eventually performing ajax calls
     loadData: function (options, timestamp) {
       options = options || {};
@@ -2254,14 +2282,18 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
           data: postData
         }).always(function () {
           self.trigger("fetch:end");
-        }).done(function (catalog) {
+        }).done(function (catalog, status, xhr) {
           //check if there is a newer call to function
           if (timestamp < self.lastFetchTimestamp) {
             //do nothing because there is a newer call to loadData
             return;
           }
-          self.trigger("fetch:done");
-          self.onFetchDone();
+          self.trigger("fetch:done").onFetchDone();
+          //check if the anchor timestamp is set
+          if (!self.anchorTimestamp) {
+            //try to obtain the anchor timestamp from the response objects
+            self.anchorTimestamp = self.getAnchorTimestamp(catalog, xhr);
+          }
 
           //check if returned data is an array or a catalog
           if (_.isArray(catalog)) {
@@ -3093,7 +3125,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     "click .pagination-bar-last-page": "goToLast",
     "click .pagination-bar-prev-page": "goToPrev",
     "click .pagination-bar-next-page": "goToNext",
-    "click .pagination-bar-refresh": "refresh",
+    "click .pagination-bar-refresh": "hardRefresh",
     "change .pagination-bar-page-number": "changePage",
     "change .pagination-bar-results-select": "changeResultsNumber",
     "click .btn-advanced-filters": "toggleAdvancedFilters",
@@ -3248,6 +3280,16 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
           var compiler = _.template(template, data);
           return compiler(context);
       }
+    },
+
+    hardRefresh: function () {
+      var self = this;
+      //unset the anchor timestamp
+      delete self.anchorTimestamp;
+      if (self.options.firstPageOnRefresh)
+        //go to first page
+        self.pagination.page = 1;
+      return self.storePage().refresh();
     },
 
     refresh: function () {

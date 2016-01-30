@@ -20,7 +20,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     "click .pagination-bar-last-page": "goToLast",
     "click .pagination-bar-prev-page": "goToPrev",
     "click .pagination-bar-next-page": "goToNext",
-    "click .pagination-bar-refresh": "refresh",
+    "click .pagination-bar-refresh": "hardRefresh",
     "change .pagination-bar-page-number": "changePage",
     "change .pagination-bar-results-select": "changeResultsNumber",
     "click .btn-advanced-filters": "toggleAdvancedFilters",
@@ -175,6 +175,16 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
           var compiler = _.template(template, data);
           return compiler(context);
       }
+    },
+
+    hardRefresh: function () {
+      var self = this;
+      //unset the anchor timestamp
+      delete self.anchorTimestamp;
+      if (self.options.firstPageOnRefresh)
+        //go to first page
+        self.pagination.page = 1;
+      return self.storePage().refresh();
     },
 
     refresh: function () {
