@@ -140,6 +140,8 @@ When receiving an AJAX response, it expects the following structure:
   total: [number] // the total count of items that respect the given filters: for example 13000
 }
 ```
+For a working example of server side implementation using Python Flask web framework, and MongoDB, see the [Flask-Three-Template repository, spa-humbular branch](https://github.com/RobertoPrevato/flask-three-template/tree/spa-humbular).
+
 ## Repository structure
 * The *servers* folder contains an implementation of a development server written in Python, using the wonderful [Flask framework](http://flask.pocoo.org/)
 * The *source* folder contains the client side source code, and the htmls pages returne
