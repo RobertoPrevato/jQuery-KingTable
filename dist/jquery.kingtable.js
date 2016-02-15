@@ -2277,7 +2277,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         //obtain ajax options
         var postData = self.mixinAjaxPostData(options, timestamp);
 
-        self.getFetchPromise({
+        self.trigger("fetch:start").getFetchPromise({
           url: url,
           data: postData
         }).always(function () {
@@ -2512,11 +2512,21 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       var optionsColumns = self.options.columns;
 
       if (optionsColumns) {
+        var i = 0;
         //support defining only the columns by their display name (to save programmers's time)
         for (var x in optionsColumns) {
-          if (_.isString(optionsColumns[x]))
+          var col = optionsColumns[x];
+          if (_.isString(col))
             //normalize
-            optionsColumns[x] = { displayName: optionsColumns[x] };
+            optionsColumns[x] = { displayName: col };
+          if (_.isString(col.name)) {
+            //if a name property is defined, replace it with the word `displayName`
+            //since the KingTable requires the name to be equal to the property name.
+            col.displayName = col.name;
+            delete col.name;
+          }
+          optionsColumns[x].position = i;
+          i++;
         }
       }
 
