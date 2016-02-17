@@ -1,4 +1,4 @@
-<th data-id="{{cid}}" class="{% if (obj.sortable) { %} sortable{%}%}">
+<th data-id="{{cid}}" class="{{$hyphenize(name)}}{% if (obj.sortable) { %} sortable{%}%}">
   {% if (name) { %}
   <div>
     <span>{{displayName}}</span>

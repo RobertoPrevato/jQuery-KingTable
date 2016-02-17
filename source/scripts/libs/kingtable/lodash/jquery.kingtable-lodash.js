@@ -265,14 +265,12 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         pag = self.pagination,
         rowTagName = options.rowTagName || "tr",
         headCellTagName = options.headCellTagName || "th",
-        emptyCell = "<" + headCellTagName + " class=\"row-number\"></" + headCellTagName + ">",
         html = ["<" + rowTagName + ">"],
         columns = self.columns;
       //add empty cells
-      html.push(emptyCell);//for first row number
-      emptyCell =  "<" + headCellTagName + "></" + headCellTagName + ">";
+      html.push("<" + headCellTagName + " class=\"row-number\"></" + headCellTagName + ">");//for first row number
       if (options.detailRoute)
-        html.push(emptyCell);//for the go to details link
+        html.push("<" + headCellTagName + " class=\"detail-link\"></" + headCellTagName + ">");//for the go to details link
       _.each(columns, function (col) {
         if (col.hidden || col.secret) return;
         html.push(self.template("king-table-head-cell", _.extend(col, {
@@ -918,6 +916,10 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
           if (!pattern) return s;
           if (typeof s != "string") s = s + "";
           return s.replace(pattern, "<span class=\"ui-search-highlight\">$1</span>");
+        },
+        $hyphenize: function (s) {
+          if (!s) return "";
+          return self.string.hyphenize(s);
         },
         $relwidth: function (origWidth, origHeight, relHeight) {
           var ratio = relHeight / origHeight;

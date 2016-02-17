@@ -11,7 +11,7 @@ if (!$.KingTable.Templates) $.KingTable.Templates = {};
     'king-table-gallery': '<div class="king-table-gallery"> <ul class="king-table-body"></ul> <br class="break" /> </div>',
     'king-table-table': '<table class="king-table"> <thead class="king-table-head"></thead> <tbody class="king-table-body"></tbody> </table>',
     'king-table-empty-view': '<div class="king-table-empty"> <span>{{$i("voc.NoResults")}}</span> </div>',
-    'king-table-head-cell': '<th data-id="{{cid}}" class="{% if (obj.sortable) { %} sortable{%}%}"> {% if (name) { %} <div> <span>{{displayName}}</span> <span class="oi" data-glyph="{% if (obj.sort) { %}sort-{{obj.sort}}ending{%}%}" aria-hidden="true"></span> {% if (obj.resizable) { %} <span class="resize-handler"></span> {% } %} </div> {% } %} </th>',
+    'king-table-head-cell': '<th data-id="{{cid}}" class="{{$hyphenize(name)}}{% if (obj.sortable) { %} sortable{%}%}"> {% if (name) { %} <div> <span>{{displayName}}</span> <span class="oi" data-glyph="{% if (obj.sort) { %}sort-{{obj.sort}}ending{%}%}" aria-hidden="true"></span> {% if (obj.resizable) { %} <span class="resize-handler"></span> {% } %} </div> {% } %} </th>',
     'king-table-empty-cell': '<th></th>',
     'king-table-base': '<div class="king-table-region"> <div class="pagination-bar"></div> <div class="filters-region"></div> <div class="king-table-container"></div> </div>',
     'king-table-error-view': '<div class="king-table-error"> <span class="message"> <span>{{message}}</span> <span class="oi" data-glyph="warning" aria-hidden="true"></span> </span> </div>',

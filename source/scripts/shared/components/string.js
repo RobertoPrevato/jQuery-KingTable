@@ -54,6 +54,10 @@ R("string", [], function () {
     removeHiphens: function (s) {
       return s.replace(/-(.)/g, function (a, b) { return b.toUpperCase(); });
     },
+    hyphenize: function (s) {
+      if (!s) return "";
+      return s.replace(/([a-z])([A-Z])/g, function (a, b, c) { return b + "-" + c.toLowerCase(); });
+    },
     repeat: function (string, num) {
       return new Array(parseInt(num) + 1).join(string);
     },

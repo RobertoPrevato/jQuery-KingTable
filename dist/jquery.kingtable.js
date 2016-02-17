@@ -282,6 +282,10 @@ R("string", [], function () {
     removeHiphens: function (s) {
       return s.replace(/-(.)/g, function (a, b) { return b.toUpperCase(); });
     },
+    hyphenize: function (s) {
+      if (!s) return "";
+      return s.replace(/([a-z])([A-Z])/g, function (a, b, c) { return b + "-" + c.toLowerCase(); });
+    },
     repeat: function (string, num) {
       return new Array(parseInt(num) + 1).join(string);
     },
@@ -3380,14 +3384,12 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         pag = self.pagination,
         rowTagName = options.rowTagName || "tr",
         headCellTagName = options.headCellTagName || "th",
-        emptyCell = "<" + headCellTagName + " class=\"row-number\"></" + headCellTagName + ">",
         html = ["<" + rowTagName + ">"],
         columns = self.columns;
       //add empty cells
-      html.push(emptyCell);//for first row number
-      emptyCell =  "<" + headCellTagName + "></" + headCellTagName + ">";
+      html.push("<" + headCellTagName + " class=\"row-number\"></" + headCellTagName + ">");//for first row number
       if (options.detailRoute)
-        html.push(emptyCell);//for the go to details link
+        html.push("<" + headCellTagName + " class=\"detail-link\"></" + headCellTagName + ">");//for the go to details link
       _.each(columns, function (col) {
         if (col.hidden || col.secret) return;
         html.push(self.template("king-table-head-cell", _.extend(col, {
@@ -4034,6 +4036,10 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
           if (typeof s != "string") s = s + "";
           return s.replace(pattern, "<span class=\"ui-search-highlight\">$1</span>");
         },
+        $hyphenize: function (s) {
+          if (!s) return "";
+          return self.string.hyphenize(s);
+        },
         $relwidth: function (origWidth, origHeight, relHeight) {
           var ratio = relHeight / origHeight;
           return Math.ceil(ratio * origWidth);
@@ -4300,7 +4306,7 @@ if (!$.KingTable.Templates) $.KingTable.Templates = {};
     'king-table-gallery': '<div class="king-table-gallery"> <ul class="king-table-body"></ul> <br class="break" /> </div>',
     'king-table-table': '<table class="king-table"> <thead class="king-table-head"></thead> <tbody class="king-table-body"></tbody> </table>',
     'king-table-empty-view': '<div class="king-table-empty"> <span>{{$i("voc.NoResults")}}</span> </div>',
-    'king-table-head-cell': '<th data-id="{{cid}}" class="{% if (obj.sortable) { %} sortable{%}%}"> {% if (name) { %} <div> <span>{{displayName}}</span> <span class="oi" data-glyph="{% if (obj.sort) { %}sort-{{obj.sort}}ending{%}%}" aria-hidden="true"></span> {% if (obj.resizable) { %} <span class="resize-handler"></span> {% } %} </div> {% } %} </th>',
+    'king-table-head-cell': '<th data-id="{{cid}}" class="{{$hyphenize(name)}}{% if (obj.sortable) { %} sortable{%}%}"> {% if (name) { %} <div> <span>{{displayName}}</span> <span class="oi" data-glyph="{% if (obj.sort) { %}sort-{{obj.sort}}ending{%}%}" aria-hidden="true"></span> {% if (obj.resizable) { %} <span class="resize-handler"></span> {% } %} </div> {% } %} </th>',
     'king-table-empty-cell': '<th></th>',
     'king-table-base': '<div class="king-table-region"> <div class="pagination-bar"></div> <div class="filters-region"></div> <div class="king-table-container"></div> </div>',
     'king-table-error-view': '<div class="king-table-error"> <span class="message"> <span>{{message}}</span> <span class="oi" data-glyph="warning" aria-hidden="true"></span> </span> </div>',
