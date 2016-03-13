@@ -3384,21 +3384,21 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         pag = self.pagination,
         rowTagName = options.rowTagName || "tr",
         headCellTagName = options.headCellTagName || "th",
-        html = ["<" + rowTagName + ">"],
+        html = "<" + rowTagName + ">",
         columns = self.columns;
       //add empty cells
-      html.push("<" + headCellTagName + " class=\"row-number\"></" + headCellTagName + ">");//for first row number
+      html += "<" + headCellTagName + " class=\"row-number\"></" + headCellTagName + ">";//for first row number
       if (options.detailRoute)
-        html.push("<" + headCellTagName + " class=\"detail-link\"></" + headCellTagName + ">");//for the go to details link
+        html += "<" + headCellTagName + " class=\"detail-link\"></" + headCellTagName + ">";//for the go to details link
       _.each(columns, function (col) {
         if (col.hidden || col.secret) return;
-        html.push(self.template("king-table-head-cell", _.extend(col, {
+        html += self.template("king-table-head-cell", _.extend(col, {
           sort: pag.orderBy == col.name ? pag.sortOrder : ""
-        })));
+        }));
       });
-      html.push("</" + rowTagName + ">");
+      html += "</" + rowTagName + ">";
       //set html inside the head
-      self.$el.find(".king-table-head").html(html.join(""));
+      self.$el.find(".king-table-head").html(html);
       if (options.keepCellsWidth) {
         //delay is intentional
         _.delay(function () {
@@ -3526,12 +3526,12 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         if (view.resolver)
           return view.resolver.call(self, items);
 
-        var html = [], rowTemplate = self.getItemTemplate();
+        var html = "", rowTemplate = self.getItemTemplate();
         _.each(items, function (item) {
-          html.push(self.templateSafe(rowTemplate, item));
+          html += self.templateSafe(rowTemplate, item);
         });
         //inject all html at once inside the table body.
-        self.$el.find(".king-table-body").html(html.join(""));
+        self.$el.find(".king-table-body").html(html);
       });
       return self;
     },
@@ -3633,7 +3633,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
      * Assumes that Columns are already ordered by Position.
      */
     getTableRowTemplate: function () {
-      var sb = [],
+      var sb = "",
         self = this,
         options = self.options,
         wrapperTagName = "tr",
@@ -3642,13 +3642,13 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       if (!self.columnsInitialized)
         self.initializeColumns();
 
-      sb.push("<" + wrapperTagName + ">");
+      sb += "<" + wrapperTagName + ">";
       if (options.rowCount) {
-        sb.push(self.string.format("<{0} class=\"row-number\">{{rowCount}}</{0}>", cellTagName));
+        sb += self.string.format("<{0} class=\"row-number\">{{rowCount}}</{0}>", cellTagName);
       }
       
       if (options.detailRoute) {
-        sb.push(self.getGoToDetailsLink());
+        sb += self.getGoToDetailsLink();
       }
 
       var searchRule = self.filters.getRuleByKey("search");
@@ -3664,23 +3664,23 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         }
 
         var propertyToUse = _.contains(self.columns.formatted, column.name) ? (column.name + self.options.formattedSuffix) : column.name;
-        sb.push("<" + cellTagName + ">");
+        sb += "<" + cellTagName + ">";
 
         //automatic highlight of searched properties: if the column template contains the $highlight function;
         //the programmer is specifying the template, so don't interfere!
         if (searchRule && options.autoHighlightSearchProperties && column.allowSearch && !/\$highlight/.test(column.template)) {
           //automatically highlight the searched property, if it contains any match
-          sb.push('{%print($highlight(' + propertyToUse + '))%}');
+          sb += '{%print($highlight(' + propertyToUse + '))%}';
         } else {
           //use the column template
-          sb.push(column.template);
+          sb += column.template;
         }
-        sb.push("</" + cellTagName + ">");
+        sb += "</" + cellTagName + ">";
       }
 
-      sb.push("</" + wrapperTagName + ">");
+      sb += "</" + wrapperTagName + ">";
 
-      var template = sb.join("");
+      var template = sb;
       return template;
     },
 
@@ -3689,7 +3689,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
      * Assumes that Columns are already ordered by Position.
      */
     getGalleryItemTemplate: function () {
-      var sb = [],
+      var sb = "",
         self = this,
         options = self.options,
         wrapperTagName = "li",
@@ -3697,9 +3697,9 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       if (!self.columnsInitialized)
         self.initializeColumns();
 
-      sb.push(self.string.format("<{0}>", wrapperTagName));
+      sb += self.string.format("<{0}>", wrapperTagName);
       if (options.rowCount) {
-        sb.push(self.string.format("<{0} class=\"item-number\">{{rowCount}}</{0}>", cellTagName));
+        sb += self.string.format("<{0} class=\"item-number\">{{rowCount}}</{0}>", cellTagName);
       }
 
       var searchRule = self.filters.getRuleByKey("search");
@@ -3716,21 +3716,20 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
 
         var propertyToUse = _.contains(self.columns.formatted, column.name) ? (column.name + self.options.formattedSuffix) : column.name;
 
-        sb.push("<" + cellTagName + " title=\""  + self.sanitizer.escape(column.displayName) + "\">");
+        sb += "<" + cellTagName + " title=\""  + self.sanitizer.escape(column.displayName) + "\">";
         //automatic highlight of searched properties: if the column template contains the $highlight function;
         //the programmer is specifying the template, so don't interfere!
         if (searchRule && options.autoHighlightSearchProperties && column.allowSearch && !/\$highlight/.test(column.template)) {
           //automatically highlight the searched property, if it contains any match
-          sb.push('{%print($highlight(' + propertyToUse + '))%}');
+          sb += '{%print($highlight(' + propertyToUse + '))%}';
         } else {
           //use the column template
-          sb.push(column.template);
+          sb += column.template;
         }
-        sb.push("</" + cellTagName + ">");
+        sb += "</" + cellTagName + ">";
       }
-      sb.push("</" + wrapperTagName + ">");
-      var template = sb.join("");
-      return template;
+      sb += "</" + wrapperTagName + ">";
+      return sb;
     },
 
     /**
@@ -4053,11 +4052,11 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
           if (!item) return stringempty;
           var attr = item.attr;
           if (!attr) return stringempty;
-          var f = [], sep = "\"";
+          var f = "", sep = "\"";
           for (var x in attr) {
-            f.push([x, "=", sep, attr[x], sep].join(stringempty));
+            f += x + "=" + sep + attr[x] + sep;
           }
-          return f.join(" ");
+          return f;
         }
       }, self.options.templateHelpers, templateSettings);
     },
