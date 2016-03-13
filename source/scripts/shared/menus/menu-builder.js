@@ -24,11 +24,10 @@ R("menu-builder", [], function () {
     if (!first.items && first.menu) {
       menus = [{ items: menus }];
     }
-    var push = "push";
-    var a = [], caret = "<span class=\"oi\" data-glyph=\"caret-right\"></span>";
+    var a = "", caret = "<span class=\"oi\" data-glyph=\"caret-right\"></span>";
     _.each(menus, function (menu) {
       var id = menu.id;
-      a[push]("<ul" + (id ? " id=\"" + id + "\"": "")+ " class=\"ug-menu\">");
+      a += "<ul" + (id ? " id=\"" + id + "\"": "")+ " class=\"ug-menu\">";
 
       _.each(menu.items, function (item) {
         if (item === null) return;
@@ -36,41 +35,40 @@ R("menu-builder", [], function () {
           type = item.type,
           href = item.href,
           name = item.name;
-        a[push]("<li" + (hasSubmenu ? " class=\"ug-submenu\">" : ">"));
-        //a[push]("<div>"); // mod
+        a += "<li" + (hasSubmenu ? " class=\"ug-submenu\">" : ">");
+
         switch (type) {
           case "checkbox":
             var cid = _.uniqueId("mnck-");
             var checked = item.checked ? " checked=\"checked\"" : "";
-            a[push]("<input id=\"" + cid + "\" type=\"checkbox\"" + attr(item) + checked + " />");
-            a[push]("<label for=\"" + cid + "\">" + name + "</label>");
+            a += "<input id=\"" + cid + "\" type=\"checkbox\"" + attr(item) + checked + " />";
+            a += "<label for=\"" + cid + "\">" + name + "</label>";
             break;
           case "radio":
             if (!item.value) throw "missing value for radio";
             var cid = _.uniqueId("mnrd-");
             var checked = item.checked ? " checked=\"checked\"" : "";
-            a[push]("<input id=\"" + cid + "\" type=\"radio\" value=\"" + item.value + "\"" + attr(item) + checked + " />");
-            a[push]("<label for=\"" + cid + "\">" + name + "</label>");
+            a += "<input id=\"" + cid + "\" type=\"radio\" value=\"" + item.value + "\"" + attr(item) + checked + " />";
+            a += "<label for=\"" + cid + "\">" + name + "</label>";
             break;
           default:
             if (href) {
-              a[push]("<a href=\"" + href + "\"" + attr(item) + ">" + name + (hasSubmenu ? caret : "") + "</a>");
+              a += "<a href=\"" + href + "\"" + attr(item) + ">" + name + (hasSubmenu ? caret : "") + "</a>";
             } else {
-              a[push]("<span tabindex=\"0\"" + attr(item) + ">" + name + (hasSubmenu ? caret : "") + "</span>");
+              a += "<span tabindex=\"0\"" + attr(item) + ">" + name + (hasSubmenu ? caret : "") + "</span>";
             }
             break;
         }
 
         if (hasSubmenu)
-          a[push](menuBuilder([item.menu]));
+          a += menuBuilder([item.menu]);
 
-        //a[push]("</div>"); // mod
-        a[push]("</li>");
+        a += "</li>";
       });
-      a[push]("</ul>");
+      a += "</ul>";
     });
 
-    return a.join("");
+    return a;
   };
 
   return menuBuilder;

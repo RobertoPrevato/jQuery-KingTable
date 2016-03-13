@@ -93,7 +93,6 @@ R("object-analyzer", ["reflection"], function (Reflection) {
       if (!prefix) prefix = '';
       var parent = prefix ? Reflection.getPropertyValue(o, prefix) : o;
       for (var x in o) {
-        var type = this.getType(o[x]);
         a.push({
           name: prefix + x,
           type: this.getType(parent[x])
@@ -142,9 +141,8 @@ R("object-analyzer", ["reflection"], function (Reflection) {
       return a;
     },
 
-    guessFilterableProperties: function (o, prefix) {
+    guessFilterableProperties: function (o) {
       var a = [];
-      if (!prefix) prefix = '';
       for (var x in o) {
         if (/_formatted$/.test(x)) continue;
         if (_.contains(['id', 'guid', 'rowcount', 'rownumber', 'rownum', 'thmguid'], x.toLowerCase())) continue;
