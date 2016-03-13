@@ -1,9 +1,9 @@
 {% if (page > firstPage) { %}
-  <span tabindex="0" class="pagination-button pagination-bar-first-page" title="{{$i('voc.FirstPage')}}"></span>
-  <span tabindex="0" class="pagination-button pagination-bar-prev-page" title="{{$i('voc.PrevPage')}}"></span>
+  <span tabindex="0" class="pagination-button pagination-bar-first-page oi" data-glyph="media-step-backward" title="{{$i('voc.FirstPage')}}"></span>
+  <span tabindex="0" class="pagination-button pagination-bar-prev-page oi" data-glyph="caret-left" title="{{$i('voc.PrevPage')}}"></span>
 {% } else { %}
-  <span class="pagination-button-disabled pagination-bar-first-page-disabled"></span>
-  <span class="pagination-button-disabled pagination-bar-prev-page-disabled"></span>
+  <span class="pagination-button-disabled pagination-bar-first-page-disabled oi" data-glyph="media-step-backward"></span>
+  <span class="pagination-button-disabled pagination-bar-prev-page-disabled oi" data-glyph="caret-left"></span>
 {% } %}
 <span class="separator"></span>
 <span class="valigned">{{$i('voc.Page')}} </span>
@@ -14,14 +14,14 @@
 {% } %}
 <span class="valigned total-page-count"> {{$i('voc.of')}} {{totalPageCount}}</span>
 <span class="separator"></span>
-<span tabindex="0" class="pagination-button pagination-bar-refresh" title="{{$i('voc.Refresh')}}"></span>
+<span tabindex="0" class="pagination-button pagination-bar-refresh oi" data-glyph="reload" title="{{$i('voc.Refresh')}}"></span>
 <span class="separator"></span>
 {% if (page < totalPageCount) { %}
-  <span tabindex="0" class="pagination-button pagination-bar-next-page" title="{{$i('voc.NextPage')}}"></span>
-  <span tabindex="0" class="pagination-button pagination-bar-last-page" title="{{$i('voc.LastPage')}}"></span>
+  <span tabindex="0" class="pagination-button pagination-bar-next-page oi" data-glyph="caret-right" aria-expanded="true" title="{{$i('voc.NextPage')}}"></span>
+  <span tabindex="0" class="pagination-button pagination-bar-last-page oi" data-glyph="media-step-forward" title="{{$i('voc.LastPage')}}"></span>
 {% } else { %}
-  <span class="pagination-button-disabled pagination-bar-next-page-disabled"></span>
-  <span class="pagination-button-disabled pagination-bar-last-page-disabled"></span>
+  <span class="pagination-button-disabled pagination-bar-next-page-disabled oi" data-glyph="caret-right"></span>
+  <span class="pagination-button-disabled pagination-bar-last-page-disabled oi" data-glyph="media-step-forward"></span>
 {% } %}
 <span class="separator"></span>
 <span class="valigned">{{$i('voc.ResultsPerPage')}}</span>
