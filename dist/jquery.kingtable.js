@@ -1865,16 +1865,10 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       searchDelay: 50,
 
       /**
-       * Whether to enable the filters wizard, or not;
-       * This is an experimental feature, work in progress.
-       */
-      filtersWizard: false,//TODO
-
-      /**
        * Whether to write and read filters inside the query string, or not
        * for usability, it is better to keep this option active.
        */
-      useQueryString: true,
+      useQueryString: false,
 
       /**
        * Whether to write and read some settings using the local storage.
