@@ -2,7 +2,7 @@
  * jQuery-KingTable.
  * https://github.com/RobertoPrevato/jQuery-KingTable
  *
- * Copyright 2015, Roberto Prevato
+ * Copyright 2016, Roberto Prevato
  * http://ugrose.com
  *
  * Licensed under the MIT license:
@@ -620,7 +620,7 @@ R("reflection", [], function () {
  * jQuery-KingTable.
  * https://github.com/RobertoPrevato/jQuery-KingTable
  *
- * Copyright 2015, Roberto Prevato
+ * Copyright 2016, Roberto Prevato
  * http://ugrose.com
  *
  * Licensed under the MIT license:
@@ -867,7 +867,6 @@ R("object-analyzer", ["reflection"], function (Reflection) {
 
     getType: function (o) {
       if (o == null || o == undefined) return;
-      if (typeof o == "string" && /(\d{4}).(\d{2}).(\d{2})\s*((\d{2}).(\d{2}))*/.test(o)) return "date";
       if (o instanceof Array) return "array";
       if (o instanceof Date) return "date";
       if (o instanceof RegExp) return "regex";
@@ -1521,7 +1520,7 @@ R("menu", ["menu-builder", "menu-functions"], function (MenuBuilder, MenuFunctio
  * jQuery-KingTable.
  * https://github.com/RobertoPrevato/jQuery-KingTable
  *
- * Copyright 2015, Roberto Prevato
+ * Copyright 2016, Roberto Prevato
  * http://ugrose.com
  *
  * Licensed under the MIT license:
@@ -1686,7 +1685,7 @@ R("filters-manager", ["string", "regex", "array-search", "extend"], function (St
  * jQuery-KingTable, core logic.
  * https://github.com/RobertoPrevato/jQuery-KingTable
  *
- * Copyright 2015, Roberto Prevato
+ * Copyright 2016, Roberto Prevato
  * http://ugrose.com
  *
  * Licensed under the MIT license:
@@ -1775,7 +1774,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
      *   someCustomProperty: 2 //this property will instead be cached inside the instance.options property
      * });
      */
-    baseProperties: ["initialize", "$el", "data", "fixed"],
+    baseProperties: ["initialize", "$el", "data", "fixed", "formatData"],
 
     /**
      * Upon instantiation; this function is called to merge the options inside the instance of KingTable.
@@ -2193,7 +2192,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
           self.beforeRender();
         //initialize columns
         self.initializeColumns()
-          .formatData()
+          .formatData(data)
           .sortColumns()
           .setTools();
 
@@ -2615,7 +2614,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       return collection;
     },
 
-    formatData: function () {
+    formatData: function (data) {
       return this;
     },
 
@@ -3058,7 +3057,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
  * on the basis of their input data.
  * https://github.com/RobertoPrevato/jQuery-KingTable
  *
- * Copyright 2015, Roberto Prevato
+ * Copyright 2016, Roberto Prevato
  * http://ugrose.com
  *
  * Licensed under the MIT license:
@@ -3111,7 +3110,7 @@ R("jquery-kingtable", ["kingtable-core"], function (KingTable) {
  * jQuery-KingTable Lodash connector.
  * https://github.com/RobertoPrevato/jQuery-KingTable
  *
- * Copyright 2015, Roberto Prevato
+ * Copyright 2016, Roberto Prevato
  * http://ugrose.com
  *
  * Licensed under the MIT license:
@@ -3482,6 +3481,9 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         var compiled = self.templateSafe(template, customFilters);
         //convert in jQuery object and assign the values
         var view = self.modelToView(customFilters, compiled);
+        //allow to edit the custom filters view externally:
+        if (options.onCustomFiltersRender)
+          options.onCustomFiltersRender.call(self, view);
         if (!options.filtersViewExpandable || options.filtersViewOpen) {
           filtersRegion.show();
           self.customFiltersVisible = true;
@@ -4094,7 +4096,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     
     //provides automatic binding from a context to a view
     modelToView: function (context, view) {
-      if (_.isString(view)) view = $(view);
+      if (_.isString(view)) view = $("<div>" + view + "</div>");
       var x, self = this, schema = self.schema;
       for (x in context) {
         var fields = view.find("[name=\"" + x + "\"]");
@@ -4185,11 +4187,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
      */
     clearFilters: function () {
       var self = this,
-          el = self.$el.find(".filters-region"),
-          currentFilters = self.customFilters;
-      if ($.isEmptyObject(currentFilters))
-        return true;
-      self.customFilters = {};
+          el = self.$el.find(".filters-region");
       var possibleValues = el.find("input[name]").map(function (i, o) { return o.name; });
       _.each(possibleValues, function (o) {
         self.query.set(o, "");
