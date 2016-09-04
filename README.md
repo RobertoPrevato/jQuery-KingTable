@@ -12,6 +12,7 @@ and reorder columns and support for custom tools. Client side export feature int
 The following demos are available online:
 * [Live demo](http://ugrose.com/content/demos/kingtable/index.html)
 * [Demo with complex filters](http://ugrose.com/content/demos/kingtable/complex-filters.html)
+* [Demo with datetime filters and datepickers](http://ugrose.com/content/demos/kingtable/datetime-filters.html)
 * [Double table: two tables displayed in the same page](http://ugrose.com/content/demos/kingtable/double.html)
 
 [![Tools](http://ugrose.com/content/demos/kingtable/images/tools.gif)](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Table-tools)
