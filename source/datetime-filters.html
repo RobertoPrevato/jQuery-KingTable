@@ -148,6 +148,12 @@
         var datePart = $.datepicker.formatDate(dateFormat, d);
         return datePart + " " + hoursMin(d, true);
       }
+      
+      function formatDate(d) {
+        if (!d) return "";
+        var dateFormat = "dd/mm/yy"; // NB: date format is culture dependent! Implement your localization strategy.
+        return $.datepicker.formatDate(dateFormat, d);
+      }
 
       // function that, given a date, returns a formatted time
       function hoursMin(v, includeSeconds) {
@@ -288,7 +294,7 @@
             o._birthdate = birthdate;
             o._registered = registered;
 
-            o.birthdate = formatDatetime(birthdate);
+            o.birthdate = formatDate(birthdate);
             o.registered = formatDatetime(registered);
           });
           return this;
