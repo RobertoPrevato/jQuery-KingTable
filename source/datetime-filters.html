@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<!--
+/**
+ * jQuery-KingTable 1.0.1
+ * https://github.com/RobertoPrevato/jQuery-KingTable
+ *
+ * Copyright 2016, Roberto Prevato
+ * http://ugrose.com
+ *
+ * Licensed under the MIT license:
+ * http://www.opensource.org/licenses/MIT
+ */
+-->
+<html lang="en">
+<head>
+  <!-- Force latest IE rendering engine or ChromeFrame if installed -->
+  <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
+  <meta charset="utf-8">
+  <title>jQuery-KingTable</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content="jQuery-KingTable, a jQuery plugin for administrative tables that are able to build themselves, on the basis of their input data." />
+  <meta name="copyright" content="Copyright 2016 Roberto Prevato roberto.prevato@gmail.com" />
+  <!-- Page styles-->
+  <link rel="stylesheet" href="styles/examples.css">
+  <link rel="stylesheet" href="styles/kingtable/kingtable.css">
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.8.23/themes/smoothness/jquery-ui.css">
+  <style>
+    /* styles related to this specific example */
+    .king-table-region .filters-region .buttons {
+      padding: 0;
+    }
+    .filters-region {
+      padding: 5px 15px 15px 15px;
+    }
+    .filters-region dl {
+
+    }
+    .filters-region dl dt {
+      float: left;
+      min-width: 100px;
+    }
+    #ui-datepicker-div {
+      font-size: .8em;
+    }
+  </style>
+</head>
+<body class="theme-flatwhite">
+  <header id="header">
+    <div id="logo-region">
+      <img src="/styles/logo.png" alt="Roberto Prevato" width="91" height="50">
+      <h6><a href="https://github.com/RobertoPrevato/jQuery-KingTable">Roberto Prevato - roberto.prevato@gmail.com</a></h6>
+    </div>
+    <h1>jQuery-KingTable<span> - example with datetime filter</span></h1>
+    <label for="theme">Theme</label>
+    <select id="theme">
+      <option value="theme-flatwhite" selected="selected">Flat white</option>
+      <option value="theme-flatblack">Flat black</option>
+      <option value="theme-clear">Clear</option>
+      <option value="theme-dark">Dark</option>
+      <option value="theme-midnight">Midnight</option>
+      <option value="theme-olive">Olive</option>
+      <option value="theme-bronze">Bronze</option>
+      <option value="theme-ultramarine">Ultramarine</option>
+    </select>
+  </header>
+  <div id="content"></div>
+  <footer id="footer"></footer>
+  <!-- libs -->
+  <script src="scripts/libs/lodash.js"></script>
+  <script src="scripts/libs/jquery.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js" integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E=" crossorigin="anonymous"></script>
+  <script src="scripts/libs/r.js"></script>
+  <script>
+      R.debug = true;
+  </script>
+  <script src="scripts/areas/public/ready.js"></script>
+  <!-- utility function for localization-->
+  <script src="scripts/libs/i.js"></script><!--
+  <script src="scripts/libs/i18next-1.10.1.js"></script>-->
+  <script src="scripts/areas/public/locale/en.js"></script>
+  <script src="scripts/areas/public/locale/it.js"></script>
+  <script src="scripts/areas/public/locale/pl.js"></script>
+  <!-- core functions -->
+  <script src="scripts/shared/components/extend.js"></script>
+  <script src="scripts/shared/components/events.js"></script>
+  <script src="scripts/shared/components/string.js"></script>
+  <script src="scripts/shared/components/regex.js"></script>
+  <script src="scripts/shared/components/date.js"></script>
+  <script src="scripts/shared/components/reflection.js"></script>
+  <script src="scripts/shared/components/array-search.js"></script>
+  <script src="scripts/shared/data/object-analyzer.js"></script>
+  <script src="scripts/shared/data/csv.js"></script>
+  <script src="scripts/shared/data/xml.js"></script>
+  <script src="scripts/shared/data/file.js"></script>
+  <script src="scripts/shared/data/sanitizer.js"></script>
+  <script src="scripts/shared/data/query.js"></script>
+  <script src="scripts/shared/data/i18n.js"></script>
+  <script src="scripts/shared/menus/menu-builder.js"></script>
+  <script src="scripts/shared/menus/menu-functions.js"></script>
+  <script src="scripts/shared/menus/menu.js"></script>
+  <script src="scripts/shared/filters/filters-manager.js"></script>
+  <script src="scripts/libs/kingtable/kingtable-core.js"></script>
+  <script src="scripts/libs/kingtable/jquery.kingtable.js"></script>
+  <script src="scripts/libs/kingtable/lodash/jquery.kingtable-lodash.js"></script>
+  <script src="scripts/libs/kingtable/lodash/templates.js"></script>
+
+  <!-- in this example, the filters template is defined in a script tag -->
+  <script id="custom-filters" type="text/html">
+    <div class="left-column">
+      <dl>
+        <dt>
+          <label for="start-birthdate">Birthdate from:</label>
+        </dt>
+        <dd>
+          <input id="start-birthdate" type="text" class="datepicker birthdate" name="start-birthdate" readonly />
+        </dd>
+        <dt>
+          <label for="end-birthdate">Birthdate to:</label>
+        </dt>
+        <dd>
+          <input id="end-birthdate" type="text" class="datepicker birthdate" name="end-birthdate" readonly />
+        </dd>
+        <dt>
+          <label for="start-registration">Registered from:</label>
+        </dt>
+        <dd>
+          <input id="start-registration" type="text" class="datepicker registration" name="start-registration" readonly />
+        </dd>
+        <dt>
+          <label for="end-registration">Registered to:</label>
+        </dt>
+        <dd>
+          <input id="end-registration" type="text" class="datepicker registration" name="end-registration" readonly />
+        </dd>
+      </dl>
+      <br class="break" />
+    </div>
+    <div class="buttons">
+      <button class="btn btn-default btn-clear-filters">Clear filters</button>
+    </div>
+  </script>
+  <script>
+    (function () {
+
+      function formatDatetime(d) {
+        if (!d) return "";
+        var dateFormat = "dd/mm/yy"; // NB: date format is culture dependent! Implement your localization strategy.
+        var datePart = $.datepicker.formatDate(dateFormat, d);
+        return datePart + " " + hoursMin(d, true);
+      }
+
+      // function that, given a date, returns a formatted time
+      function hoursMin(v, includeSeconds) {
+        var h = v.getHours() > 0 ? v.getHours().toString() : '00',
+          m = v.getMinutes().toString();
+        h = h && h.length == 1 ? '0' + h : h;
+        m = m.length == 1 ? '0' + m : m;
+        if (includeSeconds) {
+          var s = v.getSeconds().toString();
+          s = s.length == 1 ? "0" + s : s;
+          return [h, m, s].join(':');
+        }
+        return [h, m].join(':');
+      }
+
+      //add reference to window, just for debugging purpose
+      $("#content").kingtable({
+        id: "people-table",
+        url: "/api/people",
+        fixed: true, // in this example, the table is fetched only once from the server
+        filtersView: "custom-filters",//can be the id of an element;
+        orderBy: "name",
+        sortOrder: "asc",
+        columns: {
+          name: "Name",
+          email: "Email",
+          phone: "Phone",
+          birthdate: {
+            name: "Birthdate"
+          },
+          isActive: {
+            name: "Active",
+            hidden: 1
+          },
+          _id: "Id",
+          address: "Address",
+          company: "Company",
+          gender: "Gender",
+          registered: "Registered"
+        },
+        filters: {
+          //NB: the keys of filters object must match the name property of input elements
+          //that are defined in the filters view
+          "start-birthdate": function (filter, obj) {
+            // implement here your logic: the filter is the value in the input field (to be parsed into a date)
+            // obj is a single item in your table
+            // return true if the object should be filtered, false otherwise
+
+            var value = filter.value;
+            if (!value)
+              // the user cleared the start birthdate input field
+              return false;
+
+            // obtain the date using jQuery datepicker (another option would be to parse the filter.value)
+            var startDateFilter = $("[name='start-birthdate']").datepicker("getDate");
+            return obj._birthdate >= startDateFilter;
+          },
+          "end-birthdate": function (filter, obj) {
+            // implement here your logic: the filter is the value in the input field (to be parsed into a date)
+            // obj is a single item in your table
+            // return true if the object should be filtered, false otherwise
+
+            var value = filter.value;
+            if (!value)
+              // the user cleared the start birthdate input field
+              return false;
+
+            // obtain the date using jQuery datepicker (another option would be to parse the filter.value)
+            var endDateFilter = $("[name='end-birthdate']").datepicker("getDate");
+            return obj._birthdate <= endDateFilter;
+          },
+          "start-registration": function (filter, obj) {
+            var value = filter.value;
+            if (!value)
+              return false;
+            var startDateFilter = $("[name='start-registration']").datepicker("getDate");
+            return obj._registered >= startDateFilter;
+          },
+          "end-registration": function (filter, obj) {
+            var value = filter.value;
+            if (!value)
+              return false;
+            var endDateFilter = $("[name='end-registration']").datepicker("getDate");
+            return obj._registered <= endDateFilter;
+          }
+        },
+        filtersViewOpen: true, // in this example, the filters view is displayed immediately
+        onCustomFiltersRender: function (view) {
+          var table = this;
+
+          function onDateSelect(dateText, instance) {
+            //obtain the name from the context (input element)
+            var filterName = this.getAttribute("name");
+
+            if (dateText) {
+              // apply the filter
+              table.tryApplyClientSideFilter(filterName, dateText);
+            } else {
+              //remove the filter
+              table.filters.removeRuleByKey(filterName);
+            }
+
+            //force table refresh
+            table.refresh();
+          }
+
+          //set datepickers for birthdate range
+          view.find(".datepicker.birthdate").datepicker({
+            changeYear: true,
+            yearRange: "-50:-14",    // Adapt to your needs, this is just an example
+            defaultDate:"-14y-m-d",  // Relative year/month/day
+            //when a date is selected, apply filters in the table
+            onSelect: onDateSelect
+          });
+
+          //set datepickers for registration range
+          view.find(".datepicker.registration").datepicker({
+            changeYear: true,
+            yearRange: "2014:" + (new Date().getFullYear()),
+            //when a date is selected, apply filters in the table
+            onSelect: onDateSelect
+          });
+        },
+        formatData: function (data) {
+          // NB:
+          // in this example the server returns serialized dates (not formatted server side, by user culture)
+          // so we need to parse them first into dates, and then convert them in string representations in user's culture
+          // string search on dates are culture dependent!!
+          // a date represented in EN-US looks like MM/DD/YYYY, while the same date in EN-GN looks DD/MM/YYYY
+
+          _.each(data, function (o) {
+            // following two lines may be different, if the server is returning dates that are not compatible with Date constructor
+            var birthdate = new Date(o.birthdate),
+             registered = new Date(o.registered);
+
+            // store the original dates inside the object: these are needed to implement filtering functions
+            // since table columns are already initialized, the table won't try to display these extra properties
+            o._birthdate = birthdate;
+            o._registered = registered;
+
+            o.birthdate = formatDatetime(birthdate);
+            o.registered = formatDatetime(registered);
+          });
+          return this;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+

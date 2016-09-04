@@ -1,7 +1,7 @@
 /*! jQuery UI - v1.11.4 - 2015-10-19
 * http://jqueryui.com
 * Includes: core.js, widget.js, mouse.js, sortable.js
-* Copyright 2015 jQuery Foundation and other contributors; Licensed MIT */
+* Copyright 2016 jQuery Foundation and other contributors; Licensed MIT */
 
 (function( factory ) {
 	if ( typeof define === "function" && define.amd ) {

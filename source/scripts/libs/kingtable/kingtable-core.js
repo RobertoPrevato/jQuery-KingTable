@@ -2,7 +2,7 @@
  * jQuery-KingTable, core logic.
  * https://github.com/RobertoPrevato/jQuery-KingTable
  *
- * Copyright 2015, Roberto Prevato
+ * Copyright 2016, Roberto Prevato
  * http://ugrose.com
  *
  * Licensed under the MIT license:
@@ -91,7 +91,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
      *   someCustomProperty: 2 //this property will instead be cached inside the instance.options property
      * });
      */
-    baseProperties: ["initialize", "$el", "data", "fixed"],
+    baseProperties: ["initialize", "$el", "data", "fixed", "formatData"],
 
     /**
      * Upon instantiation; this function is called to merge the options inside the instance of KingTable.
@@ -509,7 +509,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
           self.beforeRender();
         //initialize columns
         self.initializeColumns()
-          .formatData()
+          .formatData(data)
           .sortColumns()
           .setTools();
 
@@ -931,7 +931,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       return collection;
     },
 
-    formatData: function () {
+    formatData: function (data) {
       return this;
     },
 

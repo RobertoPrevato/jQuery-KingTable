@@ -68,7 +68,6 @@ R("object-analyzer", ["reflection"], function (Reflection) {
 
     getType: function (o) {
       if (o == null || o == undefined) return;
-      if (typeof o == "string" && /(\d{4}).(\d{2}).(\d{2})\s*((\d{2}).(\d{2}))*/.test(o)) return "date";
       if (o instanceof Array) return "array";
       if (o instanceof Date) return "date";
       if (o instanceof RegExp) return "regex";

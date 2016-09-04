@@ -1,8 +1,8 @@
 """
- * jQuery-KingTable demo 1.0.0
+ * jQuery-KingTable demo 1.0.1
  * https://github.com/RobertoPrevato/jQuery-KingTable
  *
- * Copyright 2015, Roberto Prevato
+ * Copyright 2016, Roberto Prevato
  * http://ugrose.com
  *
  * Licensed under the MIT license:
@@ -18,7 +18,7 @@ from core.literature.scribe import Scribe
 
 # The maximum collection length that the server allows for "fixed collections"
 # (i.e. collections that don't require server side pagination)
-MAXIMUM_COLLECTION_LENGTH = 500
+MAXIMUM_COLLECTION_LENGTH = 600
 
 
 class CollectionManager:
@@ -36,7 +36,7 @@ class CollectionManager:
             # return the collection; but only if it doesn't exceeds a reasonable maximum
             all_data = self.get_all()
             all_data = ListUtils.optimize_list(all_data)
-            if len(all_data) < MAXIMUM_COLLECTION_LENGTH:
+            if len(all_data) <= MAXIMUM_COLLECTION_LENGTH:
                 return all_data
 
         # timestamp = data["timestamp"] # timestamp of the first time a page was required

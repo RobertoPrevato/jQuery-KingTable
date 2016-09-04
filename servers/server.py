@@ -6,7 +6,7 @@ from bll.collectionmanager import CollectionManager
  * jQuery-KingTable example server 1.0.0
  * https://github.com/RobertoPrevato/jQuery-KingTable
  *
- * Copyright 2015, Roberto Prevato
+ * Copyright 2016, Roberto Prevato
  * http://ugrose.com
  *
  * Licensed under the MIT license:
@@ -23,8 +23,8 @@ app = Flask(__name__, static_folder=pat)
 app.debug = True
 PORT = 44777
 
-ColorsManager = CollectionManager("colors.json")
-ProductsManager = CollectionManager("products.json")
+colors_manager = CollectionManager("colors.json")
+people_manager = CollectionManager("people.json")
 
 
 @app.route('/')
@@ -39,7 +39,18 @@ def colors():
     if data is None:
         return "Missing filters data.", 400, {"Content-Type": "text/plain"}
 
-    result = ColorsManager.get_catalog(data)
+    result = colors_manager.get_catalog(data)
+    return json.dumps(result, indent=4)
+
+
+@app.route("/api/people", methods=["OPTIONS", "GET", "POST"])
+def people():
+    # get the input data from the client:
+    data = request.get_json()
+    if data is None:
+        return "Missing filters data.", 400, {"Content-Type": "text/plain"}
+
+    result = people_manager.get_catalog(data)
     return json.dumps(result, indent=4)
 
 

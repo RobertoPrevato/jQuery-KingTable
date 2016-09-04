@@ -2,7 +2,7 @@
  * jQuery-KingTable Lodash connector.
  * https://github.com/RobertoPrevato/jQuery-KingTable
  *
- * Copyright 2015, Roberto Prevato
+ * Copyright 2016, Roberto Prevato
  * http://ugrose.com
  *
  * Licensed under the MIT license:
@@ -373,6 +373,9 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         var compiled = self.templateSafe(template, customFilters);
         //convert in jQuery object and assign the values
         var view = self.modelToView(customFilters, compiled);
+        //allow to edit the custom filters view externally:
+        if (options.onCustomFiltersRender)
+          options.onCustomFiltersRender.call(self, view);
         if (!options.filtersViewExpandable || options.filtersViewOpen) {
           filtersRegion.show();
           self.customFiltersVisible = true;
@@ -985,7 +988,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     
     //provides automatic binding from a context to a view
     modelToView: function (context, view) {
-      if (_.isString(view)) view = $(view);
+      if (_.isString(view)) view = $("<div>" + view + "</div>");
       var x, self = this, schema = self.schema;
       for (x in context) {
         var fields = view.find("[name=\"" + x + "\"]");
@@ -1076,11 +1079,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
      */
     clearFilters: function () {
       var self = this,
-          el = self.$el.find(".filters-region"),
-          currentFilters = self.customFilters;
-      if ($.isEmptyObject(currentFilters))
-        return true;
-      self.customFilters = {};
+          el = self.$el.find(".filters-region");
       var possibleValues = el.find("input[name]").map(function (i, o) { return o.name; });
       _.each(possibleValues, function (o) {
         self.query.set(o, "");

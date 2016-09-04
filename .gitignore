@@ -41,3 +41,5 @@ node_modules
 *.sh.swn
 *.sh.swo
 *.sh.swp
+
+servers/env/*
