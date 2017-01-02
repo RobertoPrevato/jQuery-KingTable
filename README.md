@@ -154,7 +154,7 @@ In order to run the provided development server it is necessary to use Python an
 If necessary, the recommended way is to install a version of Python, which by default include its **pip** (package management system for Python), then use pip to install Flask.
 Steps:
 
-* Install Python from [official website](https://www.python.org/downloads/)
+* If necessary, install Python from the [official website](https://www.python.org/downloads/)
 * When in doubt, version 3.x is recommended
 * Depending on the operating system, Python could be already installed or using different PATH variables: in most Linux distributions both Python 3.x and 2.x are pre-installed, Python 3.x has the PATH name python3, while Python 2.x has the PATH name python; while in Windows python 3.x can be launched using py -3; Python 2.x using py -2 (when they are both installed)
 * Learn how to create virtual environments: this is a best practice when working with Python, since it allows to keep the base installation clean and to install dependencies when needed, on a project-basis
@@ -165,15 +165,16 @@ python3 -m venv env
 # creating a virtual environment in a folder called 'env', using Python 3.x in Windows:
 py -3 -m venv env
 ```
-* (OPTIONAL) Activate the virtual environment using the command: `source env/bin/activate`
+* NB: under Linux (and probably Mac ?), a Python virtual environment with name _"env"_ has its interpreter files under _env/bin/_ folder; under Windows under _env\Scripts\__ folder. In following instructions, _env/bin_ is used: adapt as needed if you are using Windows
 * Install Flask using the command: `env/bin/pip install Flask`
+* (OPTIONAL) Activate the virtual environment using the command: `source env/bin/activate`
 
 * Run the development server.py included in the repository:
 ```py
-# Nota Bene: if you activated the virtual environment:
+# if you activated the virtual environment, you can run simply using:
 python server.py
 
-# if you did not activate the virtual environment:
+# if you did not activate the virtual environment, you need to call the right Python executable:
 env/bin/python server.py
 ```
 
