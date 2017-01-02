@@ -165,7 +165,7 @@ python3 -m venv env
 # creating a virtual environment in a folder called 'env', using Python 3.x in Windows:
 py -3 -m venv env
 ```
-* NB: under Linux (and probably Mac?), a Python virtual environment with name _"env"_ has its interpreter files under _env/bin/_ folder; under Windows under _env\Scripts\_ folder. In following instructions, _env/bin_ is used: adapt as needed if you are using Windows
+* NB: in Linux (and probably Mac?), a Python virtual environment with name _"env"_ has its interpreter files under _env/bin/_ folder; in Windows under _env\Scripts\_ folder. In following instructions, _env/bin_ is used: adapt as needed if you are using Windows
 * Install Flask using the command: `env/bin/pip install Flask`
 * (OPTIONAL) Activate the virtual environment using the command: `source env/bin/activate`
 
@@ -176,6 +176,9 @@ python server.py
 
 # if you did not activate the virtual environment, you need to call the right Python executable:
 env/bin/python server.py
+
+# (or, for Windows users):
+env\Scripts\python server.py
 ```
 
 ## Code organization
