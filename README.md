@@ -150,6 +150,9 @@ For a working example of server side implementation using Python Flask web frame
 * The *dist* folder contains the bundled source code (/dist/jquery.kingtable.js); and the minified source (/dist/jquery.kingtable.min.js)
 
 ### How to run the provided development server
+A development server is required for the development of the KingTable plugin, since some features require server side pagination, sorting and filtering (since filtering and sorting affect pagination). Python Flask was chosen because it's a lightweight and convenient web framework (one of my two personal favorites).
+Following are instructions on how to run a Flask development server.
+
 In order to run the provided development server it is necessary to use Python and Flask (either Python 2.x or 3.x).
 If necessary, the recommended way is to install a version of Python, which by default include its **pip** (package management system for Python), then use pip to install Flask.
 Steps:
