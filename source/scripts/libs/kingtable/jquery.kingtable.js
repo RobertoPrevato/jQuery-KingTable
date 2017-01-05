@@ -3,7 +3,7 @@
  * on the basis of their input data.
  * https://github.com/RobertoPrevato/jQuery-KingTable
  *
- * Copyright 2016, Roberto Prevato
+ * Copyright 2017, Roberto Prevato
  * http://ugrose.com
  *
  * Licensed under the MIT license:

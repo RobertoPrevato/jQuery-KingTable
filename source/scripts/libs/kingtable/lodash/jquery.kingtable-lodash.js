@@ -2,7 +2,7 @@
  * jQuery-KingTable Lodash connector.
  * https://github.com/RobertoPrevato/jQuery-KingTable
  *
- * Copyright 2016, Roberto Prevato
+ * Copyright 2017, Roberto Prevato
  * http://ugrose.com
  *
  * Licensed under the MIT license:
@@ -103,7 +103,12 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     /**
      * Allows to disable any view other than table.
      */
-    tableOnly: false
+    tableOnly: false,
+
+    /**
+     * Whether to focus automatically the search field, upon render, or not.
+     */
+    focusSearchFieldOnRender: true
   });
 
   // modifies the default schemas
@@ -231,6 +236,12 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
 
     focusSearchField: function () {
       var self = this;
+      if (!self.options.focusSearchFieldOnRender)
+        return self;
+      if ((window.pageYOffset || document.documentElement.scrollTop) > 0) {
+        // do not trigger focus, because the client would lose the page scroll position
+        return self;
+      }
       _.delay(function () {
         var sfield = $(".search-field").trigger("focus"),
           search = self.pagination.search;

@@ -2,7 +2,7 @@
  * I.js, simple helper to manage localized strings.
  * https://github.com/RobertoPrevato/I.js
  *
- * Copyright 2016, Roberto Prevato
+ * Copyright 2017, Roberto Prevato
  * http://ugrose.com
  *
  * Licensed under the MIT license:
