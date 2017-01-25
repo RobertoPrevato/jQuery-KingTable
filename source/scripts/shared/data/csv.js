@@ -1,7 +1,7 @@
 //
 // Csv utilities
 //
-R("csv", [], function () {
+R("kt-csv", ["kt-date"], function (DateUtils) {
 
   var setAttribute = "setAttribute";
 
@@ -19,12 +19,12 @@ R("csv", [], function () {
       /**
        * Separator to use
        */
-      separator: ",",
+      separator: ";",
       /**
        * Whether to add a separator line at the beginning of the file, or not.
        * (May be useful for excel)
        */
-      addSeparatorLine: false,
+      addSeparatorLine: true,
       /**
        * How the types should be handled: allStrings to manage all properties as strings (all will be quoted)
        */
@@ -47,20 +47,17 @@ R("csv", [], function () {
         test = "test",
         sep = options.separator,
         dobquote = "\"";
-      if (options.addSeparatorLine) {
-        //for excel
-        re[push]("sep=" + sep);
-      }
       for (var i = 0, l = data[len]; i < l; i++) {
         var a = [], row = data[i];
         //assume that the first row contains the columns
         for (var k = 0, j = row[len]; k < j; k++) {
           var v = row[k];
           if (v instanceof Date) {
-            v = v.toLocaleString();
+            v = DateUtils.format(v, DateUtils.hasTime(v) ? "DD.MM.YYYY hh:mm:ss" : "DD.MM.YYYY");
           } else {
-            if (typeof v != "string")
-              v = v[toString] ? v[toString]() : "";
+            if (typeof v != "string") {
+              v = v && v[toString] ? v[toString]() : "";
+            }
           }
           v = v[rep](/"/g, '""');
           //escape quotes - RFC-4180, paragraph "If double-quotes are used to enclose fields, then a double-quote
@@ -77,7 +74,10 @@ R("csv", [], function () {
         }
         re[push](a.join(sep));
       }
-      return re.join("\n");
+      if (options.addSeparatorLine) {
+        re[push]("\t" + sep);
+      }
+      return "\uFEFF" + re.join("\n");
     }
   };
 });

@@ -8,7 +8,7 @@
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
-R("array-search", ["string", "reflection"], function (StringUtils, Reflection) {
+R("kt-array-search", ["kt-string", "kt-reflection"], function (StringUtils, Reflection) {
   
   //use this object to extend prototypes of objects that should offer
   //functions to search inside arrays

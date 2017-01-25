@@ -1,7 +1,7 @@
 //
 // Menu functions
 //
-R("menu-functions", [], function () {
+R("kt-menu-functions", [], function () {
 
   var toggle = ".ug-menu,.ug-submenu";
   function protected(e) {

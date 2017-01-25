@@ -8,7 +8,7 @@
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
-R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, Menu, I) {
+R("kt-kingtable-lodash", ["kingtable-core", "kt-menu", "kt-i18n"], function (KingTable, Menu, I) {
   //
   //  Extends jQuery KingTable prototype with functions to use it with jQuery and Lodash.
   //  These functions are separated from the business logic, and contain DOM manipulation code.
@@ -40,6 +40,11 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     "click .export-btn": "onExportClick",
     "change [name='view-type']": "onViewChange"
   };
+
+  // different input types
+  _.each("text date datetime datetime-local email tel time search url week color month number".split(" "), function (inputType) {
+    baseevents["change .filters-region input[type='" + inputType + "']"] = "viewToModel";
+  });
 
   //extend the table default options
   _.extend(KingTable.prototype.defaults, {
@@ -108,7 +113,12 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     /**
      * Whether to focus automatically the search field, upon render, or not.
      */
-    focusSearchFieldOnRender: true
+    focusSearchFieldOnRender: true,
+
+    /**
+     * Debounce delay used to set values from filters view to KingTable.
+     */
+    viewToModelDelay: 500
   });
 
   // modifies the default schemas
@@ -141,7 +151,11 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         options.views = options.views.concat(extraViews);
 
       if (!self.getViewSchema()) self.view = defaultView;
-      //register a missing data event handler
+
+      // make the viewToModel function debounced, in the right context
+      self.viewToModel = _.debounce(self.viewToModel.bind(self), options.viewToModelDelay);
+
+      // register a missing data event handler
       return self.on("missing-data", function () {
         //data is missing; and the table doesn't have columns info
         //this may happen when the user refreshes the page when nothing is displayed
@@ -323,7 +337,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       var self = this;
       
       //allow to sort the columns; but only if jQuery.sortable has been loaded
-      if ($.fn.sortable) {
+      if ($.fn.sortable && self.options.allowColumnsSorting) {
         //NB: jQuery automatically removes event handlers attached using its functions, when removing elements from the DOM.
         $("#columns-menu").sortable({
           update: function (e, ui) {
@@ -393,6 +407,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         }
         self.trigger("on-filters-render", view);
         filtersRegion.html(view);
+        self.trigger("after-filters-render", view);
       }
       return self;
     },
@@ -423,12 +438,30 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
 
         var html = "", rowTemplate = self.getItemTemplate();
         _.each(items, function (item) {
+          self.formatItem(item);
           html += self.templateSafe(rowTemplate, item);
         });
         //inject all html at once inside the table body.
+        if (self.beforeRender)
+          self.beforeRender();
         self.$el.find(".king-table-body").html(html);
+        if (self.afterRender)
+          self.afterRender();
       });
       return self;
+    },
+
+    formatItem: function (item) {
+      var self = this,
+        name,
+        formattedColumns = self.columns.formatted,
+        suffix = self.options.formattedSuffix;
+      _.each(self.columns, function (col) {
+        name = col.name;
+        if (_.contains(formattedColumns, name)) {
+          item[name + suffix] = col.format.call(self, item[name]);
+        }
+      });
     },
 
     removeEmptyView: function () {
@@ -537,7 +570,18 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       if (!self.columnsInitialized)
         self.initializeColumns();
 
-      sb += "<" + wrapperTagName + ">";
+      sb += "<" + wrapperTagName;
+      if (_.any(this.columns, function (o) { return o.name == "id";})) {
+        sb += " data-id=\"{{id}}\"";
+      }
+      var tableRowDecorator = options.tableRowDecorator;
+      if (tableRowDecorator) {
+        if (!options.templateHelpers.hasOwnProperty(tableRowDecorator)) {
+          throw "Options define a tableRowDecorator, but it is not defined inside templateHelpers option.";
+        }
+        sb += " {%print(" + tableRowDecorator + "(obj))%}";
+      }
+      sb += ">";
       if (options.rowCount) {
         sb += self.string.format("<{0} class=\"row-number\">{{rowCount}}</{0}>", cellTagName);
       }
@@ -559,7 +603,8 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         }
 
         var propertyToUse = _.contains(self.columns.formatted, column.name) ? (column.name + self.options.formattedSuffix) : column.name;
-        sb += "<" + cellTagName + ">";
+        // creates the element that contains the cell value, adding a class specific to the column property
+        sb += "<" + cellTagName + " class=\"" + column.cssName + "\"" + ">";
 
         //automatic highlight of searched properties: if the column template contains the $highlight function;
         //the programmer is specifying the template, so don't interfere!
@@ -568,7 +613,11 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
           sb += '{%print($highlight(' + propertyToUse + '))%}';
         } else {
           //use the column template
-          sb += column.template;
+          if (_.contains(self.columns.formatted, column.name)) {
+            sb += "{{" + propertyToUse + "}}";
+          } else {
+            sb += column.template;
+          }
         }
         sb += "</" + cellTagName + ">";
       }

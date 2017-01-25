@@ -1,7 +1,7 @@
 //
 // An instantiable object to analyze objects and return useful information about them.
 //
-R("object-analyzer", ["reflection"], function (Reflection) {
+R("kt-object-analyzer", ["kt-reflection"], function (Reflection) {
 
   var Analyzer = function () {};
   

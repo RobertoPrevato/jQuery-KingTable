@@ -1,7 +1,7 @@
 //
 // Date utilities
 //
-R("date", [], function () {
+R("kt-date", [], function () {
 
   function zeroFill(s, l) {
     if ("string" != typeof s) s = s.toString();
@@ -140,6 +140,13 @@ R("date", [], function () {
   };
 
   return {
+   /**
+    * Returns a value indicating whether the given date includes a time component or not.
+    */
+    hasTime: function (a) {
+      if (!a) return false;
+      return _.any([a.getMinutes(), a.getSeconds(), a.getHours()], function (o) { return o > 0; });
+    },
     format: function (date, format, regional) {
       var re = format;
       for (var x in parts) {

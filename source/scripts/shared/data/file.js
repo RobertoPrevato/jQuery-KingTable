@@ -1,7 +1,7 @@
 //
 // Files utilities
 //
-R("file", [], function () {
+R("kt-file", [], function () {
 
   return {
 

@@ -1,7 +1,7 @@
 //
 // Utilities to work with the query string (location.search)
 //
-R("query", [], function () {
+R("kt-query", [], function () {
   
   return {
     

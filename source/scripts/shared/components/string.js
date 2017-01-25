@@ -1,7 +1,7 @@
 //
 // string utilities
 //
-R("string", [], function () {
+R("kt-string", [], function () {
   
   return {
     format: function (s) {

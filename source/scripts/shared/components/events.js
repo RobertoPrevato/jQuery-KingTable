@@ -1,7 +1,7 @@
 //
 // The super useful events borrowed from the Backbone library.
 //
-R("events", [], function () {
+R("kt-events", [], function () {
 
   var array = [];
   var push = array.push;

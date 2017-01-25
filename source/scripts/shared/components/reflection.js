@@ -1,4 +1,4 @@
-R("reflection", [], function () {
+R("kt-reflection", [], function () {
   
   //static
   

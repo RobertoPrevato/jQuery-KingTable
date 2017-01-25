@@ -1,7 +1,7 @@
 //
 // Instantiable object to sanitize string values inside objects, to avoid JavaScript injection
 //
-R("sanitizer", [], function () {
+R("kt-sanitizer", [], function () {
 
   var Sanitizer = function () { };
 

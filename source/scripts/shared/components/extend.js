@@ -1,7 +1,7 @@
 //
 // The super useful extend function, borrowed from the Backbone library.
 //
-R("extend", [], function () {
+R("kt-extend", [], function () {
 
   return function (protoProps, staticProps) {
     var parent = this;

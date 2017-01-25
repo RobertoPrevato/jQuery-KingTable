@@ -8,7 +8,13 @@
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
-R("filters-manager", ["string", "regex", "array-search", "extend"], function (StringUtils, RegexUtils, ArrayUtils, Extend) {
+R("kt-filters-manager", ["kt-string",
+                         "kt-regex",
+                         "kt-array-search",
+                         "kt-extend"], function (StringUtils,
+                                                 RegexUtils,
+                                                 ArrayUtils,
+                                                 Extend) {
   //
   // Instantiable object, providing business logic to manage filters.
   //

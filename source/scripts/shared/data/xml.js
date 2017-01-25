@@ -1,7 +1,7 @@
 //
 // Xml utilities
 //
-R("xml", [], function () {
+R("kt-xml", [], function () {
 
   return {
 

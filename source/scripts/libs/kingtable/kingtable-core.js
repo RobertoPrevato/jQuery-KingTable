@@ -8,9 +8,32 @@
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
-R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "query", "object-analyzer", "sanitizer",
-  "filters-manager", "csv", "xml", "file"], function (Extend, Events, StringUtils, RegexUtils, ArraySearch, Query, Analyzer,
-                                               Sanitizer, FiltersManager, Csv, Xml, FileUtil) {
+R("kingtable-core", [
+  "kt-extend",
+  "kt-events",
+  "kt-string",
+  "kt-date",
+  "kt-regex",
+  "kt-array-search",
+  "kt-query",
+  "kt-object-analyzer",
+  "kt-sanitizer",
+  "kt-filters-manager",
+  "kt-csv",
+  "kt-xml",
+  "kt-file"], function (Extend,
+                        Events,
+                        StringUtils,
+                        DateUtils,
+                        RegexUtils,
+                        ArraySearch,
+                        Query,
+                        Analyzer,
+                        Sanitizer,
+                        FiltersManager,
+                        Csv,
+                        Xml,
+                        FileUtil) {
   //
   // Defines the core business logic of the jQuery-KingTable plugin.
   // The core is abstracted from jQuery itself;
@@ -21,12 +44,13 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       _.extend(self, staticProperties);
     self.mergeOptions(options).coreInit().initialize();
   };
-
+  KingTable.version = "1.0.1";
   KingTable.extend = Extend;
 
   KingTable.Utils = {};
   KingTable.Utils.String = StringUtils;
   KingTable.Utils.Regex = RegexUtils;
+  KingTable.Utils.Date = DateUtils;
   KingTable.Utils.Array = ArraySearch;
   KingTable.Utils.Analyzer = Analyzer;
   KingTable.Utils.Sanitizer = Sanitizer;
@@ -309,7 +333,12 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       /**
        * Whether to go to the first page upon an hard refresh, or not
        */
-      firstPageOnRefresh: true
+      firstPageOnRefresh: true,
+
+      /**
+       * Whether to allow columns sorting or not.
+       */
+      allowColumnsSorting: true
     },
 
     string: StringUtils,
@@ -531,6 +560,14 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       return _.extend(self.getFilters(), self.options.postData || {});
     },
 
+    sortOrderKey: function (value) {
+      if (value == "asc")
+        return "ascending";
+      if (value == "desc")
+        return "descending";
+      return "descending";
+    },
+
     getFilters: function () {
       var self = this,
           pagination = self.pagination;
@@ -539,7 +576,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         page: pagination.page,//page number
         size: pagination.resultsPerPage,//page size; i.e. results per page
         orderBy: pagination.orderBy || "",
-        sortOrder: pagination.sortOrder || "",
+        sortOrder: this.sortOrderKey(pagination.sortOrder) || "",
         search: pagination.search,
         timestamp: self.anchorTimestamp//the timestamp of the first time the table was rendered
       }, self.customFilters);
@@ -626,6 +663,8 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
             //total number of results (possibly), so a client side pagination can be built;
             //
             //expect catalog structure (page count, page number, etc.)
+            if (catalog.items && !catalog.subset)
+              catalog.subset = catalog.items;
             if (!catalog.subset) self.raiseError("The returned object is not a catalog");
             var subset = self.normalizeCollection(catalog.subset);
             if (self.columnsInitialized) self.formatData(subset);
@@ -835,7 +874,15 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
             col.displayName = col.name;
             delete col.name;
           }
-          optionsColumns[x].position = i;
+          if (_.isString(col.type)) {
+            objSchema[x].type = col.type;
+          }
+          var colPos = col.position;
+          if (_.isNumber(colPos)) {
+            optionsColumns[x].position = colPos;
+          } else {
+            optionsColumns[x].position = i;
+          }
           i++;
         }
       }
@@ -883,6 +930,11 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         if (posData) {
           col.position = _.indexOf(posData, x);
         }
+        // set css name for column
+        n = "cssName";
+        if (!_.isString(col[n])) {
+          col[n] = _.kebabCase(col.name);
+        }
 
         if (!_.isString(col.displayName))
           col.displayName = col.name;
@@ -907,6 +959,13 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       self.setColumns(columns);
       //will contain names of formatted properties
       self.columns.formatted = [];
+
+      _.each(columns, function (col) {
+        if (col.format) {
+          self.columns.formatted.push(col.name);
+        }
+      });
+
       return self;
     },
 

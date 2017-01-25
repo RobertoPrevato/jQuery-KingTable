@@ -12,7 +12,7 @@
 //
 // The super useful extend function, borrowed from the Backbone library.
 //
-R("extend", [], function () {
+R("kt-extend", [], function () {
 
   return function (protoProps, staticProps) {
     var parent = this;
@@ -54,7 +54,7 @@ R("extend", [], function () {
 //
 // The super useful events borrowed from the Backbone library.
 //
-R("events", [], function () {
+R("kt-events", [], function () {
 
   var array = [];
   var push = array.push;
@@ -229,7 +229,7 @@ R("events", [], function () {
 //
 // string utilities
 //
-R("string", [], function () {
+R("kt-string", [], function () {
   
   return {
     format: function (s) {
@@ -324,7 +324,7 @@ R("string", [], function () {
 //
 // regex utilities
 //
-R("regex", [], function () {
+R("kt-regex", [], function () {
   
   //use this object to extend prototypes of objects that should offers
   //functions for Regular Expressions
@@ -385,7 +385,7 @@ R("regex", [], function () {
 //
 // Date utilities
 //
-R("date", [], function () {
+R("kt-date", [], function () {
 
   function zeroFill(s, l) {
     if ("string" != typeof s) s = s.toString();
@@ -524,6 +524,13 @@ R("date", [], function () {
   };
 
   return {
+   /**
+    * Returns a value indicating whether the given date includes a time component or not.
+    */
+    hasTime: function (a) {
+      if (!a) return false;
+      return _.any([a.getMinutes(), a.getSeconds(), a.getHours()], function (o) { return o > 0; });
+    },
     format: function (date, format, regional) {
       var re = format;
       for (var x in parts) {
@@ -539,7 +546,7 @@ R("date", [], function () {
 
 
 
-R("reflection", [], function () {
+R("kt-reflection", [], function () {
   
   //static
   
@@ -626,7 +633,7 @@ R("reflection", [], function () {
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
-R("array-search", ["string", "reflection"], function (StringUtils, Reflection) {
+R("kt-array-search", ["kt-string", "kt-reflection"], function (StringUtils, Reflection) {
   
   //use this object to extend prototypes of objects that should offer
   //functions to search inside arrays
@@ -800,7 +807,7 @@ R("array-search", ["string", "reflection"], function (StringUtils, Reflection) {
 //
 // An instantiable object to analyze objects and return useful information about them.
 //
-R("object-analyzer", ["reflection"], function (Reflection) {
+R("kt-object-analyzer", ["kt-reflection"], function (Reflection) {
 
   var Analyzer = function () {};
   
@@ -971,7 +978,7 @@ R("object-analyzer", ["reflection"], function (Reflection) {
 //
 // Instantiable object to sanitize string values inside objects, to avoid JavaScript injection
 //
-R("sanitizer", [], function () {
+R("kt-sanitizer", [], function () {
 
   var Sanitizer = function () { };
 
@@ -1005,7 +1012,7 @@ R("sanitizer", [], function () {
 //
 // Utilities to work with the query string (location.search)
 //
-R("query", [], function () {
+R("kt-query", [], function () {
   
   return {
     
@@ -1073,7 +1080,7 @@ R("query", [], function () {
 //
 // Files utilities
 //
-R("file", [], function () {
+R("kt-file", [], function () {
 
   return {
 
@@ -1127,7 +1134,7 @@ R("file", [], function () {
 //
 // Csv utilities
 //
-R("csv", [], function () {
+R("kt-csv", ["kt-date"], function (DateUtils) {
 
   var setAttribute = "setAttribute";
 
@@ -1145,12 +1152,12 @@ R("csv", [], function () {
       /**
        * Separator to use
        */
-      separator: ",",
+      separator: ";",
       /**
        * Whether to add a separator line at the beginning of the file, or not.
        * (May be useful for excel)
        */
-      addSeparatorLine: false,
+      addSeparatorLine: true,
       /**
        * How the types should be handled: allStrings to manage all properties as strings (all will be quoted)
        */
@@ -1173,20 +1180,17 @@ R("csv", [], function () {
         test = "test",
         sep = options.separator,
         dobquote = "\"";
-      if (options.addSeparatorLine) {
-        //for excel
-        re[push]("sep=" + sep);
-      }
       for (var i = 0, l = data[len]; i < l; i++) {
         var a = [], row = data[i];
         //assume that the first row contains the columns
         for (var k = 0, j = row[len]; k < j; k++) {
           var v = row[k];
           if (v instanceof Date) {
-            v = v.toLocaleString();
+            v = DateUtils.format(v, DateUtils.hasTime(v) ? "DD.MM.YYYY hh:mm:ss" : "DD.MM.YYYY");
           } else {
-            if (typeof v != "string")
-              v = v[toString] ? v[toString]() : "";
+            if (typeof v != "string") {
+              v = v && v[toString] ? v[toString]() : "";
+            }
           }
           v = v[rep](/"/g, '""');
           //escape quotes - RFC-4180, paragraph "If double-quotes are used to enclose fields, then a double-quote
@@ -1203,7 +1207,10 @@ R("csv", [], function () {
         }
         re[push](a.join(sep));
       }
-      return re.join("\n");
+      if (options.addSeparatorLine) {
+        re[push]("\t" + sep);
+      }
+      return "\uFEFF" + re.join("\n");
     }
   };
 });
@@ -1211,7 +1218,7 @@ R("csv", [], function () {
 //
 // Xml utilities
 //
-R("xml", [], function () {
+R("kt-xml", [], function () {
 
   return {
 
@@ -1253,7 +1260,7 @@ R("xml", [], function () {
 //
 // Returns a common interface for internazionalization, supporting scoped translations.
 //
-R("i18n", [], function () {
+R("kt-i18n", [], function () {
   //if I.js is defined; return it.
   //https://github.com/RobertoPrevato/I.js
   if (window["I"]) return window.I;
@@ -1269,7 +1276,7 @@ R("i18n", [], function () {
 //
 // Function to build menus, given a schema
 //
-R("menu-builder", [], function () {
+R("kt-menu-builder", [], function () {
 
   var map = {
     "css": "class"
@@ -1309,8 +1316,10 @@ R("menu-builder", [], function () {
           case "checkbox":
             var cid = _.uniqueId("mnck-");
             var checked = item.checked ? " checked=\"checked\"" : "";
+            a += "<span tabindex=\"0\"" + attr(item) + ">"
             a += "<input id=\"" + cid + "\" type=\"checkbox\"" + attr(item) + checked + " />";
             a += "<label for=\"" + cid + "\">" + name + "</label>";
+            a += "</span>"
             break;
           case "radio":
             if (!item.value) throw "missing value for radio";
@@ -1345,7 +1354,7 @@ R("menu-builder", [], function () {
 //
 // Menu functions
 //
-R("menu-functions", [], function () {
+R("kt-menu-functions", [], function () {
 
   var toggle = ".ug-menu,.ug-submenu";
   function protected(e) {
@@ -1509,7 +1518,7 @@ R("menu-functions", [], function () {
 //
 // Proxy module for menus modules.
 //
-R("menu", ["menu-builder", "menu-functions"], function (MenuBuilder, MenuFunctions) {
+R("kt-menu", ["kt-menu-builder", "kt-menu-functions"], function (MenuBuilder, MenuFunctions) {
   return {
     builder: MenuBuilder,
     functions: MenuFunctions
@@ -1526,7 +1535,13 @@ R("menu", ["menu-builder", "menu-functions"], function (MenuBuilder, MenuFunctio
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
-R("filters-manager", ["string", "regex", "array-search", "extend"], function (StringUtils, RegexUtils, ArrayUtils, Extend) {
+R("kt-filters-manager", ["kt-string",
+                         "kt-regex",
+                         "kt-array-search",
+                         "kt-extend"], function (StringUtils,
+                                                 RegexUtils,
+                                                 ArrayUtils,
+                                                 Extend) {
   //
   // Instantiable object, providing business logic to manage filters.
   //
@@ -1691,9 +1706,32 @@ R("filters-manager", ["string", "regex", "array-search", "extend"], function (St
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
-R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "query", "object-analyzer", "sanitizer",
-  "filters-manager", "csv", "xml", "file"], function (Extend, Events, StringUtils, RegexUtils, ArraySearch, Query, Analyzer,
-                                               Sanitizer, FiltersManager, Csv, Xml, FileUtil) {
+R("kingtable-core", [
+  "kt-extend",
+  "kt-events",
+  "kt-string",
+  "kt-date",
+  "kt-regex",
+  "kt-array-search",
+  "kt-query",
+  "kt-object-analyzer",
+  "kt-sanitizer",
+  "kt-filters-manager",
+  "kt-csv",
+  "kt-xml",
+  "kt-file"], function (Extend,
+                        Events,
+                        StringUtils,
+                        DateUtils,
+                        RegexUtils,
+                        ArraySearch,
+                        Query,
+                        Analyzer,
+                        Sanitizer,
+                        FiltersManager,
+                        Csv,
+                        Xml,
+                        FileUtil) {
   //
   // Defines the core business logic of the jQuery-KingTable plugin.
   // The core is abstracted from jQuery itself;
@@ -1704,12 +1742,13 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       _.extend(self, staticProperties);
     self.mergeOptions(options).coreInit().initialize();
   };
-
+  KingTable.version = "1.0.1";
   KingTable.extend = Extend;
 
   KingTable.Utils = {};
   KingTable.Utils.String = StringUtils;
   KingTable.Utils.Regex = RegexUtils;
+  KingTable.Utils.Date = DateUtils;
   KingTable.Utils.Array = ArraySearch;
   KingTable.Utils.Analyzer = Analyzer;
   KingTable.Utils.Sanitizer = Sanitizer;
@@ -1992,7 +2031,12 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       /**
        * Whether to go to the first page upon an hard refresh, or not
        */
-      firstPageOnRefresh: true
+      firstPageOnRefresh: true,
+
+      /**
+       * Whether to allow columns sorting or not.
+       */
+      allowColumnsSorting: true
     },
 
     string: StringUtils,
@@ -2214,6 +2258,14 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       return _.extend(self.getFilters(), self.options.postData || {});
     },
 
+    sortOrderKey: function (value) {
+      if (value == "asc")
+        return "ascending";
+      if (value == "desc")
+        return "descending";
+      return "descending";
+    },
+
     getFilters: function () {
       var self = this,
           pagination = self.pagination;
@@ -2222,7 +2274,7 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         page: pagination.page,//page number
         size: pagination.resultsPerPage,//page size; i.e. results per page
         orderBy: pagination.orderBy || "",
-        sortOrder: pagination.sortOrder || "",
+        sortOrder: this.sortOrderKey(pagination.sortOrder) || "",
         search: pagination.search,
         timestamp: self.anchorTimestamp//the timestamp of the first time the table was rendered
       }, self.customFilters);
@@ -2309,6 +2361,8 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
             //total number of results (possibly), so a client side pagination can be built;
             //
             //expect catalog structure (page count, page number, etc.)
+            if (catalog.items && !catalog.subset)
+              catalog.subset = catalog.items;
             if (!catalog.subset) self.raiseError("The returned object is not a catalog");
             var subset = self.normalizeCollection(catalog.subset);
             if (self.columnsInitialized) self.formatData(subset);
@@ -2518,7 +2572,15 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
             col.displayName = col.name;
             delete col.name;
           }
-          optionsColumns[x].position = i;
+          if (_.isString(col.type)) {
+            objSchema[x].type = col.type;
+          }
+          var colPos = col.position;
+          if (_.isNumber(colPos)) {
+            optionsColumns[x].position = colPos;
+          } else {
+            optionsColumns[x].position = i;
+          }
           i++;
         }
       }
@@ -2566,6 +2628,11 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
         if (posData) {
           col.position = _.indexOf(posData, x);
         }
+        // set css name for column
+        n = "cssName";
+        if (!_.isString(col[n])) {
+          col[n] = _.kebabCase(col.name);
+        }
 
         if (!_.isString(col.displayName))
           col.displayName = col.name;
@@ -2590,6 +2657,13 @@ R("kingtable-core", ["extend", "events", "string", "regex", "array-search", "que
       self.setColumns(columns);
       //will contain names of formatted properties
       self.columns.formatted = [];
+
+      _.each(columns, function (col) {
+        if (col.format) {
+          self.columns.formatted.push(col.name);
+        }
+      });
+
       return self;
     },
 
@@ -3116,7 +3190,7 @@ R("jquery-kingtable", ["kingtable-core"], function (KingTable) {
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
-R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, Menu, I) {
+R("kt-kingtable-lodash", ["kingtable-core", "kt-menu", "kt-i18n"], function (KingTable, Menu, I) {
   //
   //  Extends jQuery KingTable prototype with functions to use it with jQuery and Lodash.
   //  These functions are separated from the business logic, and contain DOM manipulation code.
@@ -3148,6 +3222,11 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     "click .export-btn": "onExportClick",
     "change [name='view-type']": "onViewChange"
   };
+
+  // different input types
+  _.each("text date datetime datetime-local email tel time search url week color month number".split(" "), function (inputType) {
+    baseevents["change .filters-region input[type='" + inputType + "']"] = "viewToModel";
+  });
 
   //extend the table default options
   _.extend(KingTable.prototype.defaults, {
@@ -3216,7 +3295,12 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
     /**
      * Whether to focus automatically the search field, upon render, or not.
      */
-    focusSearchFieldOnRender: true
+    focusSearchFieldOnRender: true,
+
+    /**
+     * Debounce delay used to set values from filters view to KingTable.
+     */
+    viewToModelDelay: 500
   });
 
   // modifies the default schemas
@@ -3249,7 +3333,11 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         options.views = options.views.concat(extraViews);
 
       if (!self.getViewSchema()) self.view = defaultView;
-      //register a missing data event handler
+
+      // make the viewToModel function debounced, in the right context
+      self.viewToModel = _.debounce(self.viewToModel.bind(self), options.viewToModelDelay);
+
+      // register a missing data event handler
       return self.on("missing-data", function () {
         //data is missing; and the table doesn't have columns info
         //this may happen when the user refreshes the page when nothing is displayed
@@ -3431,7 +3519,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       var self = this;
       
       //allow to sort the columns; but only if jQuery.sortable has been loaded
-      if ($.fn.sortable) {
+      if ($.fn.sortable && self.options.allowColumnsSorting) {
         //NB: jQuery automatically removes event handlers attached using its functions, when removing elements from the DOM.
         $("#columns-menu").sortable({
           update: function (e, ui) {
@@ -3501,6 +3589,7 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         }
         self.trigger("on-filters-render", view);
         filtersRegion.html(view);
+        self.trigger("after-filters-render", view);
       }
       return self;
     },
@@ -3531,12 +3620,30 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
 
         var html = "", rowTemplate = self.getItemTemplate();
         _.each(items, function (item) {
+          self.formatItem(item);
           html += self.templateSafe(rowTemplate, item);
         });
         //inject all html at once inside the table body.
+        if (self.beforeRender)
+          self.beforeRender();
         self.$el.find(".king-table-body").html(html);
+        if (self.afterRender)
+          self.afterRender();
       });
       return self;
+    },
+
+    formatItem: function (item) {
+      var self = this,
+        name,
+        formattedColumns = self.columns.formatted,
+        suffix = self.options.formattedSuffix;
+      _.each(self.columns, function (col) {
+        name = col.name;
+        if (_.contains(formattedColumns, name)) {
+          item[name + suffix] = col.format.call(self, item[name]);
+        }
+      });
     },
 
     removeEmptyView: function () {
@@ -3645,7 +3752,18 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
       if (!self.columnsInitialized)
         self.initializeColumns();
 
-      sb += "<" + wrapperTagName + ">";
+      sb += "<" + wrapperTagName;
+      if (_.any(this.columns, function (o) { return o.name == "id";})) {
+        sb += " data-id=\"{{id}}\"";
+      }
+      var tableRowDecorator = options.tableRowDecorator;
+      if (tableRowDecorator) {
+        if (!options.templateHelpers.hasOwnProperty(tableRowDecorator)) {
+          throw "Options define a tableRowDecorator, but it is not defined inside templateHelpers option.";
+        }
+        sb += " {%print(" + tableRowDecorator + "(obj))%}";
+      }
+      sb += ">";
       if (options.rowCount) {
         sb += self.string.format("<{0} class=\"row-number\">{{rowCount}}</{0}>", cellTagName);
       }
@@ -3667,7 +3785,8 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
         }
 
         var propertyToUse = _.contains(self.columns.formatted, column.name) ? (column.name + self.options.formattedSuffix) : column.name;
-        sb += "<" + cellTagName + ">";
+        // creates the element that contains the cell value, adding a class specific to the column property
+        sb += "<" + cellTagName + " class=\"" + column.cssName + "\"" + ">";
 
         //automatic highlight of searched properties: if the column template contains the $highlight function;
         //the programmer is specifying the template, so don't interfere!
@@ -3676,7 +3795,11 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
           sb += '{%print($highlight(' + propertyToUse + '))%}';
         } else {
           //use the column template
-          sb += column.template;
+          if (_.contains(self.columns.formatted, column.name)) {
+            sb += "{{" + propertyToUse + "}}";
+          } else {
+            sb += column.template;
+          }
         }
         sb += "</" + cellTagName + ">";
       }
@@ -4300,15 +4423,15 @@ R("kingtable-lodash", ["kingtable-core", "menu", "i18n"], function (KingTable, M
 if (!$.KingTable.Templates) $.KingTable.Templates = {};
 (function (templates) {
   var o = {
+    'king-table-head-cell': '<th data-id="{{cid}}" class="{{$hyphenize(name)}}{% if (obj.sortable) { %} sortable{%}%}"> {% if (name) { %} <div> <span>{{displayName}}</span> <span class="oi" data-glyph="{% if (obj.sort) { %}sort-{{obj.sort}}ending{%}%}" aria-hidden="true"></span> {% if (obj.resizable) { %} <span class="resize-handler"></span> {% } %} </div> {% } %} </th>',
     'king-table-preloader': '<div class="preloader-mask"> <div class="preloader-icon"></div> </div>',
+    'king-table-empty-cell': '<th></th>',
     'king-table-gallery': '<div class="king-table-gallery"> <ul class="king-table-body"></ul> <br class="break" /> </div>',
     'king-table-table': '<table class="king-table"> <thead class="king-table-head"></thead> <tbody class="king-table-body"></tbody> </table>',
     'king-table-empty-view': '<div class="king-table-empty"> <span>{{$i("voc.NoResults")}}</span> </div>',
-    'king-table-head-cell': '<th data-id="{{cid}}" class="{{$hyphenize(name)}}{% if (obj.sortable) { %} sortable{%}%}"> {% if (name) { %} <div> <span>{{displayName}}</span> <span class="oi" data-glyph="{% if (obj.sort) { %}sort-{{obj.sort}}ending{%}%}" aria-hidden="true"></span> {% if (obj.resizable) { %} <span class="resize-handler"></span> {% } %} </div> {% } %} </th>',
-    'king-table-empty-cell': '<th></th>',
     'king-table-base': '<div class="king-table-region"> <div class="pagination-bar"></div> <div class="filters-region"></div> <div class="king-table-container"></div> </div>',
     'king-table-error-view': '<div class="king-table-error"> <span class="message"> <span>{{message}}</span> <span class="oi" data-glyph="warning" aria-hidden="true"></span> </span> </div>',
-    'pagination-bar-buttons': '{% if (page > firstPage) { %} <span tabindex="0" class="pagination-button pagination-bar-first-page oi" data-glyph="media-step-backward" title="{{$i(\'voc.FirstPage\')}}"></span> <span tabindex="0" class="pagination-button pagination-bar-prev-page oi" data-glyph="caret-left" title="{{$i(\'voc.PrevPage\')}}"></span> {% } else { %} <span class="pagination-button-disabled pagination-bar-first-page-disabled oi" data-glyph="media-step-backward"></span> <span class="pagination-button-disabled pagination-bar-prev-page-disabled oi" data-glyph="caret-left"></span> {% } %} <span class="separator"></span> <span class="valigned">{{$i(\'voc.Page\')}} </span> {% if (totalPageCount > 1) { %} <input name="page-number" text="text" class="w30 must-integer pagination-bar-page-number" value="{{page}}" /> {% } else { %} <span class="valigned pagination-bar-page-number-disabled">{{page}}</span> {% } %} <span class="valigned total-page-count"> {{$i(\'voc.of\')}} {{totalPageCount}}</span> <span class="separator"></span> <span tabindex="0" class="pagination-button pagination-bar-refresh oi" data-glyph="reload" title="{{$i(\'voc.Refresh\')}}"></span> <span class="separator"></span> {% if (page < totalPageCount) { %} <span tabindex="0" class="pagination-button pagination-bar-next-page oi" data-glyph="caret-right" aria-expanded="true" title="{{$i(\'voc.NextPage\')}}"></span> <span tabindex="0" class="pagination-button pagination-bar-last-page oi" data-glyph="media-step-forward" title="{{$i(\'voc.LastPage\')}}"></span> {% } else { %} <span class="pagination-button-disabled pagination-bar-next-page-disabled oi" data-glyph="caret-right"></span> <span class="pagination-button-disabled pagination-bar-last-page-disabled oi" data-glyph="media-step-forward"></span> {% } %} <span class="separator"></span> <span class="valigned">{{$i(\'voc.ResultsPerPage\')}}</span> {% if (totalRowsCount) { %} <select name="pageresults" class="pagination-bar-results-select valigned"{% if (totalRowsCount <= 10) { %} disabled="disabled"{% } %}> {% _.each(resultsPerPageSelect, function (val) { %} <option value="{{val}}"{% if (val == resultsPerPage) { %} selected="selected"{%}%}>{{val}}</option> {% }) %} </select> {% } else { %} <select name="pageresults" class="pagination-bar-results-select valigned" disabled="disabled" readonly="readonly"></select> {% } %} <span class="separator"></span> <span class="valigned m0"> {% if (totalRowsCount) { %} {{$i(\'voc.Results\')}} {{firstObjectNumber}} - {{Math.min(lastObjectNumber, totalRowsCount)}} {{$i(\'voc.of\')}} {{totalRowsCount}} {% } else { %} 0 Results {% } %} </span> <span class="separator"></span>',
+    'pagination-bar-buttons': '{% if (page > firstPage) { %} <span tabindex="0" class="pagination-button pagination-bar-first-page oi" data-glyph="media-step-backward" title="{{$i(\'voc.FirstPage\')}}"></span> <span tabindex="0" class="pagination-button pagination-bar-prev-page oi" data-glyph="caret-left" title="{{$i(\'voc.PrevPage\')}}"></span> {% } else { %} <span class="pagination-button-disabled pagination-bar-first-page-disabled oi" data-glyph="media-step-backward"></span> <span class="pagination-button-disabled pagination-bar-prev-page-disabled oi" data-glyph="caret-left"></span> {% } %} <span class="separator"></span> <span class="valigned">{{$i(\'voc.Page\')}} </span> {% if (totalPageCount > 1) { %} <input name="page-number" type="text" class="w30 must-integer pagination-bar-page-number" value="{{page}}" /> {% } else { %} <span class="valigned pagination-bar-page-number-disabled">{{page}}</span> {% } %} <span class="valigned total-page-count"> {{$i(\'voc.of\')}} {{totalPageCount}}</span> <span class="separator"></span> <span tabindex="0" class="pagination-button pagination-bar-refresh oi" data-glyph="reload" title="{{$i(\'voc.Refresh\')}}"></span> <span class="separator"></span> {% if (page < totalPageCount) { %} <span tabindex="0" class="pagination-button pagination-bar-next-page oi" data-glyph="caret-right" aria-expanded="true" title="{{$i(\'voc.NextPage\')}}"></span> <span tabindex="0" class="pagination-button pagination-bar-last-page oi" data-glyph="media-step-forward" title="{{$i(\'voc.LastPage\')}}"></span> {% } else { %} <span class="pagination-button-disabled pagination-bar-next-page-disabled oi" data-glyph="caret-right"></span> <span class="pagination-button-disabled pagination-bar-last-page-disabled oi" data-glyph="media-step-forward"></span> {% } %} <span class="separator"></span> <span class="valigned">{{$i(\'voc.ResultsPerPage\')}}</span> {% if (totalRowsCount) { %} <select name="pageresults" class="pagination-bar-results-select valigned"{% if (totalRowsCount <= 10) { %} disabled="disabled"{% } %}> {% _.each(resultsPerPageSelect, function (val) { %} <option value="{{val}}"{% if (val == resultsPerPage) { %} selected="selected"{%}%}>{{val}}</option> {% }) %} </select> {% } else { %} <select name="pageresults" class="pagination-bar-results-select valigned" disabled="disabled" readonly="readonly"></select> {% } %} <span class="separator"></span> <span class="valigned m0"> {% if (totalRowsCount) { %} {{$i(\'voc.Results\')}} {{firstObjectNumber}} - {{Math.min(lastObjectNumber, totalRowsCount)}} {{$i(\'voc.of\')}} {{totalRowsCount}} {% } else { %} 0 Results {% } %} </span> <span class="separator"></span>',
     'pagination-bar-filters': '{% if (allowSearch) { %} <input type="text" class="search-field" value="{{search}}" /> {% } %} {% if (advancedFiltersButton) { %} <button class="btn camo-btn btn-advanced-filters">{{$i("voc.AdvancedFilters")}}</button> {% } %} {% if (filtersWizard) { %} <button class="btn btn-filters-wizard">{{$i("voc.Filters")}}</button> {% } %}',
     'pagination-bar-layout': '<div class="tools-region"> <span tabindex="0" class="oi ug-expander" data-glyph="cog"></span> </div> <span class="pagination-bar-buttons"></span> <span class="pagination-bar-filters"></span>'
   };

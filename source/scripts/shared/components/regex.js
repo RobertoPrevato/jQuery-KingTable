@@ -1,7 +1,7 @@
 //
 // regex utilities
 //
-R("regex", [], function () {
+R("kt-regex", [], function () {
   
   //use this object to extend prototypes of objects that should offers
   //functions for Regular Expressions

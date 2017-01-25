@@ -1,7 +1,7 @@
 //
 // Function to build menus, given a schema
 //
-R("menu-builder", [], function () {
+R("kt-menu-builder", [], function () {
 
   var map = {
     "css": "class"
@@ -41,8 +41,10 @@ R("menu-builder", [], function () {
           case "checkbox":
             var cid = _.uniqueId("mnck-");
             var checked = item.checked ? " checked=\"checked\"" : "";
+            a += "<span tabindex=\"0\"" + attr(item) + ">"
             a += "<input id=\"" + cid + "\" type=\"checkbox\"" + attr(item) + checked + " />";
             a += "<label for=\"" + cid + "\">" + name + "</label>";
+            a += "</span>"
             break;
           case "radio":
             if (!item.value) throw "missing value for radio";

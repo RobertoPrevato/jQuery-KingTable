@@ -1,7 +1,7 @@
 //
 // Returns a common interface for internazionalization, supporting scoped translations.
 //
-R("i18n", [], function () {
+R("kt-i18n", [], function () {
   //if I.js is defined; return it.
   //https://github.com/RobertoPrevato/I.js
   if (window["I"]) return window.I;

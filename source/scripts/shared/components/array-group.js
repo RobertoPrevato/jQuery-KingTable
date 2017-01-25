@@ -1,4 +1,4 @@
-R("array-group", [], function () {
+R("kt-array-group", [], function () {
   
   //use this object to extend prototypes of objects that should offer
   //functions to group arrays

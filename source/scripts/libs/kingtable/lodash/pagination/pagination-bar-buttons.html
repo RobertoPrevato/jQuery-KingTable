@@ -8,7 +8,7 @@
 <span class="separator"></span>
 <span class="valigned">{{$i('voc.Page')}} </span>
 {% if (totalPageCount > 1) { %}
-  <input name="page-number" text="text" class="w30 must-integer pagination-bar-page-number" value="{{page}}" />
+  <input name="page-number" type="text" class="w30 must-integer pagination-bar-page-number" value="{{page}}" />
 {% } else { %}
   <span class="valigned pagination-bar-page-number-disabled">{{page}}</span>
 {% } %}
