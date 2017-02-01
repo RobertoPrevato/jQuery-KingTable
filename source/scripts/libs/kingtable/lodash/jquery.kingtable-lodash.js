@@ -459,7 +459,7 @@ R("kt-kingtable-lodash", ["kingtable-core", "kt-menu", "kt-i18n"], function (Kin
       _.each(self.columns, function (col) {
         name = col.name;
         if (_.contains(formattedColumns, name)) {
-          item[name + suffix] = col.format.call(self, item[name]);
+          item[name + suffix] = col.format.call(self, item[name], item);
         }
       });
     },

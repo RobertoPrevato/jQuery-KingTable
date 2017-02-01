@@ -2853,8 +2853,19 @@ R("kingtable-core", [
           sortBy = pag.orderBy,
           sortOrder = pag.sortOrder;
       if (!sortBy) return a;
-      //the collection can be sorted client side
-      $.KingTable.Utils.Array.sortByProperty(a, sortBy, sortOrder);
+      // get the column we are sorting by:
+      var column = _.find(self.columns, function (o) { return o.name == sortBy; });
+      // does it specify a sort function?
+      if (column.sortFunction) {
+        // sort using the column sorting function
+        a.sort(column.sortFunction);
+        if (/desc/i.test(sortOrder)) {
+          a.reverse();
+        }
+      } else {
+        // sort using the default function
+        $.KingTable.Utils.Array.sortByProperty(a, sortBy, sortOrder);
+      }
       return a;
     },
 
@@ -3641,7 +3652,7 @@ R("kt-kingtable-lodash", ["kingtable-core", "kt-menu", "kt-i18n"], function (Kin
       _.each(self.columns, function (col) {
         name = col.name;
         if (_.contains(formattedColumns, name)) {
-          item[name + suffix] = col.format.call(self, item[name]);
+          item[name + suffix] = col.format.call(self, item[name], item);
         }
       });
     },

@@ -122,6 +122,7 @@
       </dl>
       <br class="break" />
     </div>
+    <button id="special-button">Special Button!</button>
     <div class="right-column">
       <dl>
         <dt>
@@ -155,6 +156,13 @@
       $("#content").kingtable({
         id: "colors-table",
         url: "/api/colors",
+    events: {
+       "click #special-button": function (e) {
+          // Nota bene: if you need to get the clicked element, use $(e.target) or $(e.currentTarget)
+          // this function is called in the context of the table
+          console.log("[*] Hello There!");
+       }
+    },
         filtersView: "custom-filters",//can be the id of an element;
         orderBy: "name",
         sortOrder: "asc",
