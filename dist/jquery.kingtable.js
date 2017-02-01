@@ -2855,6 +2855,11 @@ R("kingtable-core", [
       if (!sortBy) return a;
       // get the column we are sorting by:
       var column = _.find(self.columns, function (o) { return o.name == sortBy; });
+      if (!column) {
+        // this can happen if the table is instantiated with a 'orderBy' option that doesn't
+        // describe an existing property: do not sort - nothing bad happen, it's unclear what should be done otherwise
+        return a;
+      }
       // does it specify a sort function?
       if (column.sortFunction) {
         // sort using the column sorting function
