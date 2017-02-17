@@ -2,8 +2,8 @@
  * jQuery-KingTable demo 1.0.1
  * https://github.com/RobertoPrevato/jQuery-KingTable
  *
- * Copyright 2016, Roberto Prevato
- * http://ugrose.com
+ * Copyright 2017, Roberto Prevato
+ * https://robertoprevato.github.io
  *
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT

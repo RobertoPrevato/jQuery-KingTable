@@ -10,12 +10,12 @@ and reorder columns and support for custom tools. Client side export feature int
 
 ## Live demo
 The following demos are available online:
-* [Live demo](http://ugrose.com/content/demos/kingtable/index.html)
-* [Demo with complex filters](http://ugrose.com/content/demos/kingtable/complex-filters.html)
-* [Demo with datetime filters and datepickers](http://ugrose.com/content/demos/kingtable/datetime-filters.html)
-* [Double table: two tables displayed in the same page](http://ugrose.com/content/demos/kingtable/double.html)
+* [Live demo](https://robertoprevato.github.io/demos//kingtable/index.html)
+* [Demo with complex filters](https://robertoprevato.github.io/demos//kingtable/complex-filters.html)
+* [Demo with datetime filters and datepickers](https://robertoprevato.github.io/demos//kingtable/datetime-filters.html)
+* [Double table: two tables displayed in the same page](https://robertoprevato.github.io/demos//kingtable/double.html)
 
-[![Tools](http://ugrose.com/content/demos/kingtable/images/tools.gif)](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Table-tools)
+[![Tools](https://robertoprevato.github.io/demos//kingtable/images/tools.gif)](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Table-tools)
 
 ## Documentation
 Refer to the [wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki).
@@ -203,6 +203,6 @@ The source code makes use of the following two tools, of my creation:
 
 ## Themes
 The KingTable includes different themes, available in the provided **.css** files inside the **dist** folder:
-![Themes](http://ugrose.com/content/demos/kingtable/images/themes.gif)
+![Themes](https://robertoprevato.github.io/demos//kingtable/images/themes.gif)
 
 For more information about the themes, refer to the [dedicated wiki page](https://github.com/RobertoPrevato/jQuery-KingTable/wiki/Themes).
