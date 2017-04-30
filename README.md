@@ -3,8 +3,8 @@ Library for administrative tables that are able to build themselves, on the basi
 Supports client and server side pagination; client and server side search; custom filters views; automatic menu to hide 
 and reorder columns and support for custom tools. Client side export feature into: csv, json and xml formats.
 
-## Important notice!!
-The new version of the library is available here: [https://github.com/RobertoPrevato/KingTable](https://github.com/RobertoPrevato/KingTable). It is recommended to use the new version of the library, as it features an improved code base and many improved features over the first version of the library.
+# Important notice!!
+The new version of the library is available here: [https://github.com/RobertoPrevato/KingTable](https://github.com/RobertoPrevato/KingTable). It is recommended to use the new version of the library, as it features an improved code base and many features over the first version of the library.
 
 ### Features of the new version
 Following is a table listing the features that were added to KingTable 2.0.
